@@ -10,7 +10,7 @@ namespace PP5AutoUITests
         /// <summary>
         /// Drivers 集合
         /// </summary>
-        private ConcurrentDictionary<SessionType, IDriver> allDrivers = new ConcurrentDictionary<SessionType, IDriver>();
+        private ConcurrentDictionary<SessionType, ISessionDriver> allDrivers = new ConcurrentDictionary<SessionType, ISessionDriver>();
         private static DriverFactory driverFactory;
         DriverFactory()
         {
@@ -30,7 +30,7 @@ namespace PP5AutoUITests
         /// </summary>
         /// <param name="tableName">要建立的資料表名稱</param>
         /// <returns>回傳建立的資料表</returns>
-        public WindowsDriver<WindowsElement> Create(SessionType sessionType)
+        public PP5Driver Create(SessionType sessionType)
         {
             if (!this.allDrivers.ContainsKey(sessionType))
             {
@@ -44,7 +44,7 @@ namespace PP5AutoUITests
         /// </summary>
         /// <param name="tableName">要建立的資料表名稱</param>
         /// <returns>回傳建立的資料表</returns>
-        public WindowsDriver<WindowsElement> Attach(SessionType sessionType)
+        public PP5Driver Attach(SessionType sessionType)
         {
             if (!this.allDrivers.ContainsKey(sessionType))
             {
@@ -58,7 +58,7 @@ namespace PP5AutoUITests
         /// </summary>
         /// <param name="tableName">要建立的資料表名稱</param>
         /// <returns>回傳建立的資料表</returns>
-        public IDriver Get(SessionType sessionType)
+        public ISessionDriver Get(SessionType sessionType)
         {
             if (!this.allDrivers.ContainsKey(sessionType))
             {

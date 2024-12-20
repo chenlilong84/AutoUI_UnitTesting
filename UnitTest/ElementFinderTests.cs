@@ -168,7 +168,7 @@ namespace PP5AutoUITests
         {
             // Arrange
             //var elementFinder = new ElementFinder();
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             By findType = null;
             int timeOut = 0;
 
@@ -200,7 +200,7 @@ namespace PP5AutoUITests
         {
             // Arrange
             //var elementFinder = new ElementFinder();
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             int timeOut = 0;
             By[] findTypes = null;
 
@@ -233,7 +233,7 @@ namespace PP5AutoUITests
         {
             // Arrange
             //var elementFinder = new ElementFinder();
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             By findType = null;
             int timeOut = 0;
 
@@ -265,7 +265,7 @@ namespace PP5AutoUITests
         {
             // Arrange
             //var elementFinder = new ElementFinder();
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             By ByElementInfo = null;
             int timeOut = 0;
             int pollingInterval = 0;
@@ -282,7 +282,7 @@ namespace PP5AutoUITests
         {
             // Arrange
             //var elementFinder = new ElementFinder();
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             By findType = null;
 
             // Act
@@ -297,7 +297,7 @@ namespace PP5AutoUITests
         {
             // Arrange
             //var elementFinder = new ElementFinder();
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             string WindowTitle = null;
             int timeOut = 0;
 
@@ -312,7 +312,7 @@ namespace PP5AutoUITests
         public void CheckElementSelected_StateUnderTest_ExpectedBehavior()
         {
             // Arrange
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             IWebElement element = null;
             int timeOut = 0;
             var result = driver.CheckElementSelected(element, timeOut);
@@ -1055,7 +1055,7 @@ namespace PP5AutoUITests
         public void GetParentElement_StateUnderTest_ExpectedBehavior()
         {
             // Arrange
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             IWebElement elementSrc = null;
 
             // Act
@@ -1208,7 +1208,7 @@ namespace PP5AutoUITests
         public void GetDataTableRowElements_StateUnderTest_ExpectedBehavior()
         {
             // Arrange
-            WindowsDriver<WindowsElement> driver = Executor.GetInstance().GetCurrentDriver();
+            PP5Driver driver = Executor.GetInstance().GetCurrentDriver();
             string DataGridAutomationID = null;
 
             // Act

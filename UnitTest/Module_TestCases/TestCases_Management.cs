@@ -59,15 +59,15 @@ namespace PP5AutoUITests
         public void Management_AddUserFor5000Times_UntilWarningBoxPopup()
         {
             // Click on Security button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
             // Click on User ID tab
-            IWebElement SecurityTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IWebElement SecurityTabItem = CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("mainTab"))
+                                                       .GetWebElementsFromWebElement(By.ClassName("TabItem"))[0];
 
-            IWebElement UserIDTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IWebElement UserIDTabItem = SecurityTabItem.GetWebElementFromWebElement(By.ClassName("TabControl"))
+                                                       .GetWebElementsFromWebElement(By.ClassName("TabItem"))[0];
 
             UserIDTabItem.LeftClick();
 
@@ -76,21 +76,21 @@ namespace PP5AutoUITests
             int i = 20000;
             while (AddSuccess)
             {
-                CurrentDriver.GetElement(By.Name("Add")).LeftClick();
+                CurrentDriver.GetWebElementFromWebDriver(By.Name("Add")).LeftClick();
                 AddSuccess = AddNewUser(userID: i.ToString(), password: i.ToString());
                 i++;
             }
 
             // Check "can't add more than 5000 user IDs" warning message box popuped
-            //CurrentDriver.GetElement(By.Name("Add")).LeftClick();
-            Assert.AreEqual("The total number of User ID cannot exceed 5000, so it cannot be added!", CurrentDriver.GetElement(By.Name("Chroma ATS IDE - [Management]"))
+            //CurrentDriver.GetElementFromWebElement(By.Name("Add")).LeftClick();
+            Assert.AreEqual("The total number of User ID cannot exceed 5000, so it cannot be added!", CurrentDriver.GetExtendedElement(PP5By.Name("Chroma ATS IDE - [Management]"))
                                                                                                                    .GetSpecificChildOfControlType(ElementControlType.Window, "Notice")
                                                                                                                    .GetFirstEditContent());
 
             // Close the warning message box
-            CurrentDriver.GetElement(By.Name("Chroma ATS IDE - [Management]"))
+            CurrentDriver.GetExtendedElement(PP5By.Name("Chroma ATS IDE - [Management]"))
                          .GetSpecificChildOfControlType(ElementControlType.Window, "Notice")
-                         .GetElement(By.Name("OK"))
+                         .GetWebElementFromWebElement(By.Name("OK"))
                          .LeftClick();
         }
 
@@ -103,15 +103,15 @@ namespace PP5AutoUITests
         public void Management_AddRoleFor5000Times_UntilWarningBoxPopup()
         {
             // Click on Security button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
             // Click on Role tab
-            IWebElement SecurityTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IWebElement SecurityTabItem = CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("mainTab"))
+                                                       .GetWebElementsFromWebElement(By.ClassName("TabItem"))[0];
 
-            IWebElement roleTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
-                                                     .GetElements(By.ClassName("TabItem"))[1];
+            IWebElement roleTabItem = SecurityTabItem.GetWebElementFromWebElement(By.ClassName("TabControl"))
+                                                     .GetWebElementsFromWebElement(By.ClassName("TabItem"))[1];
 
             roleTabItem.LeftClick();
 
@@ -120,21 +120,21 @@ namespace PP5AutoUITests
             int i = 20000;
             while (AddSuccess)
             {
-                CurrentDriver.GetElement(By.Name("Add")).LeftClick();
+                CurrentDriver.GetWebElementFromWebDriver(By.Name("Add")).LeftClick();
                 AddSuccess = AddNewRole(roleName: i.ToString());
                 i++;
             }
             //"/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"][@Name=\"Chroma ATS IDE - [Management]\"]/Window[@ClassName=\"Window\"][@Name=\"Notice\"]/Edit[@ClassName=\"TextBox\"]"
             // Check "can't add more than 5000 roles" warning message box popuped
-            //CurrentDriver.GetElement(By.Name("Add")).LeftClick();
-            Assert.AreEqual("The total number of Role cannot exceed 5000, so it cannot be added!", CurrentDriver.GetElement(By.Name("Chroma ATS IDE - [Management]"))
+            //CurrentDriver.GetElementFromWebElement(By.Name("Add")).LeftClick();
+            Assert.AreEqual("The total number of Role cannot exceed 5000, so it cannot be added!", CurrentDriver.GetExtendedElement(PP5By.Name("Chroma ATS IDE - [Management]"))
                                                                                                                 .GetSpecificChildOfControlType(ElementControlType.Window, "Notice")
                                                                                                                 .GetFirstEditContent());
 
             // Close the warning message box
-            CurrentDriver.GetElement(By.Name("Chroma ATS IDE - [Management]"))
+            CurrentDriver.GetExtendedElement(PP5By.Name("Chroma ATS IDE - [Management]"))
                          .GetSpecificChildOfControlType(ElementControlType.Window, "Notice")
-                         .GetElement(By.Name("OK"))
+                         .GetWebElementFromWebElement(By.Name("OK"))
                          .LeftClick();
         }
 
@@ -146,14 +146,14 @@ namespace PP5AutoUITests
         //public void Management_AddActivityLogByEditUserAccountActiveState100000Times_CheckLatest100000Data()
         //{
         //    // Click on Security button
-        //    CurrentDriver.GetElement(By.ClassName("ToolBar"))
+        //    CurrentDriver.GetElementFromWebElement(By.ClassName("ToolBar"))
         //                 .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
 
         //    // Click on User ID tab
-        //    IWebElement SecurityTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
+        //    IWebElement SecurityTabItem = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("mainTab"))
         //                                               .GetElements(By.ClassName("TabItem"))[0];
 
-        //    IWebElement UserIDTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
+        //    IWebElement UserIDTabItem = SecurityTabItem.GetElementFromWebElement(By.ClassName("TabControl"))
         //                                               .GetElements(By.ClassName("TabItem"))[0];
 
         //    UserIDTabItem.LeftClick();
@@ -163,14 +163,14 @@ namespace PP5AutoUITests
         //    //while (AddSuccess)
         //    for (int i = 0; i < 100000; i++)
         //    {
-        //        CurrentDriver.GetElement(By.Name("Edit")).LeftClick();
+        //        CurrentDriver.GetElementFromWebElement(By.Name("Edit")).LeftClick();
         //        EditUser(isActive);
         //        System.Threading.Thread.Sleep(500);
         //        isActive = !isActive;
         //    }
 
         //    // Click on Activity Log tab
-        //    IWebElement activityLogTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
+        //    IWebElement activityLogTabItem = SecurityTabItem.GetElementFromWebElement(By.ClassName("TabControl"))
         //                                                    .GetElements(By.ClassName("TabItem"))[2];
 
         //    activityLogTabItem.LeftClick();
@@ -189,45 +189,45 @@ namespace PP5AutoUITests
         public void Management_AddActivityLogByEditUserAccountActiveState100000Times_CheckLatest100000Data()
         {
             // Click on TP/TI button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[1].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[1].LeftClick();
 
             // Click on Test Item tab
-            IWebElement TPTITabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                   .GetElements(By.ClassName("TabItem"))[1];
+            IElement TPTITabItem = CurrentDriver.GetExtendedElement(PP5By.Id("mainTab"))
+                                                   .GetExtendedElements(PP5By.ClassName("TabItem"))[1];
 
-            IWebElement TestItemTabItem = TPTITabItem.GetElement(By.ClassName("TabControl"))
-                                                     .GetElements(By.ClassName("TabItem"))[1];
+            IElement TestItemTabItem = TPTITabItem.GetExtendedElement(PP5By.ClassName("TabControl"))
+                                                     .GetExtendedElements(PP5By.ClassName("TabItem"))[1];
 
             TestItemTabItem.LeftClick();
 
-            IWebElement tiDataGrid = TestItemTabItem.GetFirstDataGridElement();
+            IElement tiDataGrid = TestItemTabItem.GetFirstDataGridElement();
 
             bool remarkBool = false;
             for (int i = 0; i < 100000; i++)
             {
-                tiDataGrid.GetCellBy(1, 5).SendContent(remarkBool.ToString());
+                tiDataGrid.GetCellBy(1, 5).SendText(remarkBool.ToString());
                 Press(Keys.Enter);
                 System.Threading.Thread.Sleep(1200);
                 remarkBool = !remarkBool;
             }
 
             // Click on Activity Log tab
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
             // Click on Security tab
-            IWebElement SecurityTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IElement SecurityTabItem = CurrentDriver.GetExtendedElement(PP5By.Id("mainTab"))
+                                                    .GetExtendedElements(PP5By.ClassName("TabItem"))[0];
 
-            IWebElement activityLogTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
-                                                            .GetElements(By.ClassName("TabItem"))[2];
+            IElement activityLogTabItem = SecurityTabItem.GetExtendedElement(PP5By.ClassName("TabControl"))
+                                                         .GetExtendedElements(PP5By.ClassName("TabItem"))[2];
 
             activityLogTabItem.LeftClick();
 
             // Check only latest 100000 data in the datagrid
             Assert.AreEqual(100000, activityLogTabItem.GetFirstDataGridElement()
-                                                      .GetElements(By.TagName(ElementControlType.DataItem.GetDescription())));
+                                                      .GetWebElementsFromWebElement(By.TagName(ElementControlType.DataItem.GetDescription())));
         }
 
         /// <summary>
@@ -240,15 +240,15 @@ namespace PP5AutoUITests
         public void Management_AddDefectCodeFor1000Times_UntilWarningBoxPopup()
         {
             // Click on MISC button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[3].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[3].LeftClick();
 
             // Click on Defect Code tab
-            IWebElement MISCTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                   .GetElements(By.ClassName("TabItem"))[3];
+            IWebElement MISCTabItem = CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("mainTab"))
+                                                   .GetWebElementsFromWebElement(By.ClassName("TabItem"))[3];
 
-            IWebElement dfTabItem = MISCTabItem.GetElement(By.ClassName("TabControl"))
-                                               .GetElements(By.ClassName("TabItem"))[6];
+            IWebElement dfTabItem = MISCTabItem.GetWebElementFromWebElement(By.ClassName("TabControl"))
+                                               .GetWebElementsFromWebElement(By.ClassName("TabItem"))[6];
 
             dfTabItem.LeftClick();
 
@@ -258,21 +258,21 @@ namespace PP5AutoUITests
             int j = i;
             while (AddSuccess)
             {
-                CurrentDriver.GetElement(By.Name("Add")).LeftClick();
+                CurrentDriver.GetWebElementFromWebDriver(By.Name("Add")).LeftClick();
                 AddSuccess = AddDefectCode(defectCode: i, customerDefectCode: i);
                 i++;
                 if (j - i >= 1000)
                     break;
             }
 
-            Assert.AreEqual("The total number of Defect Code cannot exceed 1000, so it cannot be added!", CurrentDriver.GetElement(By.Name("Chroma ATS IDE - [Management]"))
+            Assert.AreEqual("The total number of Defect Code cannot exceed 1000, so it cannot be added!", CurrentDriver.GetExtendedElement(PP5By.Id("Chroma ATS IDE - [Management]"))
                                                                                                                         .GetSpecificChildOfControlType(ElementControlType.Window, "Notice")
                                                                                                                         .GetFirstEditContent());
 
             // Close the warning message box
-            CurrentDriver.GetElement(By.Name("Chroma ATS IDE - [Management]"))
+            CurrentDriver.GetExtendedElement(PP5By.Id("Chroma ATS IDE - [Management]"))
                          .GetSpecificChildOfControlType(ElementControlType.Window, "Notice")
-                         .GetElement(By.Name("OK"))
+                         .GetWebElementFromWebElement(By.Name("OK"))
                          .LeftClick();
         }
 
@@ -286,33 +286,33 @@ namespace PP5AutoUITests
         public void Management_AddAndDeleteUser_For300Times(int repeatCount)
         {
             // Click on Security button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
             // Click on User ID tab
-            IWebElement SecurityTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IWebElement SecurityTabItem = CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("mainTab"))
+                                                       .GetWebElementsFromWebElement(By.ClassName("TabItem"))[0];
 
-            IWebElement UserIDTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IWebElement UserIDTabItem = SecurityTabItem.GetWebElementFromWebElement(By.ClassName("TabControl"))
+                                                       .GetWebElementsFromWebElement(By.ClassName("TabItem"))[0];
 
             UserIDTabItem.LeftClick();
 
             bool AddSuccess = true;
             for (int i = 0; i < repeatCount; i++)
             {
-                GetPP5Window().GetElement(By.Name("Add")).LeftClick();
+                GetPP5Window().GetWebElementFromWebElement(By.Name("Add")).LeftClick();
                 AddSuccess = AddNewUser(userID: "0", password: "0", valid: false);
                 if (AddSuccess)
                 {
-                    WaitUntil(() => GetPP5Window().GetElement(By.Name("Delete")) != null);
-                    GetPP5Window().GetElement(By.Name("Delete")).LeftClick();
-                    GetPP5Window().GetElement(5000, By.Name("Notice"), By.Name("Yes"))
+                    WaitUntil(() => GetPP5Window().GetWebElementFromWebElement(By.Name("Delete")) != null);
+                    GetPP5Window().GetWebElementFromWebElement(By.Name("Delete")).LeftClick();
+                    GetPP5Window().GetElementWithRetry<IElement, IElement>(5000, By.Name("Notice"), By.Name("Yes"))
                                   .LeftClick();
 
                     // Close error message box if it shows up
-                    if (WaitUntil(() => GetPP5Window().GetElement(By.Name("Error")) != null))
-                        GetPP5Window().GetElement(5000, By.Name("Error"), MobileBy.AccessibilityId("Close"))
+                    if (WaitUntil(() => GetPP5Window().GetWebElementFromWebElement(By.Name("Error")) != null))
+                        GetPP5Window().GetElementWithRetry<IElement, IElement>(5000, By.Name("Error"), MobileBy.AccessibilityId("Close"))
                                       .LeftClick();
                 }
             }
@@ -328,33 +328,33 @@ namespace PP5AutoUITests
         public void Management_ModifyUserAuthority_For1000Times(int repeatCount)
         {
             // Click on Security button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
             // Click on role tab
-            IWebElement SecurityTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IWebElement SecurityTabItem = CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("mainTab"))
+                                                       .GetWebElementsFromWebElement(By.ClassName("TabItem"))[0];
 
-            IWebElement roleTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
-                                                     .GetElements(By.ClassName("TabItem"))[1];
+            IWebElement roleTabItem = SecurityTabItem.GetWebElementFromWebElement(By.ClassName("TabControl"))
+                                                     .GetWebElementsFromWebElement(By.ClassName("TabItem"))[1];
 
             roleTabItem.LeftClick();
 
-            roleTabItem.GetElement(By.Name("Add")).LeftClick();
+            roleTabItem.GetWebElementFromWebElement(By.Name("Add")).LeftClick();
             AddNewRole("99999");
 
             bool isUserChecked = true;
             for (int i = 0; i < repeatCount; i++)
             {
-                WaitUntil(() => GetPP5Window().GetElement(By.Name("Edit")) != null);
-                GetPP5Window().GetElement(By.Name("Edit")).LeftClick();
+                WaitUntil(() => GetPP5Window().GetWebElementFromWebElement(By.Name("Edit")) != null);
+                GetPP5Window().GetWebElementFromWebElement(By.Name("Edit")).LeftClick();
                 EditRole(new Dictionary<string, bool>() { { "User", isUserChecked } });
                 isUserChecked = !isUserChecked;
             }
 
-            WaitUntil(() => GetPP5Window().GetElement(By.Name("Delete")) != null);
-            roleTabItem.GetElement(By.Name("Delete")).LeftClick();
-            GetPP5Window().GetElement(5000, By.Name("Notice"), By.Name("Yes"))
+            WaitUntil(() => GetPP5Window().GetWebElementFromWebElement(By.Name("Delete")) != null);
+            roleTabItem.GetWebElementFromWebElement(By.Name("Delete")).LeftClick();
+            GetPP5Window().GetElementWithRetry<IElement, IElement>(5000, By.Name("Notice"), By.Name("Yes"))
                           .LeftClick();
         }
 
@@ -368,19 +368,19 @@ namespace PP5AutoUITests
         public void Management_QueryActivityLog_For1000Times(int repeatCount)
         {
             // Click on Security tab
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
             // Click on Activity Log tab
-            IWebElement SecurityTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                       .GetElements(By.ClassName("TabItem"))[0];
+            IElement SecurityTabItem = CurrentDriver.GetExtendedElement(PP5By.Id("mainTab"))
+                                                    .GetExtendedElements(PP5By.ClassName("TabItem"))[0];
 
-            IWebElement activityLogTabItem = SecurityTabItem.GetElement(By.ClassName("TabControl"))
-                                                            .GetElements(By.ClassName("TabItem"))[2];
+            IElement activityLogTabItem = SecurityTabItem.GetExtendedElement(PP5By.ClassName("TabControl"))
+                                                         .GetExtendedElements(PP5By.ClassName("TabItem"))[2];
 
             activityLogTabItem.LeftClick();
 
-            IWebElement cmbFunction = activityLogTabItem.GetFirstCustomElement()
+            IElement cmbFunction = activityLogTabItem.GetFirstCustomElement()
                                                         .GetFirstPaneElement()
                                                         .GetFirstComboBoxElement();
 
@@ -406,42 +406,42 @@ namespace PP5AutoUITests
         public void Management_AddAndDeleteDefectCode_For1000Times(int repeatCount)
         {
             // Click on MISC button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[3].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[3].LeftClick();
 
             // Click on Defect Code tab
-            IWebElement MISCTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                   .GetElements(By.ClassName("TabItem"))[3];
+            IElement MISCTabItem = CurrentDriver.GetExtendedElement(PP5By.Id("mainTab"))
+                                                .GetExtendedElements(PP5By.ClassName("TabItem"))[3];
 
-            IWebElement dfTabItem = MISCTabItem.GetElement(By.ClassName("TabControl"))
-                                               .GetElements(By.ClassName("TabItem"))[6];
+            IElement dfTabItem = MISCTabItem.GetExtendedElement(PP5By.ClassName("TabControl"))
+                                            .GetExtendedElements(PP5By.ClassName("TabItem"))[6];
 
             dfTabItem.LeftClick();
 
-            IWebElement dgDfCode = dfTabItem.GetFirstCustomElement()
+            IElement dgDfCode = dfTabItem.GetFirstCustomElement()
                                             .GetFirstPaneElement()
                                             .GetFirstDataGridElement();
 
             int dfCode = 77777;
             for (int i = 0; i < repeatCount; i++)
             {
-                WaitUntil(() => GetPP5Window().GetElement(By.Name("Add")) != null);
-                GetPP5Window().GetElement(By.Name("Add")).LeftClick();
+                WaitUntil(() => PP5IDEWindow.GetWebElementFromWebElement(By.Name("Add")) != null);
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("Add")).LeftClick();
                 AddDefectCode(defectCode: dfCode, customerDefectCode: dfCode);
 
                 //GetPP5Window().GetCellByName(1, dfCode.ToString()).LeftClick();
                 //dgDfCode.SelectDataGridItemByRowIndex(1);
 
-                IWebElement dfCodeItem = null;
+                IElement dfCodeItem = null;
                 while (dfCodeItem == null)
                 {
-                    dfCodeItem = GetPP5Window().GetElement(MobileBy.AccessibilityId("DefectCodeDataGrid"))
+                    dfCodeItem = PP5IDEWindow.GetExtendedElement(PP5By.Id("DefectCodeDataGrid"))
                                                .GetRowByName(colNo: 1, cellName: dfCode.ToString());
                 }
                 dfCodeItem.LeftClick();
 
-                GetPP5Window().GetElement(By.Name("Delete")).LeftClick();
-                GetPP5Window().GetElement(5000, By.Name("Notice"), By.Name("Yes"))
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("Delete")).LeftClick();
+                PP5IDEWindow.GetElementWithRetry<IElement, IElement>(5000, By.Name("Notice"), By.Name("Yes"))
                               .LeftClick();
             }
         }
@@ -456,51 +456,51 @@ namespace PP5AutoUITests
         public void Management_ImportAndDeleteDefectCode_For1000Times(int repeatCount)
         {
             // Click on MISC button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[3].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[3].LeftClick();
 
             // Click on Defect Code tab
-            IWebElement MISCTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                   .GetElements(By.ClassName("TabItem"))[3];
+            IElement MISCTabItem = CurrentDriver.GetExtendedElement(PP5By.Id("mainTab"))
+                                                .GetExtendedElements(PP5By.ClassName("TabItem"))[3];
 
-            IWebElement dfTabItem = MISCTabItem.GetElement(By.ClassName("TabControl"))
-                                               .GetElements(By.ClassName("TabItem"))[6];
+            IElement dfTabItem = MISCTabItem.GetExtendedElement(PP5By.ClassName("TabControl"))
+                                            .GetExtendedElements(PP5By.ClassName("TabItem"))[6];
 
             dfTabItem.LeftClick();
 
-            IWebElement dgDfCode = dfTabItem.GetFirstCustomElement()
+            IElement dgDfCode = dfTabItem.GetFirstCustomElement()
                                             .GetFirstPaneElement()
                                             .GetFirstDataGridElement();
 
             int dfCode = 77777;
 
             // Add a new df code item
-            dfTabItem.GetElement(By.Name("Add")).LeftClick();
+            dfTabItem.GetWebElementFromWebElement(By.Name("Add")).LeftClick();
             AddDefectCode(defectCode: dfCode, customerDefectCode: dfCode);
 
             // Export the new df code item
-            GetPP5Window().GetElement(MobileBy.AccessibilityId("DefectCodeDataGrid"))
+            PP5IDEWindow.GetExtendedElement(PP5By.Id("DefectCodeDataGrid"))
                           .SelectDataGridItemByRowIndex(-1);
-            GetPP5Window().GetElement(By.Name("Export")).LeftClick();
-            GetPP5Window().GetElement(By.Name("檔案名稱:")).SendContent(dfCode.ToString());
-            GetPP5Window().GetElement(By.Name("存檔(S)")).LeftClick();
+            PP5IDEWindow.GetWebElementFromWebElement(By.Name("Export")).LeftClick();
+            PP5IDEWindow.GetWebElementFromWebElement(By.Name("檔案名稱:")).SendText(dfCode.ToString());
+            PP5IDEWindow.GetWebElementFromWebElement(By.Name("存檔(S)")).LeftClick();
 
             // Delete the new df code item
-            WaitUntil(() => GetPP5Window().GetElement(By.Name("Delete")) != null);
-            GetPP5Window().GetElement(By.Name("Delete")).LeftClick();
-            GetPP5Window().GetElement(5000, By.Name("Notice"), By.Name("Yes")).LeftClick();
+            WaitUntil(() => PP5IDEWindow.GetWebElementFromWebElement(By.Name("Delete")) != null);
+            PP5IDEWindow.GetWebElementFromWebElement(By.Name("Delete")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(5000, By.Name("Notice"), By.Name("Yes")).LeftClick();
 
             // Import and delete the exported df code item
             for (int i = 0; i < repeatCount; i++)
             {
-                GetPP5Window().GetElement(By.Name("Import")).LeftClick();
-                GetPP5Window().GetElement(5000, By.ClassName("UIItemsView"), By.Name(dfCode + ".dfl"))
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("Import")).LeftClick();
+                PP5IDEWindow.GetElementWithRetry<IElement, IElement>(5000, By.ClassName("UIItemsView"), By.Name(dfCode + ".dfl"))
                               .LeftClick();
-                GetPP5Window().GetElement(By.Name("開啟(O)")).LeftClick();
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("開啟(O)")).LeftClick();
 
                 Executor.GetInstance().SwitchTo(SessionType.Desktop);
-                WaitUntil(() => CurrentDriver.GetElement(By.Name("Select Import Item")) != null);
-                CurrentDriver.GetElement(5000, By.Name("Select Import Item"), By.Name("OK"))
+                WaitUntil(() => CurrentDriver.GetWebElementFromWebDriver(By.Name("Select Import Item")) != null);
+                CurrentDriver.GetWebElementFromWebDriver(5000, By.Name("Select Import Item"), By.Name("OK"))
                              .LeftClick();
                 Executor.GetInstance().SwitchTo(SessionType.PP5IDE);
 
@@ -509,13 +509,13 @@ namespace PP5AutoUITests
                 IWebElement dfCodeItem = null;
                 while (dfCodeItem == null)
                 {
-                    dfCodeItem = GetPP5Window().GetElement(MobileBy.AccessibilityId("DefectCodeDataGrid"))
+                    dfCodeItem = PP5IDEWindow.GetExtendedElement(PP5By.Id("DefectCodeDataGrid"))
                                                .GetRowByName(colNo: 1, cellName: dfCode.ToString());
                 }
                 dfCodeItem.LeftClick();
 
-                GetPP5Window().GetElement(By.Name("Delete")).LeftClick();
-                GetPP5Window().GetElement(5000, By.Name("Notice"), By.Name("Yes"))
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("Delete")).LeftClick();
+                PP5IDEWindow.GetElementWithRetry<IElement, IElement>(5000, By.Name("Notice"), By.Name("Yes"))
                               .LeftClick();
             }
         }
@@ -530,22 +530,22 @@ namespace PP5AutoUITests
         public void Management_SetColorOfSameTestCommand_For1000Times(int repeatCount)
         {
             // Click on System Setup button
-            PP5IDEWindow.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[2].LeftClick();
+            PP5IDEWindow.GetWebElementFromWebElement(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[2].LeftClick();
 
             // Click on Color tab
-            IWebElement systemSetupTabItem = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                          .GetElements(By.ClassName("TabItem"))[2];
+            IElement systemSetupTabItem = PP5IDEWindow.GetExtendedElement(PP5By.Id("mainTab"))
+                                                      .GetExtendedElements(PP5By.ClassName("TabItem"))[2];
 
-            IWebElement colorTabItem = systemSetupTabItem.GetElement(By.ClassName("TabControl"))
-                                                         .GetElements(By.ClassName("TabItem"))[3];
+            IElement colorTabItem = systemSetupTabItem.GetExtendedElement(PP5By.ClassName("TabControl"))
+                                                      .GetExtendedElements(PP5By.ClassName("TabItem"))[3];
 
             colorTabItem.LeftClick();
 
             //IWebElement TestCmdTV = colorTabItem.GetTreeViewElement("ColorTCGroupTreeView");
 
             // Select the first command of group: "AC Source"
-            SelectColorSettingItem(colorTabItem, ColorSettingPageType.TestCommand, "AC Source", 1, true);
+            SelectColorSettingItem(colorTabItem, ColorSettingPageType.TestCommand, TestCmdGroupType.AC_Source, 1, true);
 
             string colorCodeFont = "#FFFF00FF";
             string colorCodeBg = "#FFFF00FF";
@@ -555,11 +555,11 @@ namespace PP5AutoUITests
             {
                 //var FontColorEditBtn = colorTabItem.GetCustomElement((e) => e.Text == "Font Color Edit" && e.Enabled);
                 //FontColorEditBtn.LeftClick();
-                //GetPP5Window().GetElement(MobileBy.AccessibilityId("DefaultPicker"))
+                //GetPP5Window().GetElementFromWebElement(MobileBy.AccessibilityId("DefaultPicker"))
                 //              .SelectComboBoxItemByName("#FFFF00FF", supportKeyInputSearch: false);
 
                 //FontColorEditBtn.LeftClick();
-                //GetPP5Window().GetElement(MobileBy.AccessibilityId("DefaultColor"))
+                //GetPP5Window().GetElementFromWebElement(MobileBy.AccessibilityId("DefaultColor"))
                 //              .GetFirstListBoxItemElement()
                 //              .LeftClick();
 
@@ -580,15 +580,15 @@ namespace PP5AutoUITests
         public void Management_AddAndDeleteSameDll_For1000Times(int repeatCount)
         {
             // Click on Ex-Function button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[4].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[4].LeftClick();
 
             // Click on DLL tab
-            IWebElement ExFunctionTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                         .GetElements(By.ClassName("TabItem"))[4];
+            IWebElement ExFunctionTabItem = CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("mainTab"))
+                                                         .GetWebElementsFromWebElement(By.ClassName("TabItem"))[4];
 
-            IWebElement DllTabItem = ExFunctionTabItem.GetElement(By.ClassName("TabControl"))
-                                                      .GetElements(By.ClassName("TabItem"))[0];
+            IWebElement DllTabItem = ExFunctionTabItem.GetWebElementFromWebElement(By.ClassName("TabControl"))
+                                                      .GetWebElementsFromWebElement(By.ClassName("TabItem"))[0];
 
             DllTabItem.LeftClick();
 
@@ -598,35 +598,35 @@ namespace PP5AutoUITests
             // Repeat add and delete same dll item
             for (int i = 0; i < repeatCount; i++)
             {
-                WaitUntil(() => GetPP5Window().GetElement(By.Name("Add")) != null);
-                GetPP5Window().GetElement(By.Name("Add")).LeftClick();
+                WaitUntil(() => GetPP5Window().GetWebElementFromWebElement(By.Name("Add")) != null);
+                GetPP5Window().GetWebElementFromWebElement(By.Name("Add")).LeftClick();
 
                 GetPP5Window().GetBtnElement("先前的位置").LeftClick();
                 SendSingleKeys(DllFolder);
                 Press(Keys.Enter);
-                GetPP5Window().GetElement(By.Name(DllFilename)).DoubleClick();
+                GetPP5Window().GetWebElementFromWebElement(By.Name(DllFilename)).DoubleClick();
 
                 Executor.GetInstance().SwitchTo(SessionType.Desktop);
-                WaitUntil(() => CurrentDriver.GetElement(By.Name("Add DLL - Managed DLL")) != null);
-                CurrentDriver.GetElement(MobileBy.AccessibilityId("TopDataGrid"))
+                WaitUntil(() => CurrentDriver.GetWebElementFromWebDriver(By.Name("Add DLL - Managed DLL")) != null);
+                CurrentDriver.GetExtendedElement(PP5By.Id("TopDataGrid"))
                              .GetCellBy(1, 2).GetFirstCheckBoxElement()
                              .UnTickCheckBox();
-                CurrentDriver.GetElement(5000, By.Name("Add DLL - Managed DLL"), By.Name("OK"))
+                CurrentDriver.GetWebElementFromWebDriver(5000, By.Name("Add DLL - Managed DLL"), By.Name("OK"))
                              .LeftClick();
                 Executor.GetInstance().SwitchTo(SessionType.PP5IDE);
 
                 // Find the added Dll and uncheck "Active"
-                //WaitUntil(() => DllTabItem.GetElement(By.Name("Add")) != null);
+                //WaitUntil(() => DllTabItem.GetElementFromWebElement(By.Name("Add")) != null);
                 //System.Threading.Thread.Sleep(6000);
 
-                //GetPP5Window().GetElement(MobileBy.AccessibilityId("DllDataGrid"))
+                //GetPP5Window().GetElementFromWebElement(MobileBy.AccessibilityId("DllDataGrid"))
                 //          .GetRowByName(colNo: 5, cellName: "Managed.dll")
                 //          .LeftClick();
 
                 IWebElement dllItem = null;
                 while (dllItem == null)
                 {
-                    dllItem = GetPP5Window().GetElement(MobileBy.AccessibilityId("DllDataGrid"))
+                    dllItem = PP5IDEWindow.GetExtendedElement(PP5By.Id("DllDataGrid"))
                                             .GetRowByName(colNo: 5, cellName: DllFilename);
                 }
 
@@ -635,8 +635,8 @@ namespace PP5AutoUITests
 
                 dllItem.LeftClick();
 
-                GetPP5Window().GetElement(By.Name("Delete")).LeftClick();
-                GetPP5Window().GetElement(5000, By.Name("Notice"), By.Name("Yes"))
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("Delete")).LeftClick();
+                PP5IDEWindow.GetElementWithRetry<IElement, IElement>(5000, By.Name("Notice"), By.Name("Yes"))
                               .LeftClick();
             }
         }
@@ -651,15 +651,15 @@ namespace PP5AutoUITests
         public void Management_AddAndDeleteSamePython_For300Times(int repeatCount)
         {
             // Click on Ex-Function button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[4].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[4].LeftClick();
 
             // Click on Python tab
-            IWebElement ExFunctionTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("mainTab"))
-                                                         .GetElements(By.ClassName("TabItem"))[4];
+            IWebElement ExFunctionTabItem = CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("mainTab"))
+                                                         .GetWebElementsFromWebElement(By.ClassName("TabItem"))[4];
 
-            IWebElement PythonTabItem = ExFunctionTabItem.GetElement(By.ClassName("TabControl"))
-                                                         .GetElements(By.ClassName("TabItem"))[1];
+            IWebElement PythonTabItem = ExFunctionTabItem.GetWebElementFromWebElement(By.ClassName("TabControl"))
+                                                         .GetWebElementsFromWebElement(By.ClassName("TabItem"))[1];
 
             PythonTabItem.LeftClick();
 
@@ -669,16 +669,16 @@ namespace PP5AutoUITests
             // Repeat add and delete same python item
             for (int i = 0; i < repeatCount; i++)
             {
-                WaitUntil(() => GetPP5Window().GetElement(By.Name("Add")) != null);
-                GetPP5Window().GetElement(By.Name("Add")).LeftClick();
+                WaitUntil(() => PP5IDEWindow.GetWebElementFromWebElement(By.Name("Add")) != null);
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("Add")).LeftClick();
 
                 GetPP5Window().GetBtnElement("先前的位置").LeftClick();
                 SendSingleKeys(pythonFolder);
-                GetPP5Window().GetElement(By.Name(pythonFilename)).DoubleClick();
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name(pythonFilename)).DoubleClick();
 
                 Executor.GetInstance().SwitchTo(SessionType.Desktop);
-                WaitUntil(() => CurrentDriver.GetElement(By.Name("Add Python")) != null);
-                var AddPythonDg = CurrentDriver.GetElement(MobileBy.AccessibilityId("TopDataGrid"));
+                WaitUntil(() => CurrentDriver.GetWebElementFromWebDriver(By.Name("Add Python")) != null);
+                var AddPythonDg = CurrentDriver.GetExtendedElement(PP5By.Id("TopDataGrid"));
 
                 // Find the added Python and uncheck "Active"
                 AddPythonDg.GetCellBy(rowNo: 1, colNo: 2)
@@ -686,9 +686,9 @@ namespace PP5AutoUITests
                            .UnTickCheckBox();
 
                 AddPythonDg.GetCellBy(rowNo: 1, colNo: 1)
-                           .SendContent("test");
+                           .SendText("test");
 
-                CurrentDriver.GetElement(5000, By.Name("Add Python"), By.Name("OK"))
+                CurrentDriver.GetWebElementFromWebDriver(5000, By.Name("Add Python"), By.Name("OK"))
                     .LeftClick();
 
                 Executor.GetInstance().SwitchTo(SessionType.PP5IDE);
@@ -696,13 +696,13 @@ namespace PP5AutoUITests
                 IWebElement pythonItem = null;
                 while (pythonItem == null)
                 {
-                    pythonItem = GetPP5Window().GetElement(MobileBy.AccessibilityId("PythonDataGrid"))
+                    pythonItem = PP5IDEWindow.GetExtendedElement(PP5By.Id("PythonDataGrid"))
                                                .GetRowByName(colNo: 5, cellName: pythonFilename);
                 }
                 pythonItem.LeftClick();
 
-                GetPP5Window().GetElement(By.Name("Delete")).LeftClick();
-                GetPP5Window().GetElement(5000, By.Name("Notice"), By.Name("Yes"))
+                PP5IDEWindow.GetWebElementFromWebElement(By.Name("Delete")).LeftClick();
+                PP5IDEWindow.GetElementWithRetry<IElement, IElement>(5000, By.Name("Notice"), By.Name("Yes"))
                               .LeftClick();
             }
         }
@@ -712,30 +712,30 @@ namespace PP5AutoUITests
             Executor.GetInstance().SwitchTo(SessionType.Desktop);
             //try
             //{
-            WaitUntil(() => CurrentDriver.GetElement(By.Name("Add User")) != null);
-                var AddUserDialog = CurrentDriver.GetElement(By.Name("Add User"));
+            WaitUntil(() => CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Add User")) != null);
+                var AddUserDialog = CurrentDriver.GetExtendedElement(PP5By.Name("Add User"));
                 if (AddUserDialog == null)
                 {
                     return false;
                 }
-                AddUserDialog.GetFirstEditElement().SendContent(userID);
-                AddUserDialog.GetEditElement(1).SendContent(password);
+                AddUserDialog.GetFirstEditElement().SendText(userID);
+                AddUserDialog.GetEditElement(1).SendText(password);
                 AddUserDialog.GetFirstComboBoxElement().SelectComboBoxItemByName(role);
                 AddUserDialog.GetCustomElement(0)
                              .GetFirstEditElement()
-                             .SendContent(expiredDate);
+                             .SendText(expiredDate);
                 if (valid)
                     AddUserDialog.GetRdoBtnElement("Yes").LeftClick();
                 else
                     AddUserDialog.GetRdoBtnElement("No").LeftClick();
-                AddUserDialog.GetEditElement(2).SendContent(remark);
+                AddUserDialog.GetEditElement(2).SendText(remark);
                 AddUserDialog.GetBtnElement("Add").LeftClick();
                 Executor.GetInstance().SwitchTo(SessionType.PP5IDE);
                 return true;
             //}
             //catch
             //{
-            //    if (CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog")) != null)
+            //    if (CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("MessageBoxExDialog")) != null)
             //        return false;
             //    else
             //        throw;
@@ -747,20 +747,20 @@ namespace PP5AutoUITests
             Executor.GetInstance().SwitchTo(SessionType.Desktop);
             //try
             //{
-            WaitUntil(() => CurrentDriver.GetElement(By.Name("Add Role")) != null);
-            var AddRoleDialog = CurrentDriver.GetElement(By.Name("Add Role"));
+            WaitUntil(() => CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Add Role")) != null);
+            var AddRoleDialog = CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Add Role"));
                 if (AddRoleDialog == null)
                 {
                     return false;
                 }
-                AddRoleDialog.GetFirstEditElement().SendContent(roleName);
+                AddRoleDialog.GetFirstEditElement().SendText(roleName);
                 AddRoleDialog.GetBtnElement("Add").LeftClick();
                 Executor.GetInstance().SwitchTo(SessionType.PP5IDE);
                 return true;
             //}
             //catch (Exception ex)
             //{
-            //    if (CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog")) != null)
+            //    if (CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("MessageBoxExDialog")) != null)
             //        return false;
             //    else
             //        throw;
@@ -771,15 +771,15 @@ namespace PP5AutoUITests
         {
             Executor.GetInstance().SwitchTo(SessionType.Desktop);
 
-            WaitUntil(() => CurrentDriver.GetElement(By.Name("Add Defect Code")) != null);
-            var DefectCodeDialog = CurrentDriver.GetElement(By.Name("Add Defect Code"));
+            WaitUntil(() => CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Add Defect Code")) != null);
+            var DefectCodeDialog = CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Add Defect Code"));
             if (DefectCodeDialog == null)
             {
                 return false;
             }
-            DefectCodeDialog.GetSpecificChildOfControlType(ElementControlType.TextBox, 0).SendContent(defectCode.ToString());
-            DefectCodeDialog.GetSpecificChildOfControlType(ElementControlType.TextBox, 1).SendContent(desc);
-            DefectCodeDialog.GetSpecificChildOfControlType(ElementControlType.TextBox, 2).SendContent(customerDefectCode.ToString());
+            DefectCodeDialog.GetSpecificChildOfControlType(ElementControlType.TextBox, 0).SendText(defectCode.ToString());
+            DefectCodeDialog.GetSpecificChildOfControlType(ElementControlType.TextBox, 1).SendText(desc);
+            DefectCodeDialog.GetSpecificChildOfControlType(ElementControlType.TextBox, 2).SendText(customerDefectCode.ToString());
             DefectCodeDialog.GetBtnElement("OK").LeftClick();
 
             Executor.GetInstance().SwitchTo(SessionType.PP5IDE);
@@ -790,7 +790,7 @@ namespace PP5AutoUITests
         {
             Executor.GetInstance().SwitchTo(SessionType.Desktop);
 
-            var EditUserDialog = CurrentDriver.GetElement(By.Name("Edit User"));
+            var EditUserDialog = CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Edit User"));
             if (EditUserDialog == null)
             {
                 return false;
@@ -811,8 +811,8 @@ namespace PP5AutoUITests
         {
             Executor.GetInstance().SwitchTo(SessionType.Desktop);
 
-            WaitUntil(() => CurrentDriver.GetElement(By.Name("Edit Role")) != null);
-            var EditRoleDialog = CurrentDriver.GetElement(By.Name("Edit Role"));
+            WaitUntil(() => CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Edit Role")) != null);
+            var EditRoleDialog = CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.Name("Edit Role"));
             if (EditRoleDialog == null)
             {
                 return false;

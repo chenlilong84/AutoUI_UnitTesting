@@ -26,7 +26,7 @@ namespace PP5AutoUITests
         {
             VariableTabNavi(tabType);
 
-            var variablesRows = CurrentDriver.GetElements(MobileBy.AccessibilityId("ShowName"));
+            var variablesRows = CurrentDriver.GetWebElementsFromWebDriver(MobileBy.AccessibilityId("ShowName"));
             if (variablesRows.Count == 1)
             {
                 if (string.IsNullOrEmpty(variablesRows.First().Text))
@@ -43,8 +43,8 @@ namespace PP5AutoUITests
                 variablesRows.ToList()[0].LeftClick();
 
                 // Delete selected condition variable
-                CurrentDriver.GetElement(By.Name("Edit")).LeftClick();
-                CurrentDriver.GetElement(By.Name("Delete")).LeftClick();
+                CurrentDriver.GetWebElementFromWebDriver(By.Name("Edit")).LeftClick();
+                CurrentDriver.GetWebElementFromWebDriver(By.Name("Delete")).LeftClick();
             }
 
             //Assert.AreEqual(1, uIActionPP5IDE.GetElementsById("ShowName", "ListItemRow").Count);
@@ -53,14 +53,14 @@ namespace PP5AutoUITests
         public void AddNewEnumItem(string name, string value)
         {
             //System.Threading.Thread.Sleep(100);
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("NewBtn")).LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("NewBtn")).LeftClick();
 
             Console.WriteLine("LeftClick on Value textbox in Enum Item Creator dialog");
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("enumItemNameTxtBox")).LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("enumItemNameTxtBox")).SendKeys(name);
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("enumItemValueTxtBox")).LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("enumItemValueTxtBox")).SendKeys(value);
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("Ok")).LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("enumItemNameTxtBox")).LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("enumItemNameTxtBox")).SendKeys(name);
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("enumItemValueTxtBox")).LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("enumItemValueTxtBox")).SendKeys(value);
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("Ok")).LeftClick();
         }
 
         public void AddNewEnumItemByXPath(string name, string value)
@@ -68,7 +68,7 @@ namespace PP5AutoUITests
             // LeftClick on Button "New" at (33,5)
             Console.WriteLine("LeftClick on Button \"New\" at (33,5)");
             string xpath_LeftClickButtonNew_33_5 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"][@Name=\"Enum Item Editor\"]/Button[@Name=\"New\"][@AutomationId=\"NewBtn\"]";
-            var winElem_LeftClickButtonNew_33_5 = CurrentDriver.FindElementByAbsoluteXPath(xpath_LeftClickButtonNew_33_5);
+            var winElem_LeftClickButtonNew_33_5 = CurrentDriver.GetExtendedElement(PP5By.XPath(xpath_LeftClickButtonNew_33_5));
             if (winElem_LeftClickButtonNew_33_5 != null)
             {
                 winElem_LeftClickButtonNew_33_5.Click();
@@ -82,7 +82,7 @@ namespace PP5AutoUITests
             // LeftClick on Edit "" at (35,13)
             Console.WriteLine("LeftClick on Edit \"\" at (35,13)");
             string xpath_LeftClickEdit_35_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"][@Name=\"Enum Item Creater\"]/Edit[@AutomationId=\"enumItemNameTxtBox\"]";
-            var winElem_LeftClickEdit_35_13 = CurrentDriver.FindElementByAbsoluteXPath(xpath_LeftClickEdit_35_13);
+            var winElem_LeftClickEdit_35_13 = CurrentDriver.GetExtendedElement(PP5By.XPath(xpath_LeftClickEdit_35_13));
             if (winElem_LeftClickEdit_35_13 != null)
             {
                 winElem_LeftClickEdit_35_13.Click();
@@ -101,7 +101,7 @@ namespace PP5AutoUITests
             // LeftClick on Edit "" at (34,14)
             Console.WriteLine("LeftClick on Edit \"\" at (34,14)");
             string xpath_LeftClickEdit_34_14 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"][@Name=\"Enum Item Creater\"]/Edit[@AutomationId=\"enumItemValueTxtBox\"]";
-            var winElem_LeftClickEdit_34_14 = CurrentDriver.FindElementByAbsoluteXPath(xpath_LeftClickEdit_34_14);
+            var winElem_LeftClickEdit_34_14 = CurrentDriver.GetExtendedElement(PP5By.XPath(xpath_LeftClickEdit_34_14));
             if (winElem_LeftClickEdit_34_14 != null)
             {
                 winElem_LeftClickEdit_34_14.Click();
@@ -120,7 +120,7 @@ namespace PP5AutoUITests
             // LeftClick on Button "Ok" at (111,4)
             Console.WriteLine("LeftClick on Button \"Ok\" at (111,4)");
             string xpath_LeftClickButtonOk_111_4 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"][@Name=\"Enum Item Creater\"]/Button[@ClassName=\"Button\"][@Name=\"Ok\"]";
-            var winElem_LeftClickButtonOk_111_4 = CurrentDriver.FindElementByAbsoluteXPath(xpath_LeftClickButtonOk_111_4);
+            var winElem_LeftClickButtonOk_111_4 = CurrentDriver.GetExtendedElement(PP5By.XPath(xpath_LeftClickButtonOk_111_4));
             if (winElem_LeftClickButtonOk_111_4 != null)
             {
                 winElem_LeftClickButtonOk_111_4.Click();
@@ -132,9 +132,9 @@ namespace PP5AutoUITests
             }
         }
 
-        public static IWebElement AddNewEnumItemByNameOrId(string name, string value)
+        public static IElement AddNewEnumItemByNameOrId(string name, string value)
         {
-            IWebElement enumItemEditorWindow = PP5IDEWindow.GetElement(By.Name("Enum Item Editor"));
+            IElement enumItemEditorWindow = PP5IDEWindow.GetExtendedElement(PP5By.Name("Enum Item Editor"));
 
             // LeftClick on Button "New" at (33,5)
             //Console.WriteLine("LeftClick on Button \"New\" at (33,5)");
@@ -142,18 +142,19 @@ namespace PP5AutoUITests
 
             // LeftClick on Edit "" at (35,13)
             //Console.WriteLine("LeftClick on Edit \"\" at (35,13)");
-            enumItemEditorWindow.GetEditElement("enumItemNameTxtBox").SendKeys(name);
+            PP5IDEWindow.GetExtendedElement(PP5By.Name("Enum Item Creater"))
+                        .GetEditElement("enumItemNameTxtBox").SendKeys(name);
 
             // LeftClick on Edit "" at (34,14)
             //Console.WriteLine("LeftClick on Edit \"\" at (34,14)");
-            enumItemEditorWindow.GetElement(By.Name("Enum Item Creater"))
-                                .GetLastChildOfControlType(ElementControlType.TextBox)
-                                .SendKeys(value);
+            PP5IDEWindow.GetExtendedElement(PP5By.Name("Enum Item Creater"))
+                        .GetLastChildOfControlType(ElementControlType.TextBox)
+                        .SendKeys(value);
 
             // LeftClick on Button "Ok" at (111,4)
             //Console.WriteLine("LeftClick on Button \"Ok\" at (111,4)");
-            enumItemEditorWindow.GetElement(By.Name("Enum Item Creater"))
-                                .GetElement(By.Name("Ok")).LeftClick();
+            PP5IDEWindow.GetWebElementFromWebElement(By.Name("Enum Item Creater"))
+                        .GetWebElementFromWebElement(By.Name("Ok")).LeftClick();
 
             return enumItemEditorWindow;
         }
@@ -205,8 +206,8 @@ namespace PP5AutoUITests
 
             //uIActionPP5IDE.PerformActionByName(ActionType.LeftClick, "Ok");
             //uIActionPP5IDE.PerformActionByName(ActionType.None, "DisplayedEnum");
-            enumItemEditorWindow.GetElement(By.Name("Ok")).LeftClick();
-            var ElementFound = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("DisplayedEnum"));
+            enumItemEditorWindow.GetWebElementFromWebElement(By.Name("Ok")).LeftClick();
+            var ElementFound = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("DisplayedEnum"));
             for (int i = 0; i < 10; i++)
                 Assert.AreEqual(string.Concat(i, "=", i), ElementFound.GetAttribute("Value.Value").Split(',')[i]);
 

@@ -19,6 +19,9 @@ namespace PP5AutoUITests
             {
                 try
                 {
+#if DEBUG
+                    //Console.WriteLine($"timeout:{millisecondsTimeout}, retry: {nTryCount}");
+#endif
                     isConditionMet = SpinWait.SpinUntil(condition, millisecondsTimeout);
                 }
                 catch

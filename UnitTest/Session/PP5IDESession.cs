@@ -9,7 +9,7 @@ using OpenQA.Selenium.Appium.Windows;
 
 namespace PP5AutoUITests.Session
 {
-    public class PP5IDEDriver : DriverBase, IDriver
+    public class PP5IDEDriver : DriverBase, ISessionDriver
     {
         public PP5IDEDriver()
         {
@@ -22,23 +22,21 @@ namespace PP5AutoUITests.Session
             base.targetAppWorkingDir = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\";
         }
 
-        public WindowsDriver<WindowsElement> CreateNewDriver()
+        public PP5Driver CreateNewDriver()
         {
-            sessionType = SessionType.Desktop;
-
             OpenQA.Selenium.Appium.AppiumOptions appCapabilities = new OpenQA.Selenium.Appium.AppiumOptions();
             appCapabilities.AddAdditionalCapability("app", "Root");
             appCapabilities.AddAdditionalCapability("deviceName", DeviceName);
-            currentDriver = new WindowsDriver<WindowsElement>(new Uri(WindowsApplicationDriverUrl), appCapabilities);
+            currentDriver = new PP5Driver(new Uri(WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(180), SessionType.Desktop);
 
-            PowerPro5Config.PP5WindowSessionType = sessionType.ToString();
+            //PowerPro5Config.PP5WindowSessionType = sessionType.ToString();
 
             // Set implicit timeout to 1.5 seconds to make element search to retry every 500 ms for at most three times
             //currentDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1.5);
             return currentDriver;
         }
 
-        public override WindowsDriver<WindowsElement> CreateDriver()
+        public override PP5Driver CreateDriver()
         {
             processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(targetAppPath));
             if (processes.Length == 0)

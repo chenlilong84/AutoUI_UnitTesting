@@ -3,9 +3,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
-using DisableDevice;
 using Chroma.UnitTest.Common;
 using Newtonsoft.Json.Linq;
+using Castle.Components.DictionaryAdapter.Xml;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
+using System.Threading;
 
 namespace PP5AutoUITests.Test
 {
@@ -42,6 +44,37 @@ namespace PP5AutoUITests.Test
         public void TestDisableMouseControl()
         {
             DllHelper.EnableMouse(false);   // Disable mouse usage
+        }
+
+        [TestMethod("Test Disable Mouse usage by device name")]
+        public void TestDisableMouseControlByName()
+        {
+            bool result = DllHelper.EnableMouseByName(false);   // Disable mouse usage
+            Assert.IsTrue(result);
+
+            Thread.Sleep(5000);
+
+            DllHelper.EnableMouseByName(true);
+        }
+
+        [TestMethod("Test Disable KeyPro usage")]
+        public void TestDisableKeyPro()
+        {
+            bool result = DllHelper.ActivateDevice(false, DeviceType.KeyPro);   // Disable keyPro usage
+            Assert.IsTrue(result);
+
+            Thread.Sleep(5000);
+
+            DllHelper.ActivateDevice(true, DeviceType.KeyPro);                  // re-Enable keyPro usage
+        }
+
+        [TestMethod("Test Enable KeyPro usage")]
+        public void TestEnableKeyPro()
+        {
+            DllHelper.ActivateDevice(false, DeviceType.KeyPro);                 // Disable keyPro usage
+
+            bool result = DllHelper.ActivateDevice(true, DeviceType.KeyPro);    // re-Enable keyPro usage
+            Assert.IsTrue(result);
         }
 
         [TestMethod("Test Disable Memory Monitor Window of PP5")]
@@ -376,6 +409,20 @@ namespace PP5AutoUITests.Test
             // Check propertyValue is bool with "IsDevice" property
             Assert.IsTrue(isJsonPropertyValuesFetched);
             Assert.IsInstanceOfType(propertyValue, typeof(bool));
+        }
+
+        [TestMethod]
+        public void DummyDllTester()
+        {
+            // Generate the dummy DLL
+            string cmdName = "testdll";
+            DllHelper.DummyDllGenerator.GenerateDummyDll(cmdName);
+            Logger.LogMessage($"Dummy DLL generated at: {Path.Combine(Environment.CurrentDirectory, cmdName)}");
+
+            Assert.AreEqual(true, File.Exists(Path.Combine(Environment.CurrentDirectory, cmdName + ".dll")));
+
+            // delete the test dll
+            File.Delete(Path.Combine(Environment.CurrentDirectory, cmdName + ".dll"));
         }
 
         #endregion

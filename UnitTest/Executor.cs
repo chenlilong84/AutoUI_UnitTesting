@@ -4,6 +4,7 @@ using OpenQA.Selenium.Appium.Windows;
 using static PP5AutoUITests.ThreadHelper;
 using static PP5AutoUITests.AutoUIExtension;
 using OpenQA.Selenium;
+using System.Windows.Forms;
 
 namespace PP5AutoUITests
 {
@@ -50,8 +51,9 @@ namespace PP5AutoUITests
         */
 
         private static Executor executor;
-        private static WindowsDriver<WindowsElement> currentDriver;
-        private static Dictionary<SessionType, WindowsDriver<WindowsElement>> UsedDrivers;
+        private static PP5Driver currentDriver;
+        private static PP5Driver currentDriverNotGeneric;
+        private static Dictionary<SessionType, PP5Driver> UsedDrivers;
         public Process WinAppDriverProcess;
 
         private readonly string winAppDriverPath = @"C:\Program Files (x86)\Windows Application Driver\WinAppDriver.exe";
@@ -61,9 +63,15 @@ namespace PP5AutoUITests
 
         //private bool isWinAppDriverStarted = false;
 
-        public WindowsDriver<WindowsElement> GetCurrentDriver()
+        public IOptions driverOps => currentDriver.Manage();
+        public PP5Driver GetCurrentDriver()
         {
             return currentDriver;
+        }
+
+        public PP5Driver GetCurrentDriverNotGeneric()
+        {
+            return currentDriverNotGeneric;
         }
 
         #endregion
@@ -117,14 +125,14 @@ namespace PP5AutoUITests
         // call WinAppDriver
         private void StartWinAppDriver()
         {
-            WinAppDriverProcess = StartProcess(winAppDriverPath);
+            WinAppDriverProcess = StartProcess(winAppDriverPath, windowStyle: ProcessWindowStyle.Minimized);
             //hideWinAppDriverWindow();
             //isWinAppDriverStarted = true;
         }
 
         private void StartPP5()
         {
-            StartProcess(PP5AppPath, WaitForAppLaunch: 25000);
+            StartProcess(PP5AppPath, WaitForAppLaunch: 25000, windowStyle: ProcessWindowStyle.Normal);
         }
 
         //private void hideWinAppDriverWindow()
@@ -186,7 +194,7 @@ namespace PP5AutoUITests
             //UsedDrivers.Add(SessionType.MainPanel, DriverFactory.GetInstance().Create(SessionType.MainPanel));
         }
 
-        public IWebDriver SwitchTo(SessionType sessionType)
+        public PP5Driver SwitchTo(SessionType sessionType)
         {
             //UsedDrivers.TryGetValue(sessionType, out CurrentDriver);
             //currentDriver.ResetInputState();
@@ -194,7 +202,8 @@ namespace PP5AutoUITests
 
             if (currentDriver != null)
             {
-                if (PowerPro5Config.PP5WindowSessionType == sessionType.ToString())
+                //if (PowerPro5Config.PP5WindowSessionType == sessionType.ToString())
+                if (currentDriver.sessionType == sessionType)
                     return currentDriver;
             }
 
@@ -203,8 +212,18 @@ namespace PP5AutoUITests
             else
                 currentDriver = DriverFactory.GetInstance().Get(SessionType.PP5IDE).CreateNewDriver();
 
+            currentDriver.sessionType = sessionType;
             return currentDriver;
         }
         #endregion
+
+        //public IWindow GetWindow()
+        //{
+        //    string currWindowHandle = currentDriver.CurrentWindowHandle;
+        //    IWindow window = driverOps.Window;
+        //    return window;
+        //}
+
+
     }
 }

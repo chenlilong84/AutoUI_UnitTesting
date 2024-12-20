@@ -61,8 +61,9 @@
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\packages\Castle.Core.4.4.1\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Chroma.UnitTest.Common">
-      <HintPath>..\..\Reference\Chroma.UnitTest.Common.dll</HintPath>
+    <Reference Include="Chroma.UnitTest.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dll\Chroma.UnitTest.Common.dll</HintPath>
     </Reference>
     <Reference Include="dotMemory.Unit, Version=111.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.dotMemoryUnit.3.2.20220510\lib\net35\dotMemory.Unit.dll</HintPath>
@@ -80,6 +81,10 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RGiesecke.DllExport.Metadata, Version=1.0.0.0, Culture=neutral, PublicKeyToken=8f52d83c1a22df51, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnmanagedExports.1.2.7\lib\net\RGiesecke.DllExport.Metadata.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="SeleniumExtras.PageObjects, Version=3.11.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DotNetSeleniumExtras.PageObjects.3.11.0\lib\net45\SeleniumExtras.PageObjects.dll</HintPath>
@@ -114,15 +119,43 @@
   <ItemGroup>
     <Compile Include="Assertor.cs" />
     <Compile Include="Base\TestBase.cs" />
+    <Compile Include="Base\UtilityBase.cs" />
+    <Compile Include="Converter\ElementTypeConvertor.cs" />
+    <Compile Include="Enum\TestCmdGroupType.cs" />
+    <Compile Include="Enum\TIPanelType.cs" />
+    <Compile Include="Helper\TIEditorHelper.cs" />
+    <Compile Include="Model\DragAndDropInfo.cs" />
+    <Compile Include="Model\VariableInfo.cs" />
+    <Compile Include="StaticData.cs" />
+    <Compile Include="Enum\ArraySplitCharType.cs" />
+    <Compile Include="Enum\MoveToElementOffsetOrigin.cs" />
+    <Compile Include="Enum\ToolBarButton.cs" />
+    <Compile Include="Event\PropertyChangedExtendedEvent.cs" />
+    <Compile Include="Event\PropertyChangedExtendedEventArgs.cs" />
+    <Compile Include="Helper\FileSystemWatcher.cs" />
+    <Compile Include="Helper\WindowsAPI.cs" />
+    <Compile Include="Interface\IFindsByName.cs" />
+    <Compile Include="Module_TestCases\TestCases_TIEditor.cs" />
+    <Compile Include="Module_TestCases\TestCases_TPEditor.cs" />
+    <Compile Include="PerformAction.cs" />
+    <Compile Include="PP5DataGrid.cs" />
+    <Compile Include="PP5Element.cs" />
     <Compile Include="Enum\ColorPicker.cs" />
-    <Compile Include="Helper\ByAutomationIdOrName.cs" />
+    <Compile Include="Enum\DeviceType.cs" />
+    <Compile Include="Enum\FrameworkType.cs" />
+    <Compile Include="Helper\CursorHelper.cs" />
+    <Compile Include="Helper\DefaultElementLocator.cs" />
+    <Compile Include="Helper\PP5By.cs" />
+    <Compile Include="Helper\RetryingElementLocator.cs" />
+    <Compile Include="Helper\PP5DefaultWait.cs" />
+    <Compile Include="Interface\IDriver.cs" />
+    <Compile Include="Interface\IElement.cs" />
     <Compile Include="Interface\IModules.cs" />
     <Compile Include="Interface\ITestItem.cs" />
     <Compile Include="Interface\ITestCommand.cs" />
-    <Compile Include="Test\TestBaseTests.cs" />
+    <Compile Include="PP5Driver.cs" />
     <Compile Include="Converter\KeyConverter.cs" />
     <Compile Include="ElementFinder.cs" />
-    <Compile Include="ElementFinderTests.cs" />
     <Compile Include="Enum\ElementSearchType.cs" />
     <Compile Include="Enum\ManagemantSettings.cs" />
     <Compile Include="Enum\TestCommandType.cs" />
@@ -155,15 +188,12 @@
     <Compile Include="Helper\DeviceHelper.cs" />
     <Compile Include="Helper\ThreadHelper.cs" />
     <Compile Include="Helper\DllHelper.cs" />
-    <Compile Include="Interface\IDriver.cs" />
+    <Compile Include="Interface\ISessionDriver.cs" />
     <Compile Include="Helper\LogHelper.cs" />
     <Compile Include="Module_TestCases\TestCases_Execution.cs" />
-    <Compile Include="Module_TestCases\TestCases_GUIEditor.cs" />
     <Compile Include="Module_TestCases\TestCases_Management.cs" />
     <Compile Include="Module_TestCases\TestCases_Report.cs" />
-    <Compile Include="Module_TestCases\TestCases_TIEditor.cs" />
     <Compile Include="Module_TestCases\TestCases_TIEditor_EnumCreatorDialog.cs" />
-    <Compile Include="Module_TestCases\TestCases_TPEditor.cs" />
     <Compile Include="PowerPro5ConfigTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Factory\DriverFactory.cs" />
@@ -174,7 +204,9 @@
     <Compile Include="Test\ReportModuleTest.cs" />
     <Compile Include="Test\DataSourceTest.cs" />
     <Compile Include="Test\TIEditorModuleTest.cs" />
+    <Compile Include="Test\TI_VariableNavigationTests.cs" />
     <Compile Include="Using.cs" />
+    <Compile Include="Utility\DriverLogger.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Utility\TextFileWrapper.cs" />
     <Compile Include="Utility\Timer.cs" />
@@ -182,6 +214,23 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="TestResults\B2-6.trx" />
+    <None Include="TestResults\B2-6_1.trx" />
+    <None Include="TestResults\B2-7.trx" />
+    <None Include="TestResults\B2-7_1.trx" />
+    <None Include="TestResults\B5-10.trx" />
+    <None Include="TestResults\B5-10_3.trx" />
+    <None Include="TestResults\B6-3_2.trx" />
+    <None Include="TestResults\B7-1_1.trx" />
+    <None Include="TestResults\B7-1_2.trx" />
+    <None Include="TestResults\B7-2_1.trx" />
+    <None Include="TestResults\B7-3.trx" />
+    <None Include="TestResults\B7-4.trx" />
+    <None Include="TestResults\B7-5.trx" />
+    <None Include="TestResults\B7-6.trx" />
+    <None Include="TestResults\B7-7.trx" />
+    <None Include="TestResults\B7-8.trx" />
+    <None Include="TestResults\B7-9.trx" />
   </ItemGroup>
   <ItemGroup />
   <!--   <Choose>
@@ -215,6 +264,7 @@
   <PropertyGroup>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
+  <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

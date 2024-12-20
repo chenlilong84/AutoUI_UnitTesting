@@ -50,11 +50,11 @@ namespace PP5AutoUITests
 
                 // Wait for PASS to show up and continue the next execution
                 Console.WriteLine("Wait for \"PASS\" to show up and continue the next execution");
-                System.Threading.SpinWait.SpinUntil(() => PP5IDEWindow.GetElement(By.ClassName("TestResultStatusView"))
+                System.Threading.SpinWait.SpinUntil(() => PP5IDEWindow.GetExtendedElement(PP5By.ClassName("TestResultStatusView"))
                                                                       .GetFirstTabControlElement()
                                                                       .GetTextElement("PASS") != null);
 
-                //WaitUntil(() => GetPP5Window().GetElement(By.ClassName("TestResultStatusView"))
+                //WaitUntil(() => GetPP5Window().GetElementFromWebElement(By.ClassName("TestResultStatusView"))
                 //                              .GetFirstTabControlElement()
                 //                              .GetTextElement("PASS") != null, 4000);
             }

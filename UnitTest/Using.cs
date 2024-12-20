@@ -6,3 +6,5 @@ global using System.Reflection;
 global using UTCommon = Chroma.UnitTest.Common;
 global using static Chroma.UnitTest.Common.AssertExtenstion;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
+global using OpenQA.Selenium.Internal;
+global using PP5AutoUITests.SeleniumSupport;

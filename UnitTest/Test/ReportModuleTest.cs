@@ -20,8 +20,8 @@ namespace PP5AutoUITests
         [TestMethod]
         public void TestTabControl_ByTIAndHTMLReport()
         {
-            IWebElement ReportEditorTabControl = CurrentDriver.GetElement(MobileBy.AccessibilityId("TITPTab"));
-            IWebElement ByTIHTMLReportPage = ReportEditorTabControl.TabSelect(0, 0);
+            IElement ReportEditorTabControl = PP5IDEWindow.GetExtendedElement(PP5By.Id("TITPTab"));
+            IElement ByTIHTMLReportPage = ReportEditorTabControl.TabSelect(0, 0);
             Assert.IsNotNull(ByTIHTMLReportPage);
             //Assert.IsTrue(ByTIHTMLReportPage.Displayed, "ByTIHTMLReportPage.Displayed is true");
             true.ShouldEqualTo(ByTIHTMLReportPage.Displayed);
@@ -31,8 +31,8 @@ namespace PP5AutoUITests
         [TestMethod]
         public void TestTabControl_ByTIAndExcel()
         {
-            IWebElement ReportEditorTabControl = CurrentDriver.GetElement(MobileBy.AccessibilityId("TITPTab"));
-            IWebElement ByTIExcelPage = ReportEditorTabControl.TabSelect(0, 1);
+            IElement ReportEditorTabControl = PP5IDEWindow.GetExtendedElement(PP5By.Id("TITPTab"));
+            IElement ByTIExcelPage = ReportEditorTabControl.TabSelect(0, 1);
             Assert.IsNotNull(ByTIExcelPage);
             //Assert.IsTrue(ByTIExcelPage.Displayed, "ByTIExcelPage.Displayed is true");
             true.ShouldEqualTo(ByTIExcelPage.Displayed, "ByTIExcelPage.Displayed is true");

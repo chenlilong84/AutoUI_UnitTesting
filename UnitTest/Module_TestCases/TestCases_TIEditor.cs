@@ -9,11 +9,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Newtonsoft.Json.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using Castle.Components.DictionaryAdapter.Xml;
 using Chroma.UnitTest.Common;
 using Chroma.UnitTest.Common.AutoUI;
-//using System.Windows.Forms;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Windows;
@@ -21,13 +22,31 @@ using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.PageObjects;
 using OpenQA.Selenium.Support.UI;
+
 using static PP5AutoUITests.AutoUIActionHelper;
 using static PP5AutoUITests.AutoUIExtension;
 using static PP5AutoUITests.ThreadHelper;
 using static PP5AutoUITests.ControlElementExtension;
-using System.Windows.Input;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
-using Newtonsoft.Json.Linq;
+using MyCursor;
+using Appium.Interfaces.Generic.SearchContext;
+using System.ComponentModel;
+using SeleniumExtras.PageObjects;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using System.Data;
+using static System.Net.Mime.MediaTypeNames;
+using System.Security.Cryptography;
+using System.Runtime.Serialization;
+using System.Collections;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PP5AutoUITests.Model;
+using System.Drawing;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+//using System.Windows.Forms;
+//using SeleniumExtras.PageObjects;
+//using System.Windows.Forms;
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+//using System.Drawing.Drawing2D;
 //using System.Windows.Forms;
 
 namespace PP5AutoUITests
@@ -35,11 +54,10 @@ namespace PP5AutoUITests
     [TestClass]
     public class TestCases_TIEditor : TestBase
     {
-        string TIFilePath = null;
-
         [TestInitialize]
         public void TIEditor_TestMethodSetup()
         {
+            //fileWatcher.watcher.SynchronizingObject = base;
             OpenNewTIEditorWindow();
 
             SharedSetting.isScreenshotEnabled = false;
@@ -62,16 +80,30 @@ namespace PP5AutoUITests
                 _scrnShotTimer.Stop();
 
             // Clear the testcase TI file
-            if (TIFilePath != null)
+            //if (TIFilePath != null)
+            //{
+            //    string tmpTestCaseFilePath = $"C:/Temp/{Path.GetFileName(TIFilePath)}";
+            //    if (File.Exists(tmpTestCaseFilePath))
+            //    {
+            //        File.Delete(tmpTestCaseFilePath);         // Ensure that the target does not exist.
+            //    }
+            //    File.Move(TIFilePath, tmpTestCaseFilePath);   // Move the file.
+            //}
+            //TIFilePath = null;
+
+            if (TIFilePaths.Count > 0)
             {
-                string tmpTestCaseFilePath = $"C:/Temp/{Path.GetFileName(TIFilePath)}";
-                if (File.Exists(tmpTestCaseFilePath))
+                foreach (string path in TIFilePaths)
                 {
-                    File.Delete(tmpTestCaseFilePath);         // Ensure that the target does not exist.
+                    string tmpTestCaseFilePath = $"C:/Temp/{Path.GetFileName(path)}";
+                    if (File.Exists(tmpTestCaseFilePath))
+                    {
+                        File.Delete(tmpTestCaseFilePath);         // Ensure that the target does not exist.
+                    }
+                    File.Move(path, tmpTestCaseFilePath);   // Move the file.
                 }
-                File.Move(TIFilePath, tmpTestCaseFilePath);   // Move the file.
             }
-            TIFilePath = null;
+            TIFilePaths.Clear();
         }
 
         /// <summary>
@@ -111,7 +143,7 @@ namespace PP5AutoUITests
             //    //                                            "sendKeys[1]");
             //    //Session.GeElement("@ID=startfather").Action("sendKeys[1]");
 
-            //    //public WindowsElement GetElement(string path)
+            //    //public WindowsElement GetElementFromWebElement(string path)
             //    //{
             //    //    Session.FindEle
             //    //}
@@ -199,11 +231,11 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
             //GetCommandBy(CommandName, GroupName).DoubleClick();
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
             //AddCommandBy(GroupName, 17);
 
             // LeftClick on Text "ABS"
@@ -220,7 +252,7 @@ namespace PP5AutoUITests
             // Check same test item command is added
             CommandName.ShouldEqualTo(GetCellBy("PGGrid", 1, "Test Command").Text);
 
-            //WindowsElement testCmdSearchBox = CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchBox"));
+            //WindowsElement testCmdSearchBox = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchBox"));
             //testCmdSearchBox.ClearContent();
             //testCmdSearchBox.SendComboKeys(CommandName, OpenQA.Selenium.Keys.Enter);
 
@@ -230,25 +262,25 @@ namespace PP5AutoUITests
             // Give the CmdTreeViewID, GroupName, cmdName as tuple as key to find command element
             //((WindowsElement)CommandsMap["ABS"]).DoubleClick();
 
-            //WindowsElement menu = CurrentDriver.GetElement(By.ClassName("Menu"));
+            //WindowsElement menu = CurrentDriver.GetElementFromWebElement(By.ClassName("Menu"));
             //Console.WriteLine("LeftClick on Text \"Edit\"");
-            ////CurrentDriver.GetElement(By.XPath("(//MenuItem)[2]")).LeftClick();
-            //menu.GetElement(By.XPath(".//Text[@Name='Edit']")).LeftClick();
+            ////CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[2]")).LeftClick();
+            //menu.GetElementFromWebElement(By.XPath(".//Text[@Name='Edit']")).LeftClick();
 
             //// LeftClick on Text "Copy"
             //Console.WriteLine("LeftClick on Text \"Copy\"");
-            ////CurrentDriver.GetElement(By.XPath("(//MenuItem)[5]")).LeftClick();
-            //menu.GetElement(By.XPath(".//Text[@Name='Copy']")).LeftClick();
+            ////CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[5]")).LeftClick();
+            //menu.GetElementFromWebElement(By.XPath(".//Text[@Name='Copy']")).LeftClick();
 
             //// LeftClick on Text "Edit"
             //Console.WriteLine("LeftClick on Text \"Edit\"");
-            ////CurrentDriver.GetElement(By.XPath("(//MenuItem)[2]")).LeftClick();
-            //menu.GetElement(By.XPath(".//Text[@Name='Edit']")).LeftClick();
+            ////CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[2]")).LeftClick();
+            //menu.GetElementFromWebElement(By.XPath(".//Text[@Name='Edit']")).LeftClick();
 
             //// LeftClick on Text "Paste"
             //Console.WriteLine("LeftClick on Text \"Paste\"");
-            ////CurrentDriver.GetElement(By.XPath("(//MenuItem)[6]")).LeftClick();
-            //menu.GetElement(By.XPath(".//Text[@Name='Paste']")).LeftClick();
+            ////CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[6]")).LeftClick();
+            //menu.GetElementFromWebElement(By.XPath(".//Text[@Name='Paste']")).LeftClick();
 
             //TimeSpan.FromSeconds(2);
 
@@ -420,12 +452,12 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
             int CommandCountAfterInsertAndDelete = 1;
 
             // Add the command
             //GetCommandBy(CommandName, GroupName).DoubleClick();
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
             //AddCommandBy(GroupName, 17);
 
             // LeftClick on Text "ABS"
@@ -433,8 +465,8 @@ namespace PP5AutoUITests
             GetCellBy("PGGrid", 0, "Test Command").LeftClick();
 
             // Insert and delete by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
+            var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                                            .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
             functionBtns[9].LeftClick();
             functionBtns[12].LeftClick();
 
@@ -605,12 +637,11 @@ namespace PP5AutoUITests
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input Command name: "ABS"
-            string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
             //GetCommandBy(CommandName, GroupName).DoubleClick();
-            AddCommandBy(GroupName, 1);
+            AddCommandBy(cgt, 1);
             //AddCommandBy(GroupName, 17);
 
             // LeftClick on Text "ABS"
@@ -619,22 +650,22 @@ namespace PP5AutoUITests
 
             //
             GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Constant"))
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("editParamAreaView"))
+                         .GetWebElementFromWebElement(By.Name("Constant"))
                          .LeftClick();
 
             SendSingleKeys("0");
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Test Condition"))
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("editParamAreaView"))
+                         .GetWebElementFromWebElement(By.Name("Test Condition"))
                          .LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Test Result"))
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("editParamAreaView"))
+                         .GetWebElementFromWebElement(By.Name("Test Result"))
                          .LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Temporary Var."))
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("editParamAreaView"))
+                         .GetWebElementFromWebElement(By.Name("Temporary Var."))
                          .LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Global Var."))
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("editParamAreaView"))
+                         .GetWebElementFromWebElement(By.Name("Global Var."))
                          .LeftClick();
 
             ////MainPanel_TIEditor_OpenNewTI();
@@ -1045,28 +1076,32 @@ namespace PP5AutoUITests
         {
             //// LeftClick on Text "File"
             //Console.WriteLine("LeftClick on Text \"File\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             //// LeftClick on Text "New"
             //Console.WriteLine("LeftClick on Text \"New\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             // LeftClick on Text "File" > "New"
             MenuSelect("File", "New");
 
             // LeftClick on RadioButton "Pre Test"
             //Console.WriteLine("LeftClick on RadioButton \"Pre Test\"");
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetRdoBtnElement("Pre Test")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetRdoBtnElement("Pre Test")
+            //            .LeftClick();
+
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Pre Test]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
             //Console.WriteLine("LeftClick on Button \"Ok\"");
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetBtnElement("Ok")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetBtnElement("Ok")
+            //            .LeftClick();
 
-            string TIContextInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Ok]", ClickType.LeftClick);
+            //string TIContextInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new TI is opened by verify the TI context label
             "TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -1275,28 +1310,31 @@ namespace PP5AutoUITests
         {
             //// LeftClick on Text "File"
             //Console.WriteLine("LeftClick on Text \"File\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             //// LeftClick on Text "New"
             //Console.WriteLine("LeftClick on Text \"New\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             // LeftClick on Text "File" > "New"
             MenuSelect("File", "New");
 
             // LeftClick on RadioButton "UUT Test"
             //Console.WriteLine("LeftClick on RadioButton \"UUT Test\"");
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetRdoBtnElement("UUT Test")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetRdoBtnElement("UUT Test")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, UUT Test]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
             //Console.WriteLine("LeftClick on Button \"Ok\"");
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetBtnElement("Ok")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetBtnElement("Ok")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Ok]", ClickType.LeftClick);
 
-            string TIContextInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            //string TIContextInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new TI is opened by verify the TI context label
             "TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -1618,27 +1656,29 @@ namespace PP5AutoUITests
         {
             //// LeftClick on Text "File"
             //Console.WriteLine("LeftClick on Text \"File\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             //// LeftClick on Text "New"
             //Console.WriteLine("LeftClick on Text \"New\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             // LeftClick on Text "File" > "New"
             MenuSelect("File", "New");
 
             // LeftClick on RadioButton "Sub-TI"
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetRdoBtnElement("Sub-TI")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetRdoBtnElement("Sub-TI")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Sub-TI]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetBtnElement("Ok")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetBtnElement("Ok")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Ok]", ClickType.LeftClick);
 
-            string TIContextInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
-
+            //string TIContextInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new Sub TI is opened by verify the TI context label
             "Sub_TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -1803,27 +1843,30 @@ namespace PP5AutoUITests
         {
             //// LeftClick on Text "File"
             //Console.WriteLine("LeftClick on Text \"File\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             //// LeftClick on Text "New"
             //Console.WriteLine("LeftClick on Text \"New\"");
-            //CurrentDriver.GetElement(By.XPath("(//MenuItem)[1]")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(By.XPath("(//MenuItem)[1]")).LeftClick();
 
             // LeftClick on Text "File" > "New"
             MenuSelect("File", "New");
 
 
             // LeftClick on RadioButton "Thread-TI"
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetRdoBtnElement("Thread-TI")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetRdoBtnElement("Thread-TI")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Thread-TI]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetBtnElement("Ok")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetBtnElement("Ok")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Ok]", ClickType.LeftClick);
 
-            string TIContextInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            //string TIContextInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new Thread TI is opened by verify the TI context label
             "Thread_TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -2009,15 +2052,17 @@ namespace PP5AutoUITests
 
             // LeftClick on RadioButton "Pre Test"
             //Console.WriteLine("LeftClick on RadioButton \"Pre Test\"");
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetRdoBtnElement("Pre Test")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetRdoBtnElement("Pre Test")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Pre Test]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
             //Console.WriteLine("LeftClick on Button \"Ok\"");
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetBtnElement("Ok")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetBtnElement("Ok")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Ok]", ClickType.LeftClick);
 
             // Save the TI
             SaveAsNewTI(TIName);
@@ -2025,15 +2070,17 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[CloseButton]", ClickType.LeftClick);
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, TestItemType.TI, TestItemRunType.Pre);
+            LoadOldTI(TIName, TestItemType.TI, TestItemRunType.Pre);
 
-            string TIContextInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            //string TIContextInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new TI is opened by verify the TI context label
             "TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -2190,14 +2237,16 @@ namespace PP5AutoUITests
 
 
             // LeftClick on RadioButton "UUT Test"
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetRdoBtnElement("UUT Test")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetRdoBtnElement("UUT Test")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, UUT Test]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
-                        .GetBtnElement("Ok")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
+            //            .GetBtnElement("Ok")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[New Test Item, Ok]", ClickType.LeftClick);
 
             // Save the TI
             SaveAsNewTI(TIName);
@@ -2205,15 +2254,17 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[CloseButton]", ClickType.LeftClick);
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);
+            LoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);
 
-            string TIContextInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            //string TIContextInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new TI is opened by verify the TI context label
             "TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -2372,14 +2423,16 @@ namespace PP5AutoUITests
             MenuSelect("File", "New");
 
             // LeftClick on RadioButton "Post Test"
-            Console.WriteLine("LeftClick on RadioButton \"Post Test\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("PostRdoBtn")).LeftClick();
+            //Console.WriteLine("LeftClick on RadioButton \"Post Test\"");
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //                                        MobileBy.AccessibilityId("PostRdoBtn")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[LoginDialog, PostRdoBtn]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
             Console.WriteLine("LeftClick on Button \"Ok\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //                                        MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[LoginDialog, OkBtn]", ClickType.LeftClick);
 
             // Save the TI
             SaveAsNewTI(TIName);
@@ -2387,17 +2440,19 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            CurrentDriver.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+            //                                        MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[CloseButton]", ClickType.LeftClick);
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, TestItemType.TI, TestItemRunType.Post);
+            LoadOldTI(TIName, TestItemType.TI, TestItemRunType.Post);
 
-            string TIContextInfo = CurrentDriver.GetElement(By.ClassName("PGGridAeraView"))
-                                                .GetFirstTextContent();
+            //string TIContextInfo = CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.ClassName("PGGridAeraView"))
+            //                                    .GetFirstTextContent();
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new TI is opened by verify the TI context label
             "TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -2580,14 +2635,16 @@ namespace PP5AutoUITests
             MenuSelect("File", "New");
 
             // LeftClick on RadioButton "Sub-TI"
-            Console.WriteLine("LeftClick on RadioButton \"Sub-TI\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("SubTIRdoBtn")).LeftClick();
+            //Console.WriteLine("LeftClick on RadioButton \"Sub-TI\"");
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //                                        MobileBy.AccessibilityId("SubTIRdoBtn")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[LoginDialog, SubTIRdoBtn]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
-            Console.WriteLine("LeftClick on Button \"Ok\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            //Console.WriteLine("LeftClick on Button \"Ok\"");
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //                                        MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[LoginDialog, OkBtn]", ClickType.LeftClick);
 
             // Save the TI
             SaveAsNewTI(TIName);
@@ -2595,17 +2652,17 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            CurrentDriver.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[CloseButton]", ClickType.LeftClick);
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, TestItemType.SubTI, TestItemRunType.UUT);
+            LoadOldTI(TIName, TestItemType.SubTI, TestItemRunType.UUT);
 
-            string TIContextInfo = CurrentDriver.GetElement(By.ClassName("PGGridAeraView"))
-                                                .GetFirstTextContent();
+            //string TIContextInfo = CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.ClassName("PGGridAeraView"))
+            //                                    .GetFirstTextContent();
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new TI is opened by verify the TI context label
             "Sub_TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -2779,14 +2836,16 @@ namespace PP5AutoUITests
             MenuSelect("File", "New");
 
             // LeftClick on RadioButton "Thread-TI"
-            Console.WriteLine("LeftClick on RadioButton \"Thread-TI\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("ThreadTIRdoBtn")).LeftClick();
+            //Console.WriteLine("LeftClick on RadioButton \"Thread-TI\"");
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //                                        MobileBy.AccessibilityId("ThreadTIRdoBtn")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[LoginDialog, ThreadTIRdoBtn]", ClickType.LeftClick);
 
             // LeftClick on Button "Ok"
-            Console.WriteLine("LeftClick on Button \"Ok\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            //Console.WriteLine("LeftClick on Button \"Ok\"");
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //                                        MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[LoginDialog, OkBtn]", ClickType.LeftClick);
 
             // Save the TI
             SaveAsNewTI(TIName);
@@ -2794,17 +2853,19 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            CurrentDriver.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+            //                                        MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[CloseButton]", ClickType.LeftClick);
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, TestItemType.ThreadTI, TestItemRunType.UUT);
+            LoadOldTI(TIName, TestItemType.ThreadTI, TestItemRunType.UUT);
 
-            string TIContextInfo = CurrentDriver.GetElement(By.ClassName("PGGridAeraView"))
-                                                .GetFirstTextContent();
+            //string TIContextInfo = CurrentDriver.GetExtendedElementBySingleWithRetry(PP5By.ClassName("PGGridAeraView"))
+            //                                    .GetFirstTextContent();
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new TI is opened by verify the TI context label
             "Thread_TI".ShouldEqualTo(TIContextInfo.Split('-')[1]);
@@ -3000,14 +3061,14 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            CurrentDriver.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+            CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
                                                     MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName);
+            LoadOldTI(TIName);
 
             // Check edited values are same
             Assert.AreEqual("a", GetCellValue("TmpGrid", 0, "Show Name"));
@@ -3255,7 +3316,8 @@ namespace PP5AutoUITests
 
             SaveAsNewTI(TIName);
 
-            string TIContextInfo = CurrentDriver.GetElement(timeOut: 5000, By.ClassName("PGGridAeraView"), By.TagName("Text")).Text;
+            //string TIContextInfo = CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, By.ClassName("PGGridAeraView"), By.TagName("Text")).Text;
+            string TIContextInfo = PP5IDEWindow.PerformGetElement("/ById[TitleTxtBlk]").GetText();
 
             // Check new Sub TI is opened by verify the TI context label
             //Assert.AreEqual(TIName, TIContextInfo.Split('-').Last());
@@ -3390,23 +3452,25 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            CurrentDriver.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+            //                                        MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[CloseButton]", ClickType.LeftClick);
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, out string descActual);
+            LoadOldTI(TIName, out string descActual);
 
             // Check description is changed to new value
             //Assert.AreEqual(descExpected, descActual);
             descExpected.ShouldEqualTo(descActual);
 
             // LeftClick on Button "Cancel"
-            Console.WriteLine("LeftClick on Button \"Cancel\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("CancelBtn")).LeftClick();
+            //Console.WriteLine("LeftClick on Button \"Cancel\"");
+            //CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //                                        MobileBy.AccessibilityId("CancelBtn")).LeftClick();
+            PP5IDEWindow.PerformClick("/ById[LoginDialog, CancelBtn]", ClickType.LeftClick);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -3643,11 +3707,12 @@ namespace PP5AutoUITests
 
             // LeftClick on Button "Cancel"
             //Console.WriteLine("LeftClick on Button \"Cancel\"");
-            //CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //CurrentDriver.GetElementFromWebElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
             //                                        MobileBy.AccessibilityId("CancelBtn")).LeftClick();
-            PP5IDEWindow.GetElement(By.Name("Load Test Item"))
-                        .GetBtnElement("Cancel")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Load Test Item"))
+            //            .GetBtnElement("Cancel")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Load Test Item, Cancel]", ClickType.LeftClick);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -3864,23 +3929,23 @@ namespace PP5AutoUITests
             MenuSelect("File", "Open...");
 
             // Search TI by TIName
-            IWebElement TISearchBox = CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("LoginDialog"), 
-                                                                     MobileBy.AccessibilityId("searchBox"));
+            IWebElement TISearchBox = CurrentDriver.GetWebElementFromWebDriver(5000, MobileBy.AccessibilityId("LoginDialog"), 
+                                                                                     MobileBy.AccessibilityId("searchBox"));
             TISearchBox.ClearContent();
             TISearchBox.SendComboKeys(TIName, Keys.Enter);
 
             // Check TI not found warning message box popuped
             Executor.GetInstance().SwitchTo(SessionType.Desktop);
-            Assert.AreEqual("Search Result", CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog")).Text);
+            Assert.AreEqual("Search Result", CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("MessageBoxExDialog")).Text);
 
             // Close the warning message box
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("No"))
+            CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("MessageBoxExDialog"))
+                         .GetWebElementFromWebElement(By.Name("No"))
                          .LeftClick();
 
             // LeftClick on Button "Cancel"
             Console.WriteLine("LeftClick on Button \"Cancel\"");
-            CurrentDriver.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
                                                     MobileBy.AccessibilityId("CancelBtn")).LeftClick();
 
             ////MainPanel_TIEditor_OpenNewTI();
@@ -4002,7 +4067,7 @@ namespace PP5AutoUITests
 
             //// Close TI, Open window: Load Test Item, search TI name that not listed in grid table
             // Left Click TI window Close Button
-            CurrentDriver.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+            CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
                                                     MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
             // Left Click Menu item: Functions > TI Editor
@@ -4012,7 +4077,7 @@ namespace PP5AutoUITests
             PerformLoadTIBySearchingTIName(TIName);
 
             // Check TI searched is opened by verify the TI context label
-            string TIContextInfo = CurrentDriver.GetElement(timeOut: 5000, By.ClassName("PGGridAeraView"), 
+            string TIContextInfo = CurrentDriver.GetWebElementFromWebDriver(timeOut: 5000, By.ClassName("PGGridAeraView"), 
                                                                            By.TagName("Text")).Text;
 
             //string input = "User-TI-UnClassified-B1-3";
@@ -4141,12 +4206,12 @@ namespace PP5AutoUITests
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
-            bool IsTIEnterWindowShown = WaitUntil(() => PP5IDEWindow.GetElement(By.Name("Enter Point")) != null);
+            bool IsTIEnterWindowShown = WaitUntil(() => PP5IDEWindow.GetWebElementFromWebElement(By.Name("Enter Point")) != null);
 
             ShouldTIEnterWindowShown.ShouldEqualTo(IsTIEnterWindowShown);
 
             // Close the Enter Point window
-            PP5IDEWindow.GetElement(By.Name("Enter Point"))
+            PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Enter Point"))
                         .GetBtnElement("Cancel")
                         .LeftClick();
         }
@@ -4162,20 +4227,20 @@ namespace PP5AutoUITests
             MenuSelect("File", "Open...");
 
             // Left click the Type option by tiType
-            PP5IDEWindow.GetElement(By.Name("Load Test Item"))
+            PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Load Test Item"))
                         .GetRdoBtnElement(tiType.GetDescription())
                         .LeftClick();
 
-            bool IsPreTestRdoBtnDisabled = !PP5IDEWindow.GetElement(By.Name("Load Test Item"))
-                                                       .GetRdoBtnElement(TestItemRunType.Pre.GetDescription()).Enabled;
-            bool IsPostTestRdoBtnDisabled = !PP5IDEWindow.GetElement(By.Name("Load Test Item"))
-                                                        .GetRdoBtnElement(TestItemRunType.Post.GetDescription()).Enabled;
+            bool IsPreTestRdoBtnDisabled = !PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Load Test Item"))
+                                                        .GetRdoBtnElement(TestItemRunType.Pre.GetDescription()).Enabled;
+            bool IsPostTestRdoBtnDisabled = !PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Load Test Item"))
+                                                         .GetRdoBtnElement(TestItemRunType.Post.GetDescription()).Enabled;
 
             ShouldRunTypeOptionsDisabled.ShouldEqualTo(IsPreTestRdoBtnDisabled);
             ShouldRunTypeOptionsDisabled.ShouldEqualTo(IsPostTestRdoBtnDisabled);
 
             // Close the Load Test Item window
-            PP5IDEWindow.GetElement(By.Name("Load Test Item"))
+            PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Load Test Item"))
                         .GetBtnElement("Cancel")
                         .LeftClick();
         }
@@ -4190,17 +4255,17 @@ namespace PP5AutoUITests
             MenuSelect("File", "New");
 
             // Wait for the New Test Item shown
-            WaitUntil(() => PP5IDEWindow.GetElement(By.Name("New Test Item")) != null);
+            WaitUntil(() => PP5IDEWindow.GetWebElementFromWebElement(By.Name("New Test Item")) != null);
             
 
-            bool IsSystemTIOptionDisabled = !PP5IDEWindow.GetElement(By.Name("New Test Item"))
+            bool IsSystemTIOptionDisabled = !PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
                                                          .GetRdoBtnElement("System TI")
                                                          .Enabled;
 
             ShouldSystemTIOptionDisabled.ShouldEqualTo(IsSystemTIOptionDisabled);
 
             // Close the New Test Item window
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
+            PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
                         .GetBtnElement("Cancel")
                         .LeftClick();
         }
@@ -4217,7 +4282,7 @@ namespace PP5AutoUITests
             SaveAsNewTI(TIName);
 
             // Close the TI window, check no Save Dialog Shown
-            bool IsSaveDialogShown = PP5IDEWindow.GetElement(By.Name("Exit")) != null;
+            bool IsSaveDialogShown = PP5IDEWindow.GetWebElementFromWebElement(By.Name("Exit")) != null;
             ShouldSaveDialogShown.ShouldEqualTo(IsSaveDialogShown);
         }
 
@@ -4230,28 +4295,30 @@ namespace PP5AutoUITests
         {
             // Edit any part of the Existing TI
             VariableTabNavi(VariableTabType.Condition);
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("PGGrid"))
-                        .GetCellBy(1, 2)
-                        .LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,2]", ClickType.LeftClick, ClickType.LeftDoubleClick);
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Id("PGGrid"))
+            //            .GetCellBy(1, 2)
+            //            .LeftClick();
 
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("PGGrid"))
-                        .GetCellBy(1, 2)
-                        .DoubleClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Id("PGGrid"))
+            //            .GetCellBy(1, 2)
+            //            .DoubleClick();
+
 
             // Left Click Menu item: File > New
             MenuSelect("File", "New");
 
             // Close the TI window, check Save Dialog is Shown
-            bool IsSaveDialogShown = PP5IDEWindow.GetElement(By.Name("Exit")) != null;
+            bool IsSaveDialogShown = PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Exit")) != null;
             ShouldSaveDialogShown.ShouldEqualTo(IsSaveDialogShown);
 
             // Close the Save Dialog
-            PP5IDEWindow.GetElement(By.Name("Exit"))
+            PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Exit"))
                         .GetBtnElement("Close")
                         .LeftClick();
 
             // Close the New Test Item window
-            PP5IDEWindow.GetElement(By.Name("New Test Item"))
+            PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("New Test Item"))
                         .GetBtnElement("Close")
                         .LeftClick();
         }
@@ -4265,30 +4332,32 @@ namespace PP5AutoUITests
         {
             // Edit any part of the Existing TI
             VariableTabNavi(VariableTabType.Condition);
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("PGGrid"))
-                        .GetCellBy(1, 2)
-                        .LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,2]", ClickType.LeftClick, ClickType.LeftDoubleClick);
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Id("PGGrid"))
+            //            .GetCellBy(1, 2)
+            //            .LeftClick();
 
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("PGGrid"))
-                        .GetCellBy(1, 2)
-                        .DoubleClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Id("PGGrid"))
+            //            .GetCellBy(1, 2)
+            //            .DoubleClick();
 
             // Left Click Menu item: File > Open...
             MenuSelect("File", "Open...");
 
             // Close the TI window, check Save Dialog is Shown
-            bool IsSaveDialogShown = PP5IDEWindow.GetElement(By.Name("Exit")) != null;
+            bool IsSaveDialogShown = PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Exit")) != null;
             ShouldSaveDialogShown.ShouldEqualTo(IsSaveDialogShown);
 
             // Close the Save Dialog
-            PP5IDEWindow.GetElement(By.Name("Exit"))
-                        .GetBtnElement("Close")
-                        .LeftClick();
-
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Exit"))
+            //            .GetBtnElement("Close")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Exit]/Button[Close]", ClickType.LeftClick);
             // Close the Load Test Item window
-            PP5IDEWindow.GetElement(By.Name("Load Test Item"))
-                        .GetBtnElement("Close")
-                        .LeftClick();
+            //PP5IDEWindow.GetExtendedElementBySingleWithRetry(PP5By.Name("Load Test Item"))
+            //            .GetBtnElement("Close")
+            //            .LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Load Test Item]/Button[Close]", ClickType.LeftClick);
         }
 
 
@@ -4310,61 +4379,75 @@ namespace PP5AutoUITests
             SaveAsNewTI(TIName);
 
             // Left Click TI window Close Button
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.PerformClick("/ByIdOrName[CloseButton]", ClickType.LeftClick); // Close the TI window
 
-            //// Goto Management > TI/TP, set the TI active to true
-            // Menu selection: "Functions" > "Management"
-            MenuSelect("Functions", "Management");
+            TIExecuteAction(TIAction.SetTIActive, TIName);
 
-            // Close time consuming message box (Debug Mode)
-            // If save TI window message box popup, click No
-            //CurrentDriver.GetElement(timeOut: 15000, MobileBy.AccessibilityId("MessageBoxExDialog"),
-            //                                         By.Name("OK")).LeftClick();
+            ////// Goto Management > TI/TP, set the TI active to true
+            //// Menu selection: "Functions" > "Management"
+            //MenuSelect("Functions", "Management");
 
-            // Click on TP/TI button
-            PP5IDEWindow.GetToolbarElement((e) => e.isElementVisible())
-                        .GetRdoBtnElement(1).LeftClick();
+            //// Close time consuming message box (Debug Mode)
+            //// If save TI window message box popup, click No
+            ////CurrentDriver.GetElementFromWebElement(timeOut: 15000, MobileBy.AccessibilityId("MessageBoxExDialog"),
+            ////                                         By.Name("OK")).LeftClick();
 
-            // Click on Test Item tab
-            IWebElement mainTab = PP5IDEWindow.GetTabControlElement("mainTab");
-            IWebElement TestItemTabItem = mainTab.TabSelect(1, "Test Item");
+            //// Click on TP/TI button
+            ////PP5IDEWindow.GetToolbarElement((e) => e.isElementVisible())
+            ////            .GetRdoBtnElement(1).LeftClick();
+            //PP5IDEWindow.PerformClick("/ByCondition#ToolBar[Visible]/RadioButton[1]", ClickType.LeftClick);
 
-            // Switch to TP then back to TI
-            mainTab.TabSelect(1, "Test Program");
-            mainTab.TabSelect(1, "Test Item");
+            //// Click on Test Item tab
+            ////IWebElement mainTab = PP5IDEWindow.GetTabControlElement("mainTab");
+            ////IWebElement TestItemTabItem = mainTab.TabSelect(1, "Test Item");
+            //IWebElement mainTab = PP5IDEWindow.PerformGetElement("/Tab[mainTab]");
+            //IWebElement TestItemTabItem = mainTab.TabSelect(1, "Test Item");
 
-            // Search the TI with name
-            //IWebElement testItemSearchBox = TestItemTabItem.GetElement(5000, MobileBy.AccessibilityId("TestItemSearchBox"), 
-            //                                                                 MobileBy.AccessibilityId("searchText"));
-            TestItemTabItem.GetElement(MobileBy.AccessibilityId("searchText")).SendContent(TIName);
-            Press(Keys.Enter);
-            
-            // The datagrid AutomationID
-            string DataGridAutomationID = "TestItem_DataGrid";
+            //// Switch to TP then back to TI
+            //mainTab.TabSelect(1, "Test Program");
+            //mainTab.TabSelect(1, "Test Item");
 
-            TestItemTabItem.GetSelectedRow(DataGridAutomationID)
-                           .GetCellBy(3/*Active*/)
-                           .LeftClick();
+            //// Search the TI with name
+            ////IWebElement testItemSearchBox = TestItemTabItem.GetElementFromWebElement(5000, MobileBy.AccessibilityId("TestItemSearchBox"), 
+            ////                                                                 MobileBy.AccessibilityId("searchText"));
+            ////TestItemTabItem.GetElementFromWebElement(MobileBy.AccessibilityId("searchText")).SendText(TIName);
+            //TestItemTabItem.PerformInput("/ByIdOrName[searchText]", InputType.SendText, TIName);
+            //Press(Keys.Enter);
+
+            //// The datagrid AutomationID
+            //string DataGridAutomationID = "TestItem_DataGrid";
+
+            ////TestItemTabItem.GetSelectedRow(DataGridAutomationID)
+            ////               .GetCellBy(3/*Active*/)
+            ////               .LeftClick();
+            //PP5IDEWindow.PerformClick("/ByCell@TestItem_DataGrid[3]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByDataGrid@TestItem_DataGrid[3,3]/RadioButton[1]", ClickType.LeftClick);
 
             //// Switch back to TI Editor, edit parameter without the correct values, and save the TI
             // Menu selection: "Functions" > "TI Editor"
             MenuSelect("Functions", "TI Editor");
 
-            PerformLoadOldTI(TIName);
+            LoadOldTI(TIName);
 
             // Add command "SET"
-            AddCommandBy("Arithmetic", "SET");
+            AddCommandBy(TestCmdGroupType.Arithmetic, "SET");
 
             // Menu selection: "File" > "Save"
             MenuSelect("File", "Save");
 
             // Save the TI without setting the parameters in SET command
-            PP5IDEWindow.GetElement(By.Name("Compiler Error")).GetBtnElement("OK").LeftClick();
-            PP5IDEWindow.GetElement(By.Name("Error")).GetBtnElement("Yes").LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(By.Name("Compiler Error")).GetBtnElement("OK").LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(By.Name("Error")).GetBtnElement("Yes").LeftClick();
+            
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformClick("/ByNameOrId[Compiler Error]/ByName[OK]", ClickType.LeftClick);
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformClick("/ByNameOrId[Error]/ByName[Yes]", ClickType.LeftClick);
 
             // Wait until save button as enabled (saving completed)
-            WaitUntil(() => PP5IDEWindow.GetToolbarElement((e) => e.isElementVisible())
-                                        .GetRdoBtnElement(3).Enabled);
+            //WaitUntil(() => PP5IDEWindow.GetToolbarElement((e) => e.isElementVisible())
+            //                            .GetRdoBtnElement(3).Enabled);
+            WaitUntil(() => PP5IDEWindow.PerformGetElement("/ByCondition#ToolBar[Visible]/RadioButton[3]").Enabled);
+
             //Thread.Sleep(2000);
 
             //// Switch back to Management, check TI Valid is "N"
@@ -4374,8 +4457,9 @@ namespace PP5AutoUITests
             // Get The selected row again, then get the "Valid" Label
             //IWebElement TIValidLabel = TestItemTabItem.GetCellElementByColumnIndex(DataGridAutomationID, 1)
             //                                          .GetChildElements().Single();
-            IWebElement TIActiveCkbx = TestItemTabItem.GetSelectedRow(DataGridAutomationID)
-                                                      .GetCellBy(3/*Active*/);
+            //IWebElement TIActiveCkbx = TestItemTabItem.GetSelectedRow(DataGridAutomationID)
+            //                                          .GetCellBy(3/*Active*/);
+            IElement TIActiveCkbx = PP5IDEWindow.PerformGetElement("/ByCell@TestItem_DataGrid[3]");
 
             // Active state of TI should be false
             bool TIActiveStateExpected = false;
@@ -4395,13 +4479,13 @@ namespace PP5AutoUITests
             //SendSingleKeys(Keys.Enter);
             //new Actions(CurrentDriver).KeyDown(Keys.Control).SendKeys(Keys.Enter).KeyUp(Keys.Control).Perform();
 
-            //CurrentDriver.GetElement(5000, By.Name("Error"), By.Name("Ok")).LeftClick();
-            //CurrentDriver.GetElement(5000, By.Name("Error"), By.Name("Yes")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(5000, By.Name("Error"), By.Name("Ok")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(5000, By.Name("Error"), By.Name("Yes")).LeftClick();
 
-            //HeaderPanel = TestItemTabItem.GetElement(MobileBy.AccessibilityId(DataGridAutomationID))
-            //                             .GetElement(By.ClassName("DataGridColumnHeadersPresenter"));
+            //HeaderPanel = TestItemTabItem.GetElementFromWebElement(MobileBy.AccessibilityId(DataGridAutomationID))
+            //                             .GetElementFromWebElement(By.ClassName("DataGridColumnHeadersPresenter"));
 
-            //rows = TestItemTabItem.GetElement(MobileBy.AccessibilityId(DataGridAutomationID))
+            //rows = TestItemTabItem.GetElementFromWebElement(MobileBy.AccessibilityId(DataGridAutomationID))
             //                      .GetElements(By.ClassName("DataGridRow"));
 
             //var selectedRow1 = rows.ToList().Find(r => r.Selected).GetElements(By.XPath("*/*")).ToList();
@@ -4672,6 +4756,25 @@ namespace PP5AutoUITests
             //}
         }
 
+        [TestMethod("B1-14")]
+        [TestCategory("檔案操作(B1)")]
+        //B1-14
+        public void TIEditor_KeyProNotFound_CheckErrorWindowMessage()
+        {
+            PP5IDEWindow.PerformClick("/ByIdOrName[CloseButton]", ClickType.LeftClick); // Close the TI window
+            bool result = DllHelper.ActivateDevice(false, DeviceType.KeyPro);           // Disable the KeyPro
+            Assert.IsTrue(result);
+
+            MenuSelect("Functions", "TI Editor");                                       // Open New TI
+
+            //Window[@Name =\"Error\"][@AutomationId=\"MessageBoxExDialog\"]/Pane[@ClassName=\"ScrollViewer\"][@Name=\"Protection key not found!\"]/Edit[@AutomationId=\"txtBlockMsg\"]"
+            var msgElement = PP5IDEWindow.PerformClick("/Window[Error]/Edit[txtBlockMsg]", ClickType.None);        // Check KeyPro not found error message is: "Protection key not found!"
+            "Protection key not found!".ShouldEqualTo(msgElement.GetCellValue());
+
+            PP5IDEWindow.PerformClick("/Window[Error]/Button[Ok]", ClickType.LeftClick);          // Click OK
+            DllHelper.ActivateDevice(true, DeviceType.KeyPro);                          // ReEnable the KeyPro
+        }
+
         [TestMethod("B1-18_Save")]
         [TestCategory("檔案操作(B1)")]
         [DataRow("B1-18_Save")]
@@ -4697,8 +4800,10 @@ namespace PP5AutoUITests
             MenuSelect("File", "Save");
 
             // SaveWrongFile
-            PP5IDEWindow.GetElement(By.Name("Error")).GetBtnElement("Ok").LeftClick();
-            PP5IDEWindow.GetElement(By.Name("Error")).GetBtnElement("Yes").LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(By.Name("Error")).GetBtnElement("Ok").LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(By.Name("Error")).GetBtnElement("Yes").LeftClick();
+            PP5IDEWindow.PerformClick("/ByNameOrId[Error]/ByName[Ok]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByNameOrId[Error]/ByName[Yes]", ClickType.LeftClick);
 
             // Go to management, check the TI Valid is "N"
             MenuSelect("Functions", "Management");
@@ -4708,31 +4813,37 @@ namespace PP5AutoUITests
             WaitUntil(() => CheckPP5WindowIsOpened(WindowType.Management));
 
             // Click on TP/TI button
-            PP5IDEWindow.GetToolbarElement((e) => e.isElementVisible())
-                        .GetRdoBtnElement(1).LeftClick();
+            //PP5IDEWindow.GetToolbarElement((e) => e.isElementVisible())
+            //            .GetRdoBtnElement(1).LeftClick();
+            PP5IDEWindow.PerformClick("/ByCondition#ToolBar[Visible]/RadioButton[1]", ClickType.LeftClick);
 
             // Click on Test Item tab
-            IWebElement mainTab = PP5IDEWindow.GetTabControlElement("mainTab");
-            IWebElement TestItemTabItem = mainTab.TabSelect(1, "Test Item");
+            //IWebElement mainTab = PP5IDEWindow.GetTabControlElement("mainTab");
+            IElement mainTab = PP5IDEWindow.PerformGetElement("/Tab[mainTab]");
+            IElement TestItemTabItem = mainTab.TabSelect(1, "Test Item");
+            
 
             // Switch to TP then back to TI
             mainTab.TabSelect(1, "Test Program");
             mainTab.TabSelect(1, "Test Item");
 
             // Search the TI with name
-            TestItemTabItem.GetEditElement("searchText").SendContent(TIName);
+            //TestItemTabItem.GetEditElement("searchText").SendText(TIName);
+            TestItemTabItem.PerformInput("/Edit[searchText]", InputType.SendContent, TIName);
             Press(Keys.Enter);
 
-            IWebElement TIValidLabel = TestItemTabItem.GetSelectedRow(DataGridAutomationID: "TestItem_DataGrid")
-                                                      .GetCellBy(2/*Valid*/);
+            //IWebElement TIValidLabel = TestItemTabItem.GetSelectedRow(DataGridAutomationID: "TestItem_DataGrid")
+            //                                          .GetCellBy(2/*Valid*/);
+            IElement TIValidLabel = TestItemTabItem.PerformGetElement("/ByCell@TestItem_DataGrid[2]");
 
             // should be "N"
             string TIValidLabelExpected = "N";
-            TIValidLabelExpected.ShouldEqualTo(TIValidLabel.GetFirstTextContent(ElementSearchType.DFS));
+            //TIValidLabelExpected.ShouldEqualTo(TIValidLabel.GetFirstTextContent(ElementSearchType.DFS));
+            TIValidLabelExpected.ShouldEqualTo(TIValidLabel.PerformGetElement("/Text[0]").Text);
 
             //// Close the TI window, if can close directly, this TI is saved
             //// Left Click TI window Close Button
-            //PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+            //PP5IDEWindow.GetElementFromWebElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
             //                                        MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
             //// Check main window title is "Chroma ATS IDE"
@@ -4745,8 +4856,8 @@ namespace PP5AutoUITests
             //// Switch to desktop driver, inspect the error tooltip: "CallName can not be empty"
             //GetCellBy("CndGrid", 0, "Call Name").MoveToElement();
             //Executor.GetInstance().SwitchTo(SessionType.Desktop);
-            //string errorToolTip = CurrentDriver.GetElement(5000, By.ClassName("Popup"), By.ClassName("ToolTip"))
-            //                                   .GetElement(By.TagName("Text")).Text;
+            //string errorToolTip = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("Popup"), By.ClassName("ToolTip"))
+            //                                   .GetElementFromWebElement(By.TagName("Text")).Text;
 
             //Assert.AreEqual("CallName can not be empty", errorToolTip);
 
@@ -4949,21 +5060,25 @@ namespace PP5AutoUITests
 
             // Parameter: Condition, Add a new empty row
             VariableTabNavi(VariableTabType.Condition);
-            GetCellBy("CndGrid", 1, "Show Name").DoubleClick();
+            PP5IDEWindow.PerformClick("/ByCell@CndGrid[1,@Show Name]", ClickType.LeftDoubleClick);
+            //GetCellBy("CndGrid", 1, "Show Name").DoubleClick();
 
             // Menu selection: "File" > "Save"
             MenuSelect("File", "Save");
 
             // Save the file while still has error, Check error window is shown
-            bool errorWindowShown = WaitUntil(() => PP5IDEWindow.GetElement(By.Name("Error")) != null);
+            //bool errorWindowShown = WaitUntil(() => PP5IDEWindow.GetElementFromWebElement(By.Name("Error")) != null);
+            bool errorWindowShown = WaitUntil(() => PP5IDEWindow.PerformGetElement("/ByNameOrId[Error]") != null);
             true.ShouldEqualTo(errorWindowShown);
 
-            PP5IDEWindow.GetElement(By.Name("Error")).GetBtnElement("Ok").LeftClick();
-            PP5IDEWindow.GetElement(By.Name("Error")).GetBtnElement("No").LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(By.Name("Error")).GetBtnElement("Ok").LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(By.Name("Error")).GetBtnElement("No").LeftClick();
+            PP5IDEWindow.PerformClick("/ByNameOrId[Error]/ByName[Ok]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByNameOrId[Error]/ByName[No]", ClickType.LeftClick);
 
             //// Close the TI window, if message box: Do you want to save TestItem? popup, this TI is not saved yet
             //// Left Click TI window Close Button
-            //CurrentDriver.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+            //CurrentDriver.GetElementFromWebElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
             //                                        MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
             //// Check main window title is "Chroma ATS IDE - [TI Editor]"
@@ -4976,8 +5091,8 @@ namespace PP5AutoUITests
             //// Switch to desktop driver, inspect the error tooltip: "CallName can not be empty"
             //GetCellBy("CndGrid", 0, "Call Name").MoveToElement();
             //Executor.GetInstance().SwitchTo(SessionType.Desktop);
-            //string errorToolTip = CurrentDriver.GetElement(5000, By.ClassName("Popup"), By.ClassName("ToolTip"))
-            //                                   .GetElement(By.TagName("Text")).Text;
+            //string errorToolTip = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("Popup"), By.ClassName("ToolTip"))
+            //                                   .GetElementFromWebElement(By.TagName("Text")).Text;
 
             //Assert.AreEqual("CallName can not be empty", errorToolTip);
 
@@ -5204,16 +5319,16 @@ namespace PP5AutoUITests
 
             // LeftClick on RadioButton "UUT Test"
             Console.WriteLine("LeftClick on RadioButton \"UUT Test\"");
-            PP5IDEWindow.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("UUTRdoBtn")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+                                                                                MobileBy.AccessibilityId("UUTRdoBtn")).LeftClick();
 
             // LeftClick on Button "Ok"
             Console.WriteLine("LeftClick on Button \"Ok\"");
-            PP5IDEWindow.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+                                                                                MobileBy.AccessibilityId("OkBtn")).LeftClick();
 
             // Add Dll Command and edit on:  Skip、Label、Description
-            AddCommandBy("Dll", cmdNumber: 1);
+            AddCommandBy(TestCmdGroupType.Dll, cmdNumber: 1);
             //RefreshDataTable(DataTableAutoIDType.PGGrid);
             GetCellBy(autoIDCommandEditTable, 1, "Skip").LeftClick();
             GetCellBy(autoIDCommandEditTable, 1, "Label").SendSingleKeys(labelExpected);
@@ -5226,16 +5341,16 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+                                                                                MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);
+            LoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);
 
-            IWebElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(autoIDCommandEditTable);
+            IElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(autoIDCommandEditTable);
 
             // Check the TI has matched Skip、Label、Description as previous edited
             SkipStateExpected.ShouldEqualTo(cmdDataGrid.GetCellBy(1, 2).isElementChecked());
@@ -5581,16 +5696,16 @@ namespace PP5AutoUITests
 
             // LeftClick on RadioButton "UUT Test"
             Console.WriteLine("LeftClick on RadioButton \"UUT Test\"");
-            PP5IDEWindow.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("UUTRdoBtn")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+                                                                                MobileBy.AccessibilityId("UUTRdoBtn")).LeftClick();
 
             // LeftClick on Button "Ok"
             Console.WriteLine("LeftClick on Button \"Ok\"");
-            PP5IDEWindow.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
-                                                    MobileBy.AccessibilityId("OkBtn")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+                                                                                MobileBy.AccessibilityId("OkBtn")).LeftClick();
 
             // Add Python Command and edit on:  Skip、Label、Description
-            AddCommandBy("Python", cmdNumber: 1);
+            AddCommandBy(TestCmdGroupType.Python, cmdNumber: 1);
             //RefreshDataTable(DataTableAutoIDType.PGGrid);
             GetCellBy(autoIDCommandEditTable, 1, "Skip").LeftClick();
             GetCellBy(autoIDCommandEditTable, 1, "Label").SendSingleKeys(labelExpected);
@@ -5603,16 +5718,16 @@ namespace PP5AutoUITests
 
             //// Close TI, reopen it
             // Left Click TI window Close Button
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+                                                                                MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
             // Left Click Menu item: Functions > TI Editor
             MenuSelect("Functions", "TI Editor");
 
             // Load TI file again
-            PerformLoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);
+            LoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);
 
-            IWebElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(autoIDCommandEditTable);
+            IElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(autoIDCommandEditTable);
 
             // Check the TI has matched Skip、Label、Description as previous edited
             SkipStateExpected.ShouldEqualTo(cmdDataGrid.GetCellBy(1, 2).isElementChecked());
@@ -5976,7 +6091,7 @@ namespace PP5AutoUITests
 
             //// Step 1. 
             TIFilePath = GetTIFilePath(TIName);                                         // Get TI Testcase path       
-            AddCommandBy("Dll", cmdNumber: 1);                                          // Add Dll Command in 1st place
+            AddCommandBy(TestCmdGroupType.Dll, cmdNumber: 1);                                          // Add Dll Command in 1st place
             PP5IDEWindow.GetDataGridElement(cmdTable).SelectDataGridItemByRowIndex(0);  // Select the command
             PP5IDEWindow.GetDataGridElement(paramTable).GetCellBy(1, 3).LeftClick();    // Fill Up Parameters
             PP5IDEWindow.GetRdoBtnElement("glbRdoBtn").LeftClick();
@@ -5994,8 +6109,8 @@ namespace PP5AutoUITests
             SaveAsNewTI(TIName);                                                        // Save the TI
             Thread.Sleep(2000);
                                                                                         // Close the TI
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+                                                                                MobileBy.AccessibilityId("CloseButton")).LeftClick();
             /*
             ////// Open New TI (TI, UUT Test)
             //// LeftClick on Text "File" > "New"
@@ -6003,12 +6118,12 @@ namespace PP5AutoUITests
 
             //// LeftClick on RadioButton "UUT Test"
             //Console.WriteLine("LeftClick on RadioButton \"UUT Test\"");
-            //PP5IDEWindow.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //PP5IDEWindow.GetElementFromWebElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
             //                                        MobileBy.AccessibilityId("UUTRdoBtn")).LeftClick();
 
             //// LeftClick on Button "Ok"
             //Console.WriteLine("LeftClick on Button \"Ok\"");
-            //PP5IDEWindow.GetElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
+            //PP5IDEWindow.GetElementFromWebElement(timeOut: 5000, MobileBy.AccessibilityId("LoginDialog"),
             //                                        MobileBy.AccessibilityId("OkBtn")).LeftClick();
             */
 
@@ -6016,27 +6131,27 @@ namespace PP5AutoUITests
             MenuSelect("Functions", "Management");                                                          // Open management
             WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, 10000);
             PP5IDEWindow.ToolBarSelect(4/*Ex-Function*/);
-            IWebElement DllTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
+            IElement DllTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
                                                  .TabSelect(4/*Ex-Function*/, "DLL");                       // Tabselect "Ex-Function, DLL"
             DllTabPage.GetDataGridElement("DllDataGrid")                                                    // Select the row whose Test command alias = {testCmdName}
                       .GetRowByName(3, testCmdName)
                       .LeftClick();                                                                         
-            DllTabPage.GetElement(By.Name("Edit")).LeftClick();                                             // Click on "Edit" button
+            DllTabPage.GetWebElementFromWebElement(By.Name("Edit")).LeftClick();                                             // Click on "Edit" button
             PP5IDEWindow.GetWindowElement("Notice")                                                         // 警告視窗跳出，按Yes
                         .GetBtnElement("Yes")
                         .LeftClick();
 
             
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Edit DLL - Unmanaged"))        // Alias (command) 修改為: {testCmdName{1}}
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Unmanaged"))        // Alias (command) 修改為: {testCmdName{1}}
                                                         .GetDataGridElement("TopDataGrid")
                                                         .GetCellBy(1, 3)
-                                                        .SendContent(testCmdNameChanged);
+                                                        .SendText(testCmdNameChanged);
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Edit DLL - Unmanaged"))        // 按OK
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Unmanaged"))        // 按OK
                                                         .GetBtnElement("OK")
                                                         .LeftClick();
             Thread.Sleep(1000);
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Check files to be fixed"))     // 連動修復視窗，按OK進行修復
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Check files to be fixed"))     // 連動修復視窗，按OK進行修復
                                                         .GetBtnElement("OK")
                                                         .LeftClick();
 
@@ -6055,13 +6170,13 @@ namespace PP5AutoUITests
             //            .LeftClick();
             //// Step 3.
             MenuSelect("Functions", "TI Editor");                                   // 開啟TI視窗                   
-            PerformLoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);         // Load TI file that just finished fixing files
+            LoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);         // Load TI file that just finished fixing files
 
             //PP5IDEWindow.GetWindowElement("TI Editor - [{TIName}]")                    // 確認修復視窗跳出，按OK
             //            .GetBtnElement("OK")
             //            .LeftClick();
 
-            IWebElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(cmdTable);
+            IElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(cmdTable);
 
             // Check Rebuild window not showing up // 確認是否要 Rebuild的提醒視窗沒有跳出
             // Check Datagrid value on row: 1, column: "Test Command" is {testCmdNameChanged}
@@ -6083,7 +6198,7 @@ namespace PP5AutoUITests
 
             //// Step 1. 
             TIFilePath = GetTIFilePath(TIName);                                         // Get TI Testcase path       
-            AddCommandBy("Dll", cmdNumber: 1);                                          // Add Dll Command in 1st place
+            AddCommandBy(TestCmdGroupType.Dll, cmdNumber: 1);                                          // Add Dll Command in 1st place
             PP5IDEWindow.GetDataGridElement(cmdTable).SelectDataGridItemByRowIndex(0);  // Select the command
             PP5IDEWindow.GetDataGridElement(paramTable).GetCellBy(1, 3).LeftClick();    // Fill Up Parameters
             PP5IDEWindow.GetRdoBtnElement("glbRdoBtn").LeftClick();
@@ -6101,38 +6216,38 @@ namespace PP5AutoUITests
             SaveAsNewTI(TIName);                                                        // Save the TI
             Thread.Sleep(2000);
             // Close the TI
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
-                                                    MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),
+                                                                                MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
             //// Step 2. 
             MenuSelect("Functions", "Management");                                                          // Open management
             WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, 10000);
             PP5IDEWindow.ToolBarSelect(4/*Ex-Function*/);
-            IWebElement DllTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
-                                                 .TabSelect(4/*Ex-Function*/, "DLL");                       // Tabselect "Ex-Function, DLL"
+            IElement DllTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
+                                              .TabSelect(4/*Ex-Function*/, "DLL");                       // Tabselect "Ex-Function, DLL"
             DllTabPage.GetDataGridElement("DllDataGrid")                                                    // Select the row whose Test command alias = {testCmdName}
                       .GetRowByName(3, testCmdName)
                       .LeftClick();
-            DllTabPage.GetElement(By.Name("Edit")).LeftClick();                                             // Click on "Edit" button
+            DllTabPage.GetWebElementFromWebElement(By.Name("Edit")).LeftClick();                                             // Click on "Edit" button
             PP5IDEWindow.GetWindowElement("Notice")                                                         // 警告視窗跳出，按Yes
                         .GetBtnElement("Yes")
                         .LeftClick();
 
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Edit DLL - Unmanaged"))        // Alias (command) 修改為: {testCmdName{1}}
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Unmanaged"))        // Alias (command) 修改為: {testCmdName{1}}
                                                         .GetDataGridElement("TopDataGrid")
                                                         .GetCellBy(1, 3)
-                                                        .SendContent(testCmdNameChanged);
+                                                        .SendText(testCmdNameChanged);
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Edit DLL - Unmanaged"))        // 按OK
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Unmanaged"))        // 按OK
                                                         .GetBtnElement("OK")
                                                         .LeftClick();
             Thread.Sleep(1000);
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Check files to be fixed"))     // 連動修復視窗，取消選取該TI，按OK不進行修復
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Check files to be fixed"))     // 連動修復視窗，取消選取該TI，按OK不進行修復
                                                         .GetBtnElement("Uncheck all")
                                                         .LeftClick();
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Check files to be fixed"))
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Check files to be fixed"))
                                                         .GetBtnElement("OK")
                                                         .LeftClick();
 
@@ -6152,7 +6267,7 @@ namespace PP5AutoUITests
 
             //// Step 3.
             MenuSelect("Functions", "TI Editor");                                   // 開啟TI視窗                   
-            PerformLoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);         // Load TI file that just finished fixing files
+            LoadOldTI(TIName, TestItemType.TI, TestItemRunType.UUT);         // Load TI file that just finished fixing files
 
             //PP5IDEWindow.GetWindowElement($"TI Editor - [{TIName}]")                    // 確認修復視窗跳出，按OK
             //            .GetBtnElement("Ok")
@@ -6164,7 +6279,7 @@ namespace PP5AutoUITests
 
             // Check Datagrid value on row: 1, column: "Test Command" is {testCmdName}
             // 檢查TI的內容保持為原本內容
-            IWebElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(cmdTable);
+            IElement cmdDataGrid = PP5IDEWindow.GetDataGridElement(cmdTable);
             testCmdName.ShouldEqualTo(cmdDataGrid.GetCellValue(1, 5));
         }
 
@@ -6175,23 +6290,24 @@ namespace PP5AutoUITests
         {
             // Arrange
             string cmdName = "AAA_B2-1";            // prefix name: AAA to let command show up on the first in the group list
-            string groupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
+            string groupName = GetGroupNameByEnum(cgt);
             bool isCmdUpdatedExpected = true;
             bool isCmdUpdated = AddCommandInCGIList(groupName, cmdName);
             isCmdUpdatedExpected.ShouldEqualTo(isCmdUpdated);
 
             // Action
             // Close TI window and re-open it (reload the cgi list)
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),         // Close the TI
-                                                   MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),         // Close the TI
+            //                                       MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
-            MenuSelect("Functions", "TI Editor");
-            WaitUntil(() => GetPP5Window() != null);
+            //MenuSelect("Functions", "TI Editor");
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Assert
-            IWebElement commandAddedExpected = null;                                                        // Check the command is inserted in the command group in TI Editor
-            IWebElement commandAdded = GetCommandBy(groupName, cmdName);
+            IElement commandAddedExpected = null;                                                        // Check the command is inserted in the command group in TI Editor
+            IElement commandAdded = GetCommandBy(cgt, cmdName);
             commandAddedExpected.ShouldNotEqualTo(commandAdded);
 
             // Delete the added command
@@ -6211,24 +6327,24 @@ namespace PP5AutoUITests
             MenuSelect("Functions", "Management");                                                          // Open management
             WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, 10000);
             PP5IDEWindow.ToolBarSelect(2/*System Setup*/);
-            IWebElement colorTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
+            IElement colorTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
                                                    .TabSelect(2/*System Setup*/, "Color");                  // Tabselect "System Setup, Color"
 
             #region Set font color and bg color
             //string colorCodeFont = "#Navy";                                                             
             //string colorCodeBg = "#FF00FF00";
-            SelectColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, "AC Source", 1);         // Select the first command of group: "AC Source"
+            SelectColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, TestCmdGroupType.AC_Source, 1);         // Select the first command of group: "AC Source"
             SetColor(colorTabPage, ColorSettingType.Font, colorFont);
             SetColor(colorTabPage, ColorSettingType.Background, colorBackground);
                                                                                 // Get screenshot of the test command (yellow grid) before changing the color
-            Screenshot scTestCmdInMgntBeforeSet = GetColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, "AC Source", 1)
+            Screenshot scTestCmdInMgntBeforeSet = GetColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, TestCmdGroupType.AC_Source, 1)
                                                               .GetFirstTextElement()
                                                               .GetElementImageFromScreenshot();
             
-            PP5IDEWindow.GetElement(By.Name("OK")).LeftClick();                 // click OK to confirm the setting
+            PP5IDEWindow.GetWebElementFromWebElement(By.Name("OK")).LeftClick();                 // click OK to confirm the setting
 
                                                                                 // If the color is set, testcommand color will change
-            Func<bool> getTcTextEleMgFunc = (() => !GetColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, "AC Source", 1)
+            Func<bool> getTcTextEleMgFunc = (() => !GetColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, TestCmdGroupType.AC_Source, 1)
                                                                 .GetFirstTextElement()
                                                                 .GetElementImageFromScreenshot()
                                                                 .Compare(scTestCmdInMgntBeforeSet));
@@ -6236,7 +6352,7 @@ namespace PP5AutoUITests
             WaitUntil(getTcTextEleMgFunc);                                      // Wait until command color is changed                   
             
                                                                                 // Gets the screenshot of test command element in Management window
-            Screenshot scTestCmdInMgnt = GetColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, "AC Source", 1)
+            Screenshot scTestCmdInMgnt = GetColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, TestCmdGroupType.AC_Source, 1)
                                                      .GetFirstTextElement()
                                                      .GetElementImageFromScreenshot();
             #endregion
@@ -6244,7 +6360,7 @@ namespace PP5AutoUITests
             MenuSelect("Windows", "TI Editor");                                                             // Back to TI window
 
                                                                                                             
-            IWebElement textTestCmdInTI = GetCommandBy("AC Source",                                        // Get test command textblock (with color)
+            IWebElement textTestCmdInTI = GetCommandBy(TestCmdGroupType.AC_Source,                          // Get test command textblock (with color)
                                                         "ReadAC_Current", 
                                                         collapseTreeView: false).GetFirstTextElement();
                                                                                                             
@@ -6261,13 +6377,13 @@ namespace PP5AutoUITests
             #region Restore the color to default
             MenuSelect("Windows", "Management");
 
-            SelectColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, "AC Source", 1);         // Select the first command of group: "AC Source"
-            SetColor(colorTabPage, ColorSettingType.Font, "default");                                       // set Font color to "default"
-            SetColor(colorTabPage, ColorSettingType.Background, "default");                                 // set Background color to "default"
+            SelectColorSettingItem(colorTabPage, ColorSettingPageType.TestCommand, TestCmdGroupType.AC_Source, 1);          // Select the first command of group: "AC Source"
+            SetColor(colorTabPage, ColorSettingType.Font, "default");                                                       // set Font color to "default"
+            SetColor(colorTabPage, ColorSettingType.Background, "default");                                                 // set Background color to "default"
 
-            PP5IDEWindow.GetElement(By.Name("OK")).LeftClick();                                             // click OK to confirm the setting
+            PP5IDEWindow.GetWebElementFromWebElement(By.Name("OK")).LeftClick();                                            // click OK to confirm the setting
             
-            var testresults = TestResultCollection.Results;
+            //var testresults = TestResultCollection.Results;
             #endregion
         }
 
@@ -6278,24 +6394,25 @@ namespace PP5AutoUITests
         {
             // Arrange
             string cmdName = "AAA_B2-3";        // prefix name: AAA to let command show up on the first in the group list
-            string groupName = "AC Source";
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string groupName = GetGroupNameByEnum(cgt);
             bool isCmdUpdatedExpected = true;
             bool isCmdUpdated = AddCommandInCGIList(groupName, cmdName);
             isCmdUpdatedExpected.ShouldEqualTo(isCmdUpdated);
 
             // Action
             // Close TI window and re-open it (reload the cgi list)
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),         // Close the TI
-                                                   MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),         // Close the TI
+            //                                       MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
-            MenuSelect("Functions", "TI Editor");
-            WaitUntil(() => GetPP5Window() != null);
+            //MenuSelect("Functions", "TI Editor");
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Assert
             IWebElement commandAddedExpected = null;                                                        // Check the command is inserted in the command group in TI Editor
             WaitUntil(() => CheckAllTasksCompleted());
-            IWebElement commandAdded = GetCommandBy(groupName, cmdName);
+            IWebElement commandAdded = GetCommandBy(cgt, cmdName);
             commandAddedExpected.ShouldNotEqualTo(commandAdded);
 
             // Delete the added command
@@ -6311,24 +6428,25 @@ namespace PP5AutoUITests
         {
             // Arrange
             string cmdName = "AAA_B2-4";                // prefix name: AAA to let command show up on the first in the group list
-            string groupName = "System, Flow Control";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
+            string groupName = GetGroupNameByEnum(cgt);
             bool isCmdUpdatedExpected = true;
             bool isCmdUpdated = AddCommandInCGIList(groupName, cmdName);
             isCmdUpdatedExpected.ShouldEqualTo(isCmdUpdated);
 
             // Action
             // Close TI window and re-open it (reload the cgi list)
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),         // Close the TI
-                                                   MobileBy.AccessibilityId("CloseButton")).LeftClick();
+            //PP5IDEWindow.GetElementFromWebElement(timeOut: 5000, By.Name(PowerPro5Config.IDE_TIEditorWindowName),         // Close the TI
+            //                                       MobileBy.AccessibilityId("CloseButton")).LeftClick();
 
-            MenuSelect("Functions", "TI Editor");                                                           // Open New TI window
-            WaitUntil(() => GetPP5Window() != null);
+            //MenuSelect("Functions", "TI Editor");                                                           // Open New TI window
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Assert
             IWebElement commandAddedExpected = null;                                                        // Check the command is inserted in the command group in TI Editor
             WaitUntil(() => CheckAllTasksCompleted());
-            IWebElement commandAdded = GetCommandBy(groupName, cmdName);
+            IWebElement commandAdded = GetCommandBy(cgt, cmdName);
             commandAddedExpected.ShouldNotEqualTo(commandAdded);
 
             // Delete the added command
@@ -6344,10 +6462,10 @@ namespace PP5AutoUITests
         {
             // Arrange
             //// Step 1. Create a new python command with name: "AAA_B2-5_Python"
-            string cmdName = "AAA_B2-5_Python";                // prefix name: AAA to let command show up on the first in the group list
+            string cmdName = "AAA_B2-5_Python";                                                             // prefix name: AAA to let command show up on the first in the group list
             string cmdNameChanged = "AAA_B2-5_Python1";
-            string groupName = "Python";
-            string cmdTable = DataTableAutoIDType.PGGrid.ToString();
+            TestCmdGroupType cgt = TestCmdGroupType.Python;
+            string groupName = GetGroupNameByEnum(cgt);
             bool isCmdUpdatedExpected = true;
             bool isCmdUpdated = AddEmptyCommandInCGIList(groupName, cmdName);
             isCmdUpdatedExpected.ShouldEqualTo(isCmdUpdated);
@@ -6357,32 +6475,33 @@ namespace PP5AutoUITests
             MenuSelect("Functions", "Management");                                                          // Open management
             WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, SharedSetting.LONG_TIMEOUT);
             PP5IDEWindow.ToolBarSelect(4/*Ex-Function*/);
-            IWebElement PythonTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
-                                                    .TabSelect(4/*Ex-Function*/, "Python");                 // Tabselect "Ex-Function, DLL"
-            PythonTabPage.GetDataGridElement("PythonDataGrid")                                              // Select the row whose Test command alias is "AAA_B2-5_Python"
-                         .GetRowByName(3, cmdName)
-                         .LeftClick();
-            PythonTabPage.GetElement(By.Name("Edit")).LeftClick();                                          // Click on "Edit" button
+            IElement PythonTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
+                                                    .TabSelect(4/*Ex-Function*/, "Python");                 // Tabselect "Ex-Function, Python"
+            var pythonTable = PythonTabPage.GetDataGridElement("PythonDataGrid");                           // Select the row whose Test command alias is "AAA_B2-5_Python"
+            pythonTable.GetRowByName(3, cmdName)
+                       .LeftClick();
+            PythonTabPage.GetWebElementFromWebElement(By.Name("Edit")).LeftClick();                                          // Click on "Edit" button
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Edit Python"))                 // Alias (command)欄位修改command name: "AAA_B2-5_Python" > "AAA_B2-5_Python1"
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit Python"))                 // Alias (command)欄位修改command name: "AAA_B2-5_Python" > "AAA_B2-5_Python1"
                                                         .GetDataGridElement("TopDataGrid")
                                                         .GetCellBy(1, 3)
-                                                        .SendContent(cmdNameChanged);
+                                                        .SendText(cmdNameChanged);
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetElement(By.Name("Edit Python"))                 // 按OK
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit Python"))                 // 按OK
                                                         .GetBtnElement("OK")
                                                         .LeftClick();
 
+            Thread.Sleep(SharedSetting.NORMAL_TIMEOUT);
             PP5IDEWindowRefresh();
 
-            WaitUntil(() => cmdNameChanged == PythonTabPage.GetCellValue("PythonDataGrid", 2/*Alias(Command)*/)); // 檢查欄位是否已更新到datatable
+            WaitUntil(() => cmdNameChanged == PP5IDEWindow.GetCellValue("PythonDataGrid", 2/*Alias(Command)*/));               // 檢查欄位是否已更新到datatable
 
             //// Step 3. Switch back to TI Editor, check command name is updated to "AAA_B2-5_Python1"
             MenuSelect("Windows", "TI Editor");
 
             // Assert
-            IWebElement commandAddedExpected = null;
-            IWebElement commandAdded = GetCommandBy(groupName, cmdName);
+            IWebElement commandAddedExpected = null;                                                        // Check the command is updated to the newname in TI Editor
+            IWebElement commandAdded = GetCommandBy(cgt, cmdName);
             commandAddedExpected.ShouldNotEqualTo(commandAdded);
 
             // Delete the added command
@@ -6391,948 +6510,790 @@ namespace PP5AutoUITests
                                                    nodePath: $"CommandGroupInfos[{CGIListIdx}]/Commands[-1]");
         }
 
-        [TestMethod]
-        //B2-3_IsDevice
-        public void TIEditor_AddIsDeviceCommands()
+        [TestMethod("B2-5_Dll")]
+        [TestCategory("測試命令列表(B2)")]
+        //[DataRow("B2-5_Dll")]
+        public void TIEditor_ModifyDllCommandNameInManagement_CheckDllCommandIsUpdated()
         {
-
+            // Arrange
+            //// Step 1. Create a new Dll command with name: "AAA_B2-5_Dll", and add the command into PP5
+            string cmdName = "AAA_B2-5_Dll";                                                                                // prefix name: AAA to let command show up on the first in the group list
+            string cmdNameChanged = "AAA_B2-5_Dll1";
+            TestCmdGroupType cgt = TestCmdGroupType.Dll;
             
+            //bool isCmdUpdatedExpected = true;
+            //bool isCmdUpdated = AddEmptyCommandInCGIList(groupName, cmdName);
+            //isCmdUpdatedExpected.ShouldEqualTo(isCmdUpdated);
 
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
+            DllHelper.DummyDllGenerator.GenerateDummyDll(dllName: cmdName, dllClassName:cmdName, dllFunctionName:cmdName);  // Generate the dummy DLL    
+            Logger.LogMessage($"Dummy DLL generated at: {Path.Combine(Environment.CurrentDirectory, cmdName)}");
 
-            //bool bSuccess = false;
+            // Action
+            //// Step 2. In management, change the command name to "AAA_B2-5_Dll1"
+            MenuSelect("Functions", "Management");                                                          // Open management
+            WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, SharedSetting.LONG_TIMEOUT);
+            PP5IDEWindow.ToolBarSelect(4/*Ex-Function*/);
+            IElement DllTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
+                                                 .TabSelect(4/*Ex-Function*/, "DLL");                       // Tabselect "Ex-Function, DLL"
 
-            //try
-            //{
+            DllTabPage.GetBtnElement("Add").LeftClick();                                                    // Add the DLL
+            var fileDialog = PP5IDEWindow.GetExtendedElement(PP5By.Name("Document"));
+            Logger.LogMessage($"fileDialog windowName: {fileDialog.ControlType.ToString()}");
+            fileDialog.GetExtendedElement(PP5By.ClassName("Address Band Root"))
+                      .GetExtendedElement(PP5By.Id("1001"))
+                      .ComboBoxSelectByName(Environment.CurrentDirectory);
 
-            //    // LeftDblClick on Text "AC Source" at (34,5)
-            //    Console.WriteLine("LeftDblClick on Text \"AC Source\" at (34,5)");
-            //    string xpath_LeftDblClickTextACSource_34_5 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Tree[@AutomationId=\"CommandTreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/Text[@Name=\"AC Source\"][@AutomationId=\"ShowNodeName\"]";
-            //    var winElem_LeftDblClickTextACSource_34_5 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextACSource_34_5);
-            //    if (winElem_LeftDblClickTextACSource_34_5 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextACSource_34_5.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextACSource_34_5}");
-            //        return;
-            //    }
+            fileDialog.GetExtendedElement(PP5By.Name("項目檢視"))
+                      .ComboBoxSelectByName(cmdName + ".dll");
+            fileDialog.GetWebElementFromWebElement(By.Name("開啟(O)"))
+                      .LeftClick();
+            /// List[@ClassName =\"UIItemsView\"][@Name=\"項目檢視\"]/ListItem[@ClassName=\"UIItem\"][@Name=\"testdll.dll\"]/Edit[@Name=\"名稱\"][@AutomationId=\"System.ItemNameDisplay\"]"
+            //]\"]/Window[@ClassName=\"#32770\"][@Name=\"Document\"]/Button[@ClassName=\"Button\"][@Name=\"開啟(O)\"]"
 
+            Thread.Sleep(SharedSetting.SHORT_TIMEOUT);
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Add DLL - Managed DLL"))       // 按OK
+                                                        .GetBtnElement("OK")
+                                                        .LeftClick();
 
-            //    // LeftDblClick on Text "Commands" at (26,6)
-            //    Console.WriteLine("LeftDblClick on Text \"Commands\" at (26,6)");
-            //    string xpath_LeftDblClickTextCommands_26_6 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Tree[@AutomationId=\"CommandTreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/Text[@Name=\"Commands\"][@AutomationId=\"ShowNodeName\"]";
-            //    var winElem_LeftDblClickTextCommands_26_6 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextCommands_26_6);
-            //    if (winElem_LeftDblClickTextCommands_26_6 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextCommands_26_6.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextCommands_26_6}");
-            //        return;
-            //    }
+            Thread.Sleep(SharedSetting.SHORT_TIMEOUT);
+            PP5IDEWindowRefresh();
+            WaitUntil(() => cmdName == PP5IDEWindow.GetCellValue("DllDataGrid", 2/*Alias(Command)*/));
 
+            // Edit the Dll
+            PP5IDEWindow.GetDataGridElement("DllDataGrid")
+                        .GetRowByName(3, cmdName)
+                        .LeftClick();
 
-            //    // LeftClick on Text "Add" at (29,11)
-            //    Console.WriteLine("LeftClick on Text \"Add\" at (29,11)");
-            //    string xpath_LeftClickTextAdd_29_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Button[@Name=\"Add\"][@AutomationId=\"AddBtn\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Add\"]";
-            //    var winElem_LeftClickTextAdd_29_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextAdd_29_11);
-            //    if (winElem_LeftClickTextAdd_29_11 != null)
-            //    {
-            //        winElem_LeftClickTextAdd_29_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextAdd_29_11}");
-            //        return;
-            //    }
+            PP5IDEWindow.GetExtendedElement(PP5By.Name("Edit")).LeftClick();                                             // Click on "Edit" button
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Managed"))          // Alias (command)欄位修改command name: "AAA_B2-5_Dll" > "AAA_B2-5_Dll1"
+                                                        .GetDataGridElement("TopDataGrid")
+                                                        .GetCellBy(1, 3)
+                                                        .SendText(cmdNameChanged);
 
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Managed"))          // 按OK
+                                                        .GetBtnElement("OK")
+                                                        .LeftClick();
 
-            //    // LeftClick on Edit "" at (96,9)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (96,9)");
-            //    string xpath_LeftClickEdit_96_9 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Custom[@ClassName=\"CommandEditorCommand\"]/Tree[@ClassName=\"TreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"測試命令\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"System.Windows.Controls.StackPanel\"]/Edit[@ClassName=\"TextBox\"]";
-            //    var winElem_LeftClickEdit_96_9 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_96_9);
-            //    if (winElem_LeftClickEdit_96_9 != null)
-            //    {
-            //        winElem_LeftClickEdit_96_9.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_96_9}");
-            //        return;
-            //    }
+            Thread.Sleep(SharedSetting.NORMAL_TIMEOUT);
+            PP5IDEWindowRefresh();
 
+            WaitUntil(() => cmdNameChanged == PP5IDEWindow.GetCellValue("DllDataGrid", 2/*Alias(Command)*/)); // 檢查欄位是否已更新到datatable
 
-            //    // LeftDblClick on Edit "" at (99,8)
-            //    Console.WriteLine("LeftDblClick on Edit \"\" at (99,8)");
-            //    string xpath_LeftDblClickEdit_99_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Custom[@ClassName=\"CommandEditorCommand\"]/Tree[@ClassName=\"TreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"測試命令\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"System.Windows.Controls.StackPanel\"]/Edit[@ClassName=\"TextBox\"]";
-            //    var winElem_LeftDblClickEdit_99_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickEdit_99_8);
-            //    if (winElem_LeftDblClickEdit_99_8 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickEdit_99_8.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickEdit_99_8}");
-            //        return;
-            //    }
+            //// Step 3. Switch back to TI Editor, check command name is updated to "AAA_B2-5_Dll1"
+            MenuSelect("Windows", "TI Editor");
 
+            // Assert
+            IWebElement commandAddedExpected = null;                                                        // Check the command is updated to the newname in TI Editor
+            IWebElement commandAdded = GetCommandBy(cgt, cmdName);
+            commandAddedExpected.ShouldNotEqualTo(commandAdded);
 
-            //    // KeyboardInput VirtualKeys="Keys.Backspace + Keys.Backspace" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.Backspace + Keys.Backspace\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_96_9.SendKeys(Keys.Backspace + Keys.Backspace);
+            // Delete the added command
+            MenuSelect("Windows", "Management");
+            PP5IDEWindow.GetSelectedRow("DllDataGrid")
+                        .GetCellBy(2/*Active*/).GetFirstCheckBoxElement()
+                        .UnTickCheckBox();
+            PP5IDEWindow.GetBtnElement("Delete").LeftClick();
+            PP5IDEWindow.GetWindowElement("Notice").GetBtnElement("Yes").LeftClick();
 
+            //PP5IDEWindow.GetSelectedRow("DllDataGrid")
+            //            .GetCellBy(2/*Active*/)
+            //            .PerformClick("/CheckBox[0]", ClickType.UnTickCheckBox);
+            //PP5IDEWindow.PerformClick("/Button[Delete]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/Window[Notice]/Button[Yes]", ClickType.LeftClick);
 
-            //    // LeftClick on Edit "" at (114,5)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (114,5)");
-            //    string xpath_LeftClickEdit_114_5 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Custom[@ClassName=\"CommandEditorCommand\"]/Tree[@ClassName=\"TreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"測試命令\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"System.Windows.Controls.StackPanel\"]/Edit[@ClassName=\"TextBox\"]";
-            //    var winElem_LeftClickEdit_114_5 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_114_5);
-            //    if (winElem_LeftClickEdit_114_5 != null)
-            //    {
-            //        winElem_LeftClickEdit_114_5.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_114_5}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.Backspace + Keys.Backspace" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.Backspace + Keys.Backspace\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_114_5.SendKeys(Keys.Backspace + Keys.Backspace);
-
-
-            //    // LeftDblClick on Edit "" at (100,9)
-            //    Console.WriteLine("LeftDblClick on Edit \"\" at (100,9)");
-            //    string xpath_LeftDblClickEdit_100_9 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Custom[@ClassName=\"CommandEditorCommand\"]/Tree[@ClassName=\"TreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"測試命令\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"System.Windows.Controls.StackPanel\"]/Edit[@ClassName=\"TextBox\"]";
-            //    var winElem_LeftDblClickEdit_100_9 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickEdit_100_9);
-            //    if (winElem_LeftDblClickEdit_100_9 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickEdit_100_9.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickEdit_100_9}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "i" + Keys.LeftShift"s"Keys.LeftShift + "d" + Keys.LeftShift"evice"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"i\" + Keys.LeftShift\"s\"Keys.LeftShift + \"d\" + Keys.LeftShift\"evice\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_114_5.SendKeys(Keys.LeftShift + "i" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_114_5.SendKeys("s");
-            //    winElem_LeftClickEdit_114_5.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_114_5.SendKeys("evice");
-
-
-            //    // LeftClick on Text "Save" at (20,15)
-            //    Console.WriteLine("LeftClick on Text \"Save\" at (20,15)");
-            //    string xpath_LeftClickTextSave_20_15 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Tab[@ClassName=\"TabControl\"]/TabItem[@Name=\"Commands\"][@AutomationId=\"CommandTabControl\"]/Pane[@ClassName=\"ScrollViewer\"]/Button[@ClassName=\"Button\"][@Name=\"Save\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Save\"]";
-            //    var winElem_LeftClickTextSave_20_15 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextSave_20_15);
-            //    if (winElem_LeftClickTextSave_20_15 != null)
-            //    {
-            //        winElem_LeftClickTextSave_20_15.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextSave_20_15}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Text "OK" at (11,14)
-            //    Console.WriteLine("LeftClick on Text \"OK\" at (11,14)");
-            //    string xpath_LeftClickTextOK_11_14 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Window[@Name=\"Save File\"][@AutomationId=\"MessageBoxExDialog\"]/Button[@Name=\"OK\"][@AutomationId=\"btnOK\"]/Text[@ClassName=\"TextBlock\"][@Name=\"OK\"]";
-            //    var winElem_LeftClickTextOK_11_14 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextOK_11_14);
-            //    if (winElem_LeftClickTextOK_11_14 != null)
-            //    {
-            //        winElem_LeftClickTextOK_11_14.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextOK_11_14}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Button "" at (20,13)
-            //    Console.WriteLine("LeftClick on Button \"\" at (20,13)");
-            //    string xpath_LeftClickButton_20_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Button[@AutomationId=\"Minimize\"]";
-            //    var winElem_LeftClickButton_20_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButton_20_13);
-            //    if (winElem_LeftClickButton_20_13 != null)
-            //    {
-            //        winElem_LeftClickButton_20_13.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButton_20_13}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Button "PP5IDE - 1 個執行中視窗" at (19,28)
-            //    Console.WriteLine("LeftClick on Button \"PP5IDE - 1 個執行中視窗\" at (19,28)");
-            //    string xpath_LeftClickButtonPP5IDE1個執行_19_28 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Pane[@ClassName=\"Shell_TrayWnd\"][@Name=\"工作列\"]/ToolBar[@ClassName=\"MSTaskListWClass\"][@Name=\"執行中的應用程式\"]/Button[@Name=\"PP5IDE - 1 個執行中視窗\"]";
-            //    var winElem_LeftClickButtonPP5IDE1個執行_19_28 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButtonPP5IDE1個執行_19_28);
-            //    if (winElem_LeftClickButtonPP5IDE1個執行_19_28 != null)
-            //    {
-            //        winElem_LeftClickButtonPP5IDE1個執行_19_28.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButtonPP5IDE1個執行_19_28}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Text "File" at (4,9)
-            //    Console.WriteLine("LeftClick on Text \"File\" at (4,9)");
-            //    string xpath_LeftClickTextFile_4_9 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Menu[@ClassName=\"Menu\"]/MenuItem[@ClassName=\"MenuItem\"][@Name=\"Chroma.UI.Wpf.MDI.MenuItemViewModel\"]/Text[@ClassName=\"TextBlock\"][@Name=\"File\"]";
-            //    var winElem_LeftClickTextFile_4_9 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextFile_4_9);
-            //    if (winElem_LeftClickTextFile_4_9 != null)
-            //    {
-            //        winElem_LeftClickTextFile_4_9.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextFile_4_9}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Text "New" at (13,11)
-            //    Console.WriteLine("LeftClick on Text \"New\" at (13,11)");
-            //    string xpath_LeftClickTextNew_13_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@ClassName=\"Popup\"]/MenuItem[@ClassName=\"MenuItem\"][@Name=\"Chroma.UI.Wpf.MDI.MenuItemViewModel\"]/Text[@ClassName=\"TextBlock\"][@Name=\"New\"]";
-            //    var winElem_LeftClickTextNew_13_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextNew_13_11);
-            //    if (winElem_LeftClickTextNew_13_11 != null)
-            //    {
-            //        winElem_LeftClickTextNew_13_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextNew_13_11}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Text "Ok" at (10,13)
-            //    Console.WriteLine("LeftClick on Text \"Ok\" at (10,13)");
-            //    string xpath_LeftClickTextOk_10_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@Name=\"New Test Item\"][@AutomationId=\"LoginDialog\"]/Button[@Name=\"Ok\"][@AutomationId=\"OkBtn\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Ok\"]";
-            //    var winElem_LeftClickTextOk_10_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextOk_10_13);
-            //    if (winElem_LeftClickTextOk_10_13 != null)
-            //    {
-            //        winElem_LeftClickTextOk_10_13.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextOk_10_13}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Edit "" at (104,20)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (104,20)");
-            //    string xpath_LeftClickEdit_104_20 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_104_20 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_104_20);
-            //    if (winElem_LeftClickEdit_104_20 != null)
-            //    {
-            //        winElem_LeftClickEdit_104_20.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_104_20}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "i" + Keys.LeftShift"s"Keys.LeftShift + "d" + Keys.LeftShift"evice"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"i\" + Keys.LeftShift\"s\"Keys.LeftShift + \"d\" + Keys.LeftShift\"evice\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_104_20.SendKeys(Keys.LeftShift + "i" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_104_20.SendKeys("s");
-            //    winElem_LeftClickEdit_104_20.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_104_20.SendKeys("evice");
-
-
-            //    // LeftClick on Image "" at (11,11)
-            //    Console.WriteLine("LeftClick on Image \"\" at (11,11)");
-            //    string xpath_LeftClickImage_11_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_11_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_11_11);
-            //    if (winElem_LeftClickImage_11_11 != null)
-            //    {
-            //        winElem_LeftClickImage_11_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_11_11}");
-            //        return;
-            //    }
-
-
-
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B2-3_IsDevice");
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            //int CGIListIdx = GetGroupNames().IndexOf(groupName);
+            //FileProcessingExtension.JsonDeleteNode(filePath: GetCommandFileFullPath(),
+            //                                       nodePath: $"CommandGroupInfos[{CGIListIdx}]/Commands[-1]");
         }
 
-        //[TestMethod]
-        ////B2-3_NotDevice
-        //public void TIEditor_AddNotDeviceCommands()
+        [TestMethod("B2-6")]
+        [TestCategory("測試命令列表(B2)")]
+        [DataRow(TestItemType.SubTI, typeof(object), DisplayName = "Rename SubTI In Management, Check SubTI Not Updated")]
+        [DataRow(TestItemType.ThreadTI, typeof(object), DisplayName = "Rename SubTI In Management, Check ThreadTI Not Updated")]
+        public void TIEditor_RenameSubTIInManagement(TestItemType itemType, object dummy)
+        {
+            string subTiName = "B2-6_SubTi";
+            string newSubTiName = "B2-6_SubTi_new";
+            PerformOpenAndSaveTI(subTiName, TestItemType.SubTI, TestItemRunType.UUT);               // Save new sub-TI
+            PerformCloseTI();
+
+            TIExecuteAction(TIAction.SetTIActive, subTiName);
+
+            PerformOpenNewTI(itemType, TestItemRunType.UUT);                           // Open new thread-TI and include the subTI
+            GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Sub_TI).ShouldBeNull();
+
+            TIRename(subTiName, newSubTiName);
+
+            MenuSelect("Windows", "TI Editor");
+            GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Sub_TI).ShouldBeNull();
+        }
+
+        [TestMethod("B2-6_1")]
+        [TestCategory("測試命令列表(B2)")]
+        public void TIEditor_RenameSubTIInManagement_CheckTIIsUpdated()
+        {
+            string subTiName = "B2-6_SubTi";
+            string newSubTiName = "B2-6_SubTi_new";
+            PerformOpenAndSaveTI(subTiName, TestItemType.SubTI, TestItemRunType.UUT);                       // Save new sub-TI
+            PerformCloseTI();
+
+            TIExecuteAction(TIAction.SetTIActive, subTiName);
+
+            PerformOpenNewTI(TestItemType.TI, TestItemRunType.UUT);                                         // Open new TI and include the subTI
+            GetCommandBy(TestCmdGroupType.Sub_TI, subTiName).ShouldNotBeNull();
+
+            TIRename(subTiName, newSubTiName);
+
+            MenuSelect("Windows", "TI Editor");
+            GetCommandBy(TestCmdGroupType.Sub_TI, newSubTiName).ShouldNotBeNull();
+        }
+
+        //[TestMethod("B2-6_2")]
+        //[TestCategory("測試命令列表(B2)")]
+        //public void TIEditor_RenameSubTIInManagement_CheckSubTINotUpdated()
         //{
-        //    //MainPanel_TIEditor_OpenNewTI();
-        //    TimeSpan.FromSeconds(2);
+        //    string subTiName = "B2-6_SubTi";
+        //    string newSubTiName = "B2-6_SubTi_new";
+        //    PerformOpenAndSaveTI(subTiName, TestItemType.SubTI, TestItemRunType.UUT);                       // Save new sub-TI
+        //    PerformCloseTI();
 
-        //    bool bSuccess = false;
+        //    TIExecuteAction(TIAction.SetTIActive, subTiName);
 
-        //    try
-        //    {
-        //        // LeftDblClick on Text "Arithmetic" at (40,0)
-        //        Console.WriteLine("LeftDblClick on Text \"Arithmetic\" at (40,0)");
-        //        string xpath_LeftDblClickTextArithmetic_40_0 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Tree[@AutomationId=\"CommandTreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/Text[@Name=\"Arithmetic\"][@AutomationId=\"ShowNodeName\"]";
-        //        var winElem_LeftDblClickTextArithmetic_40_0 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextArithmetic_40_0);
-        //        if (winElem_LeftDblClickTextArithmetic_40_0 != null)
-        //        {
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextArithmetic_40_0.Coordinates);
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextArithmetic_40_0}");
-        //            return;
-        //        }
+        //    PerformOpenNewTI(TestItemType.SubTI, TestItemRunType.UUT);                                      // Open new sub-TI and include the subTI
+        //    GetCmdGroupTreeItemByGroupName("Sub TI").ShouldBeNull();
 
+        //    TIRename(subTiName, newSubTiName);
 
-        //        // LeftDblClick on Text "Commands" at (38,7)
-        //        Console.WriteLine("LeftDblClick on Text \"Commands\" at (38,7)");
-        //        string xpath_LeftDblClickTextCommands_38_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Tree[@AutomationId=\"CommandTreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"Chroma.EngineerModeEditor.TreeViewTable\"]/Text[@Name=\"Commands\"][@AutomationId=\"ShowNodeName\"]";
-        //        var winElem_LeftDblClickTextCommands_38_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextCommands_38_7);
-        //        if (winElem_LeftDblClickTextCommands_38_7 != null)
-        //        {
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextCommands_38_7.Coordinates);
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextCommands_38_7}");
-        //            return;
-        //        }
-
-
-        //        // LeftClick on Text "Add" at (22,13)
-        //        Console.WriteLine("LeftClick on Text \"Add\" at (22,13)");
-        //        string xpath_LeftClickTextAdd_22_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Button[@Name=\"Add\"][@AutomationId=\"AddBtn\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Add\"]";
-        //        var winElem_LeftClickTextAdd_22_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextAdd_22_13);
-        //        if (winElem_LeftClickTextAdd_22_13 != null)
-        //        {
-        //            winElem_LeftClickTextAdd_22_13.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextAdd_22_13}");
-        //            return;
-        //        }
-
-
-        //        // LeftDblClick on Edit "" at (115,13)
-        //        Console.WriteLine("LeftDblClick on Edit \"\" at (115,13)");
-        //        string xpath_LeftDblClickEdit_115_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Custom[@ClassName=\"CommandEditorCommand\"]/Tree[@ClassName=\"TreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"測試命令\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"System.Windows.Controls.StackPanel\"]/Edit[@ClassName=\"TextBox\"]";
-        //        var winElem_LeftDblClickEdit_115_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickEdit_115_13);
-        //        if (winElem_LeftDblClickEdit_115_13 != null)
-        //        {
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickEdit_115_13.Coordinates);
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickEdit_115_13}");
-        //            return;
-        //        }
-
-
-        //        // KeyboardInput VirtualKeys="Keys.Backspace + Keys.BackspaceKeys.Backspace + Keys.Backspace" CapsLock=False NumLock=True ScrollLock=False
-        //        Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.Backspace + Keys.BackspaceKeys.Backspace + Keys.Backspace\" CapsLock=False NumLock=True ScrollLock=False");
-        //        System.Threading.Thread.Sleep(100);
-        //        winElem_LeftDblClickEdit_115_13.SendKeys(Keys.Backspace + Keys.Backspace);
-        //        winElem_LeftDblClickEdit_115_13.SendKeys(Keys.Backspace + Keys.Backspace);
-
-
-        //        // LeftDblClick on Edit "" at (137,9)
-        //        Console.WriteLine("LeftDblClick on Edit \"\" at (137,9)");
-        //        string xpath_LeftDblClickEdit_137_9 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Custom[@ClassName=\"CommandEditorCommand\"]/Tree[@ClassName=\"TreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"測試命令\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"System.Windows.Controls.StackPanel\"]/Edit[@ClassName=\"TextBox\"]";
-        //        var winElem_LeftDblClickEdit_137_9 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickEdit_137_9);
-        //        if (winElem_LeftDblClickEdit_137_9 != null)
-        //        {
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickEdit_137_9.Coordinates);
-        //            AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickEdit_137_9}");
-        //            return;
-        //        }
-
-
-        //        // KeyboardInput VirtualKeys="Keys.Backspace + Keys.Backspace" CapsLock=False NumLock=True ScrollLock=False
-        //        Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.Backspace + Keys.Backspace\" CapsLock=False NumLock=True ScrollLock=False");
-        //        System.Threading.Thread.Sleep(100);
-        //        winElem_LeftDblClickEdit_137_9.SendKeys(Keys.Backspace + Keys.Backspace);
-
-        //        // LeftClick on Edit "" at (23,8)
-        //        Console.WriteLine("LeftClick on Edit \"\" at (23,8)");
-        //        string xpath_LeftClickEdit_23_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Custom[@ClassName=\"CommandEditorCommand\"]/Tree[@ClassName=\"TreeView\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"測試命令\"]/TreeItem[@ClassName=\"TreeViewItem\"][@Name=\"System.Windows.Controls.StackPanel\"]/Edit[@ClassName=\"TextBox\"]";
-        //        var winElem_LeftClickEdit_23_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_23_8);
-        //        if (winElem_LeftClickEdit_23_8 != null)
-        //        {
-        //            winElem_LeftClickEdit_23_8.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_23_8}");
-        //            return;
-        //        }
-
-
-        //        // KeyboardInput VirtualKeys="Keys.LeftShift + "n" + Keys.LeftShift"ot"Keys.LeftShift + "d" + Keys.LeftShift"evice"" CapsLock=False NumLock=True ScrollLock=False
-        //        Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"n\" + Keys.LeftShift\"ot\"Keys.LeftShift + \"d\" + Keys.LeftShift\"evice\"\" CapsLock=False NumLock=True ScrollLock=False");
-        //        System.Threading.Thread.Sleep(100);
-        //        winElem_LeftClickEdit_23_8.SendKeys(Keys.LeftShift + "n" + Keys.LeftShift);
-        //        winElem_LeftClickEdit_23_8.SendKeys("ot");
-        //        winElem_LeftClickEdit_23_8.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-        //        winElem_LeftClickEdit_23_8.SendKeys("evice");
-
-
-        //        // LeftClick on Text "Save" at (19,16)
-        //        Console.WriteLine("LeftClick on Text \"Save\" at (19,16)");
-        //        string xpath_LeftClickTextSave_19_16 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Tab[@ClassName=\"TabControl\"]/TabItem[@Name=\"Commands\"][@AutomationId=\"CommandTabControl\"]/Pane[@ClassName=\"ScrollViewer\"]/Button[@ClassName=\"Button\"][@Name=\"Save\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Save\"]";
-        //        var winElem_LeftClickTextSave_19_16 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextSave_19_16);
-        //        if (winElem_LeftClickTextSave_19_16 != null)
-        //        {
-        //            winElem_LeftClickTextSave_19_16.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextSave_19_16}");
-        //            return;
-        //        }
-
-
-
-        //        // LeftClick on Text "OK" at (10,10)
-        //        Console.WriteLine("LeftClick on Text \"OK\" at (10,10)");
-        //        string xpath_LeftClickTextOK_10_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Window[@Name=\"Save File\"][@AutomationId=\"MessageBoxExDialog\"]/Button[@Name=\"OK\"][@AutomationId=\"btnOK\"]/Text[@ClassName=\"TextBlock\"][@Name=\"OK\"]";
-        //        var winElem_LeftClickTextOK_10_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextOK_10_10);
-        //        if (winElem_LeftClickTextOK_10_10 != null)
-        //        {
-        //            winElem_LeftClickTextOK_10_10.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextOK_10_10}");
-        //            return;
-        //        }
-
-
-        //        // LeftClick on Button "" at (12,20)
-        //        Console.WriteLine("LeftClick on Button \"\" at (12,20)");
-        //        string xpath_LeftClickButton_12_20 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@Name=\"EngineerModeEditor\"][@AutomationId=\"MainWindowsUI\"]/Button[@AutomationId=\"Minimize\"]";
-        //        var winElem_LeftClickButton_12_20 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButton_12_20);
-        //        if (winElem_LeftClickButton_12_20 != null)
-        //        {
-        //            winElem_LeftClickButton_12_20.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButton_12_20}");
-        //            return;
-        //        }
-
-
-        //        // LeftClick on Button "PP5IDE - 1 個執行中視窗" at (21,25)
-        //        Console.WriteLine("LeftClick on Button \"PP5IDE - 1 個執行中視窗\" at (21,25)");
-        //        string xpath_LeftClickButtonPP5IDE1個執行_21_25 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Pane[@ClassName=\"Shell_TrayWnd\"][@Name=\"工作列\"]/ToolBar[@ClassName=\"MSTaskListWClass\"][@Name=\"執行中的應用程式\"]/Button[@Name=\"PP5IDE - 1 個執行中視窗\"]";
-        //        var winElem_LeftClickButtonPP5IDE1個執行_21_25 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButtonPP5IDE1個執行_21_25);
-        //        if (winElem_LeftClickButtonPP5IDE1個執行_21_25 != null)
-        //        {
-        //            winElem_LeftClickButtonPP5IDE1個執行_21_25.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButtonPP5IDE1個執行_21_25}");
-        //            return;
-        //        }
-
-
-        //        // LeftClick on Text "File" at (10,14)
-        //        Console.WriteLine("LeftClick on Text \"File\" at (10,14)");
-        //        string xpath_LeftClickTextFile_10_14 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Menu[@ClassName=\"Menu\"]/MenuItem[@ClassName=\"MenuItem\"][@Name=\"Chroma.UI.Wpf.MDI.MenuItemViewModel\"]/Text[@ClassName=\"TextBlock\"][@Name=\"File\"]";
-        //        var winElem_LeftClickTextFile_10_14 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextFile_10_14);
-        //        if (winElem_LeftClickTextFile_10_14 != null)
-        //        {
-        //            winElem_LeftClickTextFile_10_14.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextFile_10_14}");
-        //            return;
-        //        }
-
-
-        //        // LeftClick on Text "New" at (17,7)
-        //        Console.WriteLine("LeftClick on Text \"New\" at (17,7)");
-        //        string xpath_LeftClickTextNew_17_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@ClassName=\"Popup\"]/MenuItem[@ClassName=\"MenuItem\"][@Name=\"Chroma.UI.Wpf.MDI.MenuItemViewModel\"]/Text[@ClassName=\"TextBlock\"][@Name=\"New\"]";
-        //        var winElem_LeftClickTextNew_17_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextNew_17_7);
-        //        if (winElem_LeftClickTextNew_17_7 != null)
-        //        {
-        //            winElem_LeftClickTextNew_17_7.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextNew_17_7}");
-        //            return;
-        //        }
-
-
-        //        // LeftClick on Text "Ok" at (12,13)
-        //        Console.WriteLine("LeftClick on Text \"Ok\" at (12,13)");
-        //        string xpath_LeftClickTextOk_12_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@Name=\"New Test Item\"][@AutomationId=\"LoginDialog\"]/Button[@Name=\"Ok\"][@AutomationId=\"OkBtn\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Ok\"]";
-        //        var winElem_LeftClickTextOk_12_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextOk_12_13);
-        //        if (winElem_LeftClickTextOk_12_13 != null)
-        //        {
-        //            winElem_LeftClickTextOk_12_13.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextOk_12_13}");
-        //            return;
-        //        }
-
-
-        //        // LeftClick on Edit "" at (150,8)
-        //        Console.WriteLine("LeftClick on Edit \"\" at (150,8)");
-        //        string xpath_LeftClickEdit_150_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-        //        var winElem_LeftClickEdit_150_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_150_8);
-        //        if (winElem_LeftClickEdit_150_8 != null)
-        //        {
-        //            winElem_LeftClickEdit_150_8.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_150_8}");
-        //            return;
-        //        }
-
-
-        //        // KeyboardInput VirtualKeys="Keys.LeftShift + "n" + Keys.LeftShift"ot"Keys.LeftShift + "d" + Keys.LeftShift"evice"" CapsLock=False NumLock=True ScrollLock=False
-        //        Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"n\" + Keys.LeftShift\"ot\"Keys.LeftShift + \"d\" + Keys.LeftShift\"evice\"\" CapsLock=False NumLock=True ScrollLock=False");
-        //        System.Threading.Thread.Sleep(100);
-        //        winElem_LeftClickEdit_150_8.SendKeys(Keys.LeftShift + "n" + Keys.LeftShift);
-        //        winElem_LeftClickEdit_150_8.SendKeys("ot");
-        //        winElem_LeftClickEdit_150_8.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-        //        winElem_LeftClickEdit_150_8.SendKeys("evice");
-
-
-        //        // LeftClick on Image "" at (20,10)
-        //        Console.WriteLine("LeftClick on Image \"\" at (20,10)");
-        //        string xpath_LeftClickImage_20_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
-        //        var winElem_LeftClickImage_20_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_20_10);
-        //        if (winElem_LeftClickImage_20_10 != null)
-        //        {
-        //            winElem_LeftClickImage_20_10.Click();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_20_10}");
-        //            return;
-        //        }
-
-        //        AutoUIExtension.TakeScreenshotPNGformat(true, "B2-3_NotDevice");
-
-        //        bSuccess = true;
-        //    }
-
-        //    finally
-        //    {
-        //        Assert.AreEqual(bSuccess, true);
-        //    }
+        //    MenuSelect("Windows", "TI Editor");
+        //    GetCmdGroupTreeItemByGroupName("Sub TI").ShouldBeNull();
         //}
 
-        [TestMethod("B3-1_SearchByEnterKey")]
-        [TestCategory("測試命令搜尋(B3)")]
-        //B3-1_SearchByEnterKey
-        public void TIEditor_UseCommandByCommandSearch_SearchByEnterKey()
+        //[TestMethod("B2-6_3")]
+        //[TestCategory("測試命令列表(B2)")]
+        //public void TIEditor_RenameSubTIInManagement_CheckThreadTINotUpdated()
+        //{
+        //    string subTiName = "B2-6_SubTi";
+        //    string newSubTiName = "B2-6_SubTi_new";
+        //    PerformOpenAndSaveTI(subTiName, TestItemType.SubTI, TestItemRunType.UUT);               // Save new sub-TI
+        //    PerformCloseTI();
+
+        //    TIExecuteAction(TIAction.SetTIActive, subTiName);
+
+        //    PerformOpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);                           // Open new thread-TI and include the subTI
+        //    GetCmdGroupTreeItemByGroupName("Sub TI").ShouldBeNull();
+
+        //    TIRename(subTiName, newSubTiName);
+
+        //    MenuSelect("Windows", "TI Editor");
+        //    GetCmdGroupTreeItemByGroupName("Sub TI").ShouldBeNull();
+        //}
+
+        [TestMethod("B2-7")]
+        [TestCategory("測試命令列表(B2)")]
+        [DataRow(TestItemType.TI, typeof(object), DisplayName = "Rename ThreadTI In Management, Check TI Has Cmd List Updated")]                 
+        [DataRow(TestItemType.SubTI, typeof(object), DisplayName = "Rename ThreadTI In Management, Check SubTI Has Cmd List Updated")]    
+        public void TIEditor_RenameThreadTIInManagement(TestItemType itemType, object dummy)
         {
-            // Input Command name: "SET"
-            string CommandName = "SET";
-            IWebElement testCmdSearchBox = CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchBox"));
-            testCmdSearchBox.ClearContent();
+            string threadTiName = "B2-6_ThreadTi";
+            string newThreadTiName = "B2-6_ThreadTi_new";
+            PerformOpenAndSaveTI(threadTiName, TestItemType.ThreadTI, TestItemRunType.UUT);     // Save new thread-TI
+            PerformCloseTI();
 
-            // Search By EnterKey
-            testCmdSearchBox.SendComboKeys(CommandName, OpenQA.Selenium.Keys.Enter);
+            TIExecuteAction(TIAction.SetTIActive, threadTiName);
 
-            // Check command names are same
-            //Assert.AreEqual(CommandName, GetCommandBy(CommandName).GetSubElementText());
-            string searchedCommand = GetCommandIsSelected(CommandName, GroupNameToSearch: "", findExactSameCommand: false).GetFirstTextContent();
-            //Assert.IsTrue(searchedCommand.ToUpper().Contains(CommandName));
+            PerformOpenNewTI(itemType, TestItemRunType.UUT);                                    // Open new TI of itemType and include the threadTI
+            GetCommandBy(TestCmdGroupType.Thread_TI, threadTiName).ShouldNotBeNull();
 
-            string errorMsg = $"The searchedCommand: {searchedCommand} didn't contains Command name {CommandName}.";
-            StringAssert.Contains(searchedCommand.ToUpper(), CommandName, errorMsg);
+            TIRename(threadTiName, newThreadTiName);
 
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (50,7)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (50,7)");
-            //    string xpath_LeftClickEdit_50_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    //var winElem_LeftClickEdit_50_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_50_7);
-            //    uIActionPP5IDE.PerformActionByAutomationID(ActionType.None, "searchText");
-            //    if (uIActionPP5IDE.ElementFound != null)
-            //    {
-            //        uIActionPP5IDE.ElementFound.Click();
-            //    }
-            //    else
-            //    {
-            //        LogHelper.LogFindElementFailedByAutomationID("searchText");
-            //        //LogHelper.LogFindElementFaidByXPath(xpath_LeftClickEdit_50_7);
-            //        //Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_50_7}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys=""y"Keys.LeftShift + "/" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"y\"Keys.LeftShift + \"/\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    uIActionPP5IDE.ElementFound.SendKeys("y");
-            //    uIActionPP5IDE.ElementFound.SendKeys(Keys.LeftShift + "/" + Keys.LeftShift);
-
-
-            //    // LeftClick on Image "" at (8,3)
-            //    Console.WriteLine("LeftClick on Image \"\" at (8,3)");
-            //    string xpath_LeftClickImage_8_3 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_8_3 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_8_3);
-            //    if (winElem_LeftClickImage_8_3 != null)
-            //    {
-            //        winElem_LeftClickImage_8_3.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_8_3}");
-            //        return;
-            //    }
-
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-1");
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            MenuSelect("Windows", "TI Editor");
+            GetCommandBy(TestCmdGroupType.Thread_TI, newThreadTiName).ShouldNotBeNull();
         }
 
-        [TestMethod("B3-1_SearchBySearchButton")]
-        [TestCategory("測試命令搜尋(B3)")]
-        //B3-1_SearchBySearchButton
-        public void TIEditor_UseCommandByCommandSearch_SearchBySearchButton()
+        //[TestMethod("B2-7_1")]
+        //[TestCategory("測試命令列表(B2)")]
+        //public void TIEditor_RenameThreadTIInManagement_CheckTIHasCmdListUpdated()
+        //{
+        //    string threadTiName = "B2-6_ThreadTi";
+        //    string newThreadTiName = "B2-6_ThreadTi_new";
+        //    PerformOpenAndSaveTI(threadTiName, TestItemType.ThreadTI, TestItemRunType.UUT);         // Save new thread-TI
+        //    PerformCloseTI();
+
+        //    TIExecuteAction(TIAction.SetTIActive, threadTiName);
+
+        //    PerformOpenNewTI(TestItemType.TI, TestItemRunType.UUT);                                 // Open new TI and include the threadTI
+        //    GetCommandBy("Thread TI", threadTiName).ShouldNotBeNull();
+
+        //    TIRename(threadTiName, newThreadTiName);
+
+        //    MenuSelect("Windows", "TI Editor");
+        //    GetCommandBy("Thread TI", newThreadTiName).ShouldNotBeNull();
+        //}
+
+        //[TestMethod("B2-7_2")]
+        //[TestCategory("測試命令列表(B2)")]
+        //public void TIEditor_RenameThreadTIInManagement_CheckSubTIHasCmdListUpdated()
+        //{
+        //    string threadTiName = "B2-6_ThreadTi";
+        //    string newThreadTiName = "B2-6_ThreadTi_new";
+        //    PerformOpenAndSaveTI(threadTiName, TestItemType.ThreadTI, TestItemRunType.UUT);         // Save new thread-TI
+        //    PerformCloseTI();
+
+        //    TIExecuteAction(TIAction.SetTIActive, threadTiName);
+
+        //    PerformOpenNewTI(TestItemType.SubTI, TestItemRunType.UUT);                              // Open new SubTI and include the threadTI
+        //    GetCommandBy("Thread TI", threadTiName).ShouldNotBeNull();
+
+        //    TIRename(threadTiName, newThreadTiName);
+
+        //    MenuSelect("Windows", "TI Editor");
+        //    GetCommandBy("Thread TI", newThreadTiName).ShouldNotBeNull();
+        //}
+
+        [TestMethod("B2-7_1")]
+        [TestCategory("測試命令列表(B2)")]
+        public void TIEditor_RenameThreadTIInManagement_CheckThreadTINotInCmdList()
         {
-            // Input Command name: "SET"
-            string CommandName = "SET";
-            IWebElement testCmdSearchBox = CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchBox"));
-            testCmdSearchBox.ClearContent();
-            testCmdSearchBox.SendSingleKeys(CommandName);
+            string threadTiName = "B2-6_ThreadTi";
+            string newThreadTiName = "B2-6_ThreadTi_new";
+            PerformOpenAndSaveTI(threadTiName, TestItemType.ThreadTI, TestItemRunType.UUT);         // Save new thread-TI
+            PerformCloseTI();
 
-            // Search By SearchButton
-            CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("SearchBtn")).LeftClick();
+            TIExecuteAction(TIAction.SetTIActive, threadTiName);
 
-            // Check command names are same
-            //Assert.AreEqual(CommandName, GetCommandBy(CommandName).GetSubElementText());
-            string searchedCommand = GetCommandIsSelected(CommandName, GroupNameToSearch: "", findExactSameCommand: false).GetFirstTextContent();
-            //Assert.IsTrue(searchedCommand.ToUpper().Contains(CommandName));
+            PerformOpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);                           // Open new Thread-TI and include the threadTI
+            GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Thread_TI).ShouldBeNull();
 
-            string errorMsg = $"The searchedCommand: {searchedCommand} didn't contains Command name {CommandName}.";
-            StringAssert.Contains(searchedCommand.ToUpper(), CommandName, errorMsg);
+            TIRename(threadTiName, newThreadTiName);
+
+            MenuSelect("Windows", "TI Editor");
+            GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Thread_TI).ShouldBeNull();
         }
 
-        [TestMethod("B3-2_SearchByDownwardButton")]
+        [TestMethod("B3-1_1")]
         [TestCategory("測試命令搜尋(B3)")]
-        //B3-2_SearchByDownwardButton
-        public void TIEditor_UseCommandByCommandSearchDownwards_SearchByDownwardButton()
+        //B3-1_1
+        public void TIEditor_SearchInTestCommandList_ByPressingEnter()
         {
-            // Input Command name: "FLOOR"
-            string CommandName = "FLOOR";
-            IWebElement testCmdSearchBox = CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchText"));
-            testCmdSearchBox.ClearContent();
-            testCmdSearchBox.SendSingleKeys(CommandName);
+            string searchPattern = "ReadAC_Current";
 
-            // Search By DownwardButton until message box: "Search to the end" show up
-            //do
-            //{
-            //    CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("NextBtn")).LeftClickWithDelay(10);
-            //}
-            //while (!CheckMessageBoxOpened(By.Name("Search Result")));
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[searchText]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+            Press(Keys.Enter);
 
-            // Search By DownwardButton until message box: "Search to the end" show up
+            true.ShouldEqualTo(GetCommandBy(TestCmdGroupType.AC_Source, searchPattern).Selected);                                                               // Verify the command is searched
+        }
+
+        [TestMethod("B3-1_2")]
+        [TestCategory("測試命令搜尋(B3)")]
+        //B3-1_2
+        public void TIEditor_SearchInTestCommandList_ByPressingSearchButton()
+        {
+            //  Searching Command name: "ReadAC_Current"
+            string searchPattern = "ReadAC_Current";
+
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+            PP5IDEWindow.PerformClick("/ById[TCListPanel]/ById[SearchBtn]", ClickType.LeftClick);
+
+            true.ShouldEqualTo(GetCommandBy(TestCmdGroupType.AC_Source, searchPattern).Selected);
+        }
+
+        [TestMethod("B3-2_1")]
+        [TestCategory("測試命令搜尋(B3)")]
+        //B3-2_1
+        public void TIEditor_SearchInTestCommandListDown_ByPressingSearchDownButton()
+        {
+            //  Searching Command name: "ReadAC_Current"
+            string searchPattern = "ReadAC_Current";
+            string warningMessage = "Search to the end, whether to search from the beginning ?";
+
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+
+            // Keep pressing "search Next" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(By.Name("Search Result")))
             {
-                CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("NextBtn")).LeftClick();
+                PP5IDEWindow.PerformClick("/ById[TCListPanel]/ById[NextBtn]", ClickType.LeftClick);
             }
 
             true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+            string warningMessageActual = PP5IDEWindow.PerformGetElement("/Window[Search Result]/ById[txtBlockMsg]").GetCellValue();
+            warningMessage.ShouldEqualTo(warningMessageActual);
 
             // Close message box
-            CurrentDriver.GetElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
-
-            //System.Windows.Threading.Dispatcher.Invoke(new Action(() =>
-            //{
-            //    // UI Action
-
-            //}), System.Windows.Threading.DispatcherPriority.Background);
-
-            // Create thread to Search By DownwardButton until message box: "Search to the end" show up
-            //Task task = Task.Run(() =>
-            //    {
-            //        do
-            //        {
-            //            //safe call
-            //            System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() =>
-            //            {
-            //                CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("NextBtn")).LeftClick();
-            //            });
-            //        }
-            //        while (!CheckMessageBoxOpened(By.Name("Search Result")));
-            //    }
-            //);
-            // this task is running asynchronously here
-            // the method will exit if you don't wait for the Task to finish
-            // A. wait without blocking the main thread
-            //  -> requires MyButton_ClickAsync to be async
-            //await task;
-            // or
-            // B. wait and block the thread (NOT RECOMMENDED AT ALL)
-            // -> does not require MyButton_ClickAsync to be async
-            //task.Wait();
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (196,12)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (196,12)");
-            //    string xpath_LeftClickEdit_196_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_196_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_196_12);
-            //    if (winElem_LeftClickEdit_196_12 != null)
-            //    {
-            //        winElem_LeftClickEdit_196_12.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_196_12}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys=""y"Keys.LeftShift + "/" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"y\"Keys.LeftShift + \"/\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_196_12.SendKeys("y");
-            //    winElem_LeftClickEdit_196_12.SendKeys(Keys.LeftShift + "/" + Keys.LeftShift);
-
-
-            //    // LeftClick on Image "" at (4,16)
-            //    Console.WriteLine("LeftClick on Image \"\" at (4,16)");
-            //    string xpath_LeftClickImage_4_16 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_4_16 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_4_16);
-            //    if (winElem_LeftClickImage_4_16 != null)
-            //    {
-            //        winElem_LeftClickImage_4_16.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_4_16}");
-            //        return;
-            //    }
-
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-2");
-
-            //    // LeftClick on Image "" at (12,16)
-            //    Console.WriteLine("LeftClick on Image \"\" at (12,16)");
-            //    string xpath_LeftClickImage_12_16 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"NextBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_12_16 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_12_16);
-            //    if (winElem_LeftClickImage_12_16 != null)
-            //    {
-            //        winElem_LeftClickImage_12_16.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_12_16}");
-            //        return;
-            //    }
-
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-2_2");
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            //CurrentDriver.GetElementFromWebElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Search Result]/ByName[No]", ClickType.LeftClick);
         }
 
-        [TestMethod("B3-2_SearchByDownwardButton")]
+        [TestMethod("B3-2_2")]
         [TestCategory("測試命令搜尋(B3)")]
-        //B3-2_SearchByDownwardButton
-        public void TIEditor_UseCommandByCommandSearchDownwards_SearchByKeyF3()
+        //B3-2_2
+        public void TIEditor_SearchInTestCommandListDown_ByPressingSearchF3()
         {
-            // Input Command name: "FLOOR"
-            string CommandName = "FLOOR";
-            IWebElement testCmdSearchBox = CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchText"));
-            testCmdSearchBox.ClearContent();
+            //  Searching Command name: "ReadAC_Current"
+            string searchPattern = "ReadAC_Current";
+            string warningMessage = "Search to the end, whether to search from the beginning ?";
 
-            // Search By Key F3 until message box: "Search to the end" show up
-            testCmdSearchBox.SendSingleKeys(CommandName);
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+
+            // Keep pressing "search Next" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(By.Name("Search Result")))
             {
-                testCmdSearchBox.SendSingleKeys(Keys.F3);
+                Press(Keys.F3);
             }
 
             true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+            string warningMessageActual = PP5IDEWindow.PerformGetElement("/Window[Search Result]/ById[txtBlockMsg]").GetCellValue();
+            warningMessage.ShouldEqualTo(warningMessageActual);
 
             // Close message box
-            CurrentDriver.GetElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Search Result]/ByName[No]", ClickType.LeftClick);
         }
 
         [TestMethod("B3-3")]
         [TestCategory("測試命令搜尋(B3)")]
         //B3-3
-        public void TIEditor_UseCommandByCommandSearchUpwards_SearchByUpwardButton()
+        public void TIEditor_SearchInTestCommandListUp_ByPressingSearchUpButton()
         {
-            // Input Command name: "FLOOR"
-            string CommandName = "FLOOR";
-            IWebElement testCmdSearchBox = CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchText"));
-            testCmdSearchBox.ClearContent();
-            testCmdSearchBox.SendSingleKeys(CommandName);
+            //  Searching Command name: "ReadAC_Current"
+            string searchPattern = "ReadAC_Current";
+            string warningMessage = "Search to the end, whether to search from the beginning ?";
 
-            // Search By UpwardButton until message box: "Search to the end" show up
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+
+            // Keep pressing "search Previus" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(By.Name("Search Result")))
             {
-                CurrentDriver.GetElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("PreviosBtn")).LeftClick();
+                PP5IDEWindow.PerformClick("/ById[TCListPanel]/ById[PreviosBtn]", ClickType.LeftClick);
             }
 
             true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+            string warningMessageActual = PP5IDEWindow.PerformGetElement("/Window[Search Result]/ById[txtBlockMsg]").GetCellValue();
+            warningMessage.ShouldEqualTo(warningMessageActual);
 
             // Close message box
-            CurrentDriver.GetElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Search Result]/ByName[No]", ClickType.LeftClick);
+        }
 
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
+        //[TestMethod("B3-1_SearchByEnterKey")]
+        //[TestCategory("測試命令搜尋(B3)")]
+        ////B3-1_SearchByEnterKey
+        //public void TIEditor_UseCommandByCommandSearch_SearchByEnterKey()
+        //{
+        //    // Input Command name: "SET"
+        //    string CommandName = "SET";
+        //    IWebElement testCmdSearchBox = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchBox"));
+        //    testCmdSearchBox.ClearContent();
 
-            //bool bSuccess = false;
+        //    // Search By EnterKey
+        //    testCmdSearchBox.SendComboKeys(CommandName, OpenQA.Selenium.Keys.Enter);
 
-            //try
-            //{
+        //    // Check command names are same
+        //    //Assert.AreEqual(CommandName, GetCommandBy(CommandName).GetSubElementText());
+        //    string searchedCommand = GetCommandIsSelected(CommandName, GroupNameToSearch: "", findExactSameCommand: false).GetFirstTextContent();
+        //    //Assert.IsTrue(searchedCommand.ToUpper().Contains(CommandName));
 
-            //    // LeftClick on Edit "" at (119,12)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (119,12)");
-            //    string xpath_LeftClickEdit_119_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_119_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_119_12);
-            //    if (winElem_LeftClickEdit_119_12 != null)
-            //    {
-            //        winElem_LeftClickEdit_119_12.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_119_12}");
-            //        return;
-            //    }
+        //    string errorMsg = $"The searchedCommand: {searchedCommand} didn't contains Command name {CommandName}.";
+        //    StringAssert.Contains(searchedCommand.ToUpper(), CommandName, errorMsg);
 
+        //    ////MainPanel_TIEditor_OpenNewTI();
+        //    //TimeSpan.FromSeconds(2);
 
-            //    // KeyboardInput VirtualKeys=""y"Keys.LeftShift + "/" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"y\"Keys.LeftShift + \"/\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_119_12.SendKeys("y");
-            //    winElem_LeftClickEdit_119_12.SendKeys(Keys.LeftShift + "/" + Keys.LeftShift);
+        //    //bool bSuccess = false;
 
-
-            //    // LeftClick on Image "" at (10,5)
-            //    Console.WriteLine("LeftClick on Image \"\" at (10,5)");
-            //    string xpath_LeftClickImage_10_5 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_10_5 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_10_5);
-            //    if (winElem_LeftClickImage_10_5 != null)
-            //    {
-            //        winElem_LeftClickImage_10_5.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_10_5}");
-            //        return;
-            //    }
+        //    //try
+        //    //{
+        //    //    // LeftClick on Edit "" at (50,7)
+        //    //    Console.WriteLine("LeftClick on Edit \"\" at (50,7)");
+        //    //    string xpath_LeftClickEdit_50_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
+        //    //    //var winElem_LeftClickEdit_50_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_50_7);
+        //    //    uIActionPP5IDE.PerformActionByAutomationID(ActionType.None, "searchText");
+        //    //    if (uIActionPP5IDE.ElementFound != null)
+        //    //    {
+        //    //        uIActionPP5IDE.ElementFound.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        LogHelper.LogFindElementFailedByAutomationID("searchText");
+        //    //        //LogHelper.LogFindElementFaidByXPath(xpath_LeftClickEdit_50_7);
+        //    //        //Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_50_7}");
+        //    //        return;
+        //    //    }
 
 
-            //    // LeftClick on Image "" at (17,13)
-            //    Console.WriteLine("LeftClick on Image \"\" at (17,13)");
-            //    string xpath_LeftClickImage_17_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"NextBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_17_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_17_13);
-            //    if (winElem_LeftClickImage_17_13 != null)
-            //    {
-            //        winElem_LeftClickImage_17_13.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_17_13}");
-            //        return;
-            //    }
+        //    //    // KeyboardInput VirtualKeys=""y"Keys.LeftShift + "/" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
+        //    //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"y\"Keys.LeftShift + \"/\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
+        //    //    System.Threading.Thread.Sleep(100);
+        //    //    uIActionPP5IDE.ElementFound.SendKeys("y");
+        //    //    uIActionPP5IDE.ElementFound.SendKeys(Keys.LeftShift + "/" + Keys.LeftShift);
 
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-3");
 
-            //    // LeftClick on Image "" at (12,17)
-            //    Console.WriteLine("LeftClick on Image \"\" at (12,17)");
-            //    string xpath_LeftClickImage_12_17 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"PreviosBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_12_17 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_12_17);
-            //    if (winElem_LeftClickImage_12_17 != null)
-            //    {
-            //        winElem_LeftClickImage_12_17.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_12_17}");
-            //        return;
-            //    }
+        //    //    // LeftClick on Image "" at (8,3)
+        //    //    Console.WriteLine("LeftClick on Image \"\" at (8,3)");
+        //    //    string xpath_LeftClickImage_8_3 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
+        //    //    var winElem_LeftClickImage_8_3 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_8_3);
+        //    //    if (winElem_LeftClickImage_8_3 != null)
+        //    //    {
+        //    //        winElem_LeftClickImage_8_3.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_8_3}");
+        //    //        return;
+        //    //    }
 
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-3_2");
+        //    //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-1");
 
-            //    bSuccess = true;
-            //}
 
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+        //    //    bSuccess = true;
+        //    //}
+
+        //    //finally
+        //    //{
+        //    //    Assert.AreEqual(bSuccess, true);
+        //    //}
+        //}
+
+        //[TestMethod("B3-1_SearchBySearchButton")]
+        //[TestCategory("測試命令搜尋(B3)")]
+        ////B3-1_SearchBySearchButton
+        //public void TIEditor_UseCommandByCommandSearch_SearchBySearchButton()
+        //{
+        //    // Input Command name: "SET"
+        //    string CommandName = "SET";
+        //    IWebElement testCmdSearchBox = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchBox"));
+        //    testCmdSearchBox.ClearContent();
+        //    testCmdSearchBox.SendSingleKeys(CommandName);
+
+        //    // Search By SearchButton
+        //    CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("SearchBtn")).LeftClick();
+
+        //    // Check command names are same
+        //    //Assert.AreEqual(CommandName, GetCommandBy(CommandName).GetSubElementText());
+        //    string searchedCommand = GetCommandIsSelected(CommandName, GroupNameToSearch: "", findExactSameCommand: false).GetFirstTextContent();
+        //    //Assert.IsTrue(searchedCommand.ToUpper().Contains(CommandName));
+
+        //    string errorMsg = $"The searchedCommand: {searchedCommand} didn't contains Command name {CommandName}.";
+        //    StringAssert.Contains(searchedCommand.ToUpper(), CommandName, errorMsg);
+        //}
+
+        //[TestMethod("B3-2_SearchByDownwardButton")]
+        //[TestCategory("測試命令搜尋(B3)")]
+        ////B3-2_SearchByDownwardButton
+        //public void TIEditor_UseCommandByCommandSearchDownwards_SearchByDownwardButton()
+        //{
+        //    // Input Command name: "FLOOR"
+        //    string CommandName = "FLOOR";
+        //    IWebElement testCmdSearchBox = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchText"));
+        //    testCmdSearchBox.ClearContent();
+        //    testCmdSearchBox.SendSingleKeys(CommandName);
+
+        //    // Search By DownwardButton until message box: "Search to the end" show up
+        //    //do
+        //    //{
+        //    //    CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("NextBtn")).LeftClickWithDelay(10);
+        //    //}
+        //    //while (!CheckMessageBoxOpened(By.Name("Search Result")));
+
+        //    // Search By DownwardButton until message box: "Search to the end" show up
+        //    while (!CheckMessageBoxOpened(By.Name("Search Result")))
+        //    {
+        //        CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("NextBtn")).LeftClick();
+        //    }
+
+        //    true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+
+        //    // Close message box
+        //    CurrentDriver.GetElementFromWebElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+
+        //    //System.Windows.Threading.Dispatcher.Invoke(new Action(() =>
+        //    //{
+        //    //    // UI Action
+
+        //    //}), System.Windows.Threading.DispatcherPriority.Background);
+
+        //    // Create thread to Search By DownwardButton until message box: "Search to the end" show up
+        //    //Task task = Task.Run(() =>
+        //    //    {
+        //    //        do
+        //    //        {
+        //    //            //safe call
+        //    //            System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() =>
+        //    //            {
+        //    //                CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("NextBtn")).LeftClick();
+        //    //            });
+        //    //        }
+        //    //        while (!CheckMessageBoxOpened(By.Name("Search Result")));
+        //    //    }
+        //    //);
+        //    // this task is running asynchronously here
+        //    // the method will exit if you don't wait for the Task to finish
+        //    // A. wait without blocking the main thread
+        //    //  -> requires MyButton_ClickAsync to be async
+        //    //await task;
+        //    // or
+        //    // B. wait and block the thread (NOT RECOMMENDED AT ALL)
+        //    // -> does not require MyButton_ClickAsync to be async
+        //    //task.Wait();
+
+        //    ////MainPanel_TIEditor_OpenNewTI();
+        //    //TimeSpan.FromSeconds(2);
+
+        //    //bool bSuccess = false;
+
+        //    //try
+        //    //{
+        //    //    // LeftClick on Edit "" at (196,12)
+        //    //    Console.WriteLine("LeftClick on Edit \"\" at (196,12)");
+        //    //    string xpath_LeftClickEdit_196_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
+        //    //    var winElem_LeftClickEdit_196_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_196_12);
+        //    //    if (winElem_LeftClickEdit_196_12 != null)
+        //    //    {
+        //    //        winElem_LeftClickEdit_196_12.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_196_12}");
+        //    //        return;
+        //    //    }
+
+
+        //    //    // KeyboardInput VirtualKeys=""y"Keys.LeftShift + "/" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
+        //    //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"y\"Keys.LeftShift + \"/\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
+        //    //    System.Threading.Thread.Sleep(100);
+        //    //    winElem_LeftClickEdit_196_12.SendKeys("y");
+        //    //    winElem_LeftClickEdit_196_12.SendKeys(Keys.LeftShift + "/" + Keys.LeftShift);
+
+
+        //    //    // LeftClick on Image "" at (4,16)
+        //    //    Console.WriteLine("LeftClick on Image \"\" at (4,16)");
+        //    //    string xpath_LeftClickImage_4_16 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
+        //    //    var winElem_LeftClickImage_4_16 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_4_16);
+        //    //    if (winElem_LeftClickImage_4_16 != null)
+        //    //    {
+        //    //        winElem_LeftClickImage_4_16.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_4_16}");
+        //    //        return;
+        //    //    }
+
+        //    //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-2");
+
+        //    //    // LeftClick on Image "" at (12,16)
+        //    //    Console.WriteLine("LeftClick on Image \"\" at (12,16)");
+        //    //    string xpath_LeftClickImage_12_16 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"NextBtn\"]/Image[@ClassName=\"Image\"]";
+        //    //    var winElem_LeftClickImage_12_16 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_12_16);
+        //    //    if (winElem_LeftClickImage_12_16 != null)
+        //    //    {
+        //    //        winElem_LeftClickImage_12_16.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_12_16}");
+        //    //        return;
+        //    //    }
+
+        //    //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-2_2");
+
+        //    //    bSuccess = true;
+        //    //}
+
+        //    //finally
+        //    //{
+        //    //    Assert.AreEqual(bSuccess, true);
+        //    //}
+        //}
+
+        //[TestMethod("B3-2_SearchByDownwardButton")]
+        //[TestCategory("測試命令搜尋(B3)")]
+        ////B3-2_SearchByDownwardButton
+        //public void TIEditor_UseCommandByCommandSearchDownwards_SearchByKeyF3()
+        //{
+        //    // Input Command name: "FLOOR"
+        //    string CommandName = "FLOOR";
+        //    IWebElement testCmdSearchBox = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchText"));
+        //    testCmdSearchBox.ClearContent();
+
+        //    // Search By Key F3 until message box: "Search to the end" show up
+        //    testCmdSearchBox.SendSingleKeys(CommandName);
+        //    while (!CheckMessageBoxOpened(By.Name("Search Result")))
+        //    {
+        //        testCmdSearchBox.SendSingleKeys(Keys.F3);
+        //    }
+
+        //    true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+
+        //    // Close message box
+        //    CurrentDriver.GetElementFromWebElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+        //}
+
+        //[TestMethod("B3-3")]
+        //[TestCategory("測試命令搜尋(B3)")]
+        ////B3-3
+        //public void TIEditor_UseCommandByCommandSearchUpwards_SearchByUpwardButton()
+        //{
+        //    // Input Command name: "FLOOR"
+        //    string CommandName = "FLOOR";
+        //    IWebElement testCmdSearchBox = CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("searchText"));
+        //    testCmdSearchBox.ClearContent();
+        //    testCmdSearchBox.SendSingleKeys(CommandName);
+
+        //    // Search By UpwardButton until message box: "Search to the end" show up
+        //    while (!CheckMessageBoxOpened(By.Name("Search Result")))
+        //    {
+        //        CurrentDriver.GetElementFromWebElement(5000, By.ClassName("CmdTreeView"), MobileBy.AccessibilityId("PreviosBtn")).LeftClick();
+        //    }
+
+        //    true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+
+        //    // Close message box
+        //    CurrentDriver.GetElementFromWebElement(5000, By.Name("Search Result"), By.Name("No")).LeftClick();
+
+        //    ////MainPanel_TIEditor_OpenNewTI();
+        //    //TimeSpan.FromSeconds(2);
+
+        //    //bool bSuccess = false;
+
+        //    //try
+        //    //{
+
+        //    //    // LeftClick on Edit "" at (119,12)
+        //    //    Console.WriteLine("LeftClick on Edit \"\" at (119,12)");
+        //    //    string xpath_LeftClickEdit_119_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
+        //    //    var winElem_LeftClickEdit_119_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_119_12);
+        //    //    if (winElem_LeftClickEdit_119_12 != null)
+        //    //    {
+        //    //        winElem_LeftClickEdit_119_12.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_119_12}");
+        //    //        return;
+        //    //    }
+
+
+        //    //    // KeyboardInput VirtualKeys=""y"Keys.LeftShift + "/" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
+        //    //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"y\"Keys.LeftShift + \"/\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
+        //    //    System.Threading.Thread.Sleep(100);
+        //    //    winElem_LeftClickEdit_119_12.SendKeys("y");
+        //    //    winElem_LeftClickEdit_119_12.SendKeys(Keys.LeftShift + "/" + Keys.LeftShift);
+
+
+        //    //    // LeftClick on Image "" at (10,5)
+        //    //    Console.WriteLine("LeftClick on Image \"\" at (10,5)");
+        //    //    string xpath_LeftClickImage_10_5 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
+        //    //    var winElem_LeftClickImage_10_5 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_10_5);
+        //    //    if (winElem_LeftClickImage_10_5 != null)
+        //    //    {
+        //    //        winElem_LeftClickImage_10_5.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_10_5}");
+        //    //        return;
+        //    //    }
+
+
+        //    //    // LeftClick on Image "" at (17,13)
+        //    //    Console.WriteLine("LeftClick on Image \"\" at (17,13)");
+        //    //    string xpath_LeftClickImage_17_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"NextBtn\"]/Image[@ClassName=\"Image\"]";
+        //    //    var winElem_LeftClickImage_17_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_17_13);
+        //    //    if (winElem_LeftClickImage_17_13 != null)
+        //    //    {
+        //    //        winElem_LeftClickImage_17_13.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_17_13}");
+        //    //        return;
+        //    //    }
+
+        //    //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-3");
+
+        //    //    // LeftClick on Image "" at (12,17)
+        //    //    Console.WriteLine("LeftClick on Image \"\" at (12,17)");
+        //    //    string xpath_LeftClickImage_12_17 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"PreviosBtn\"]/Image[@ClassName=\"Image\"]";
+        //    //    var winElem_LeftClickImage_12_17 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_12_17);
+        //    //    if (winElem_LeftClickImage_12_17 != null)
+        //    //    {
+        //    //        winElem_LeftClickImage_12_17.Click();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_12_17}");
+        //    //        return;
+        //    //    }
+
+        //    //    AutoUIExtension.TakeScreenshotPNGformat(true, "B3-3_2");
+
+        //    //    bSuccess = true;
+        //    //}
+
+        //    //finally
+        //    //{
+        //    //    Assert.AreEqual(bSuccess, true);
+        //    //}
+        //}
+
+        [TestMethod("B4-1")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-1
+        public void TIEditor_AddCommand_CheckCommandAddedInCorrectRowPosition()
+        {
+            // Arrange
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string commandName = "ReadAC_Current";
+            string commandNameToCheck = "ReadAC_Frequency";
+            AddCommandBy(cgt, commandName, 2);                                                                // Add 2 commands with name: ReadAC_Current
+
+            TestItemTabNavi(TestItemTabType.TIContext);                                                             // Switch to test item context window
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);                       // Select on the second command in TI context page
+
+            AddCommandBy(cgt, commandNameToCheck);                                                            // Add command: ReadAC_Frequency
+
+            // Assert
+            string commandNameOnTIContext = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[2,@TestCommand]").Text;  // Check command is inserted in the previous position of the selected command
+            commandNameToCheck.ShouldEqualTo(commandNameOnTIContext);
+        }
+
+        [TestMethod("B4-2_1")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-2_1
+        public void TIEditor_AddCommand_TickOnSkip()
+        {
+            // Arrange
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string commandName = "ReadAC_Current";
+
+            AddCommandBy(cgt, commandName);                                                   // Add command with name: ReadAC_Current
+
+            TestItemTabNavi(TestItemTabType.TIContext);                                             // Switch to test item context window
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.TickCheckBox);           // Tick on "Skip" in the added command in TI context page
+
+            // Assert
+            IElement SkipChbx = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Skip]");       // Check "Skip" is checked
+            true.ShouldEqualTo(SkipChbx.isElementChecked());
+        }
+
+        [TestMethod("B4-2_2")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-2_2
+        public void TIEditor_AddCommand_UnTickOnSkip()
+        {
+            // Arrange
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string commandName = "ReadAC_Current";
+
+            AddCommandBy(cgt, commandName);                                                   // Add command with name: ReadAC_Current
+
+            TestItemTabNavi(TestItemTabType.TIContext);                                             // Switch to test item context window
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.UnTickCheckBox);         // Untick on "Skip" in the added command in TI context page
+
+            // Assert
+            IElement SkipChbx = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Skip]");       // Check "Skip" is unchecked
+            false.ShouldEqualTo(SkipChbx.isElementChecked());
         }
 
         [TestMethod("B4-3_1")]
@@ -7340,37 +7301,45 @@ namespace PP5AutoUITests
         //B4-3_1
         public void TIEditor_ChooseMultipleCommandAndCheckSkipBySelectAll_VerifyAllSkipCheckedAndUnChecked()
         {
-            // Switch to test item context window
-            TestItemTabNavi(TestItemTabType.TIContext);
+            TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", addCount: 3);                                       // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
+            
+            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@TestCommand]", InputType.SelectAllContent, null);  // Select all commands
 
-            // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
-            AddCommandBy("AC Source", "ReadAC_Current", addCount: 3);
-
-            // Select all commands
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
-
-            // LeftClick on first row > Skip checkbox
-            Console.WriteLine("LeftClick on first row > Skip checkbox");
-            GetCellBy("PGGrid", 0, "Skip").LeftClick();
-
-            // Verify Skip cell are all Checked
+            Logger.LogMessage("LeftClick on first row > Skip checkbox");
+            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row > Skip checkbox
+            
             string SkipStateExpected = "Checked";
-            foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all Checked
             {
+                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
                 SkipStateExpected.ShouldEqualTo(SkipState);
             }
+            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            //{
+            //    SkipStateExpected.ShouldEqualTo(SkipState);
+            //}
 
-            // LeftClick on first row > Skip checkbox
-            Console.WriteLine("LeftClick on first row > Skip checkbox");
-            GetCellBy("PGGrid", 0, "Skip").LeftClick();
-
-            // Verify Skip cell are all UnChecked
+            
+            Logger.LogMessage("LeftClick on first row > Skip checkbox");
+            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row > Skip checkbox
+            
             SkipStateExpected = "Unchecked";
-            foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all UnChecked
             {
+                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
                 SkipStateExpected.ShouldEqualTo(SkipState);
             }
+            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            //{
+            //    SkipStateExpected.ShouldEqualTo(SkipState);
+            //}
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -7546,31 +7515,36 @@ namespace PP5AutoUITests
         //B4-3_2
         public void TIEditor_ChooseMultipleCommandAndCheckSkipBySelectAll_VerifyAllSkipUnChecked()
         {
-            // Switch to test item context window
-            TestItemTabNavi(TestItemTabType.TIContext);
+            TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", addCount: 3);                                       // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
+                
+            Logger.LogMessage("LeftClick on first and third row > Skip checkbox");                          // LeftClick on first and third row > Skip checkbox
+            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
+            //GetCellBy("PGGrid", 2, "Skip").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[3,@Skip]", ClickType.LeftClick);
 
-            // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
-            AddCommandBy("AC Source", "ReadAC_Current", addCount: 3);
+            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@TestCommand]", InputType.SelectAllContent, null);  // Select all commands
+            
+            Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");
+            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row to uncheck all Skip checkbox
 
-            // LeftClick on first and third row > Skip checkbox
-            Console.WriteLine("LeftClick on first and third row > Skip checkbox");
-            GetCellBy("PGGrid", 0, "Skip").LeftClick();
-            GetCellBy("PGGrid", 2, "Skip").LeftClick();
-
-            // Select all commands
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
-
-            // LeftClick on first row to uncheck all Skip checkbox
-            Console.WriteLine("LeftClick on first row to uncheck all Skip checkbox");
-            GetCellBy("PGGrid", 0, "Skip").LeftClick();
-
-            // Verify Skip cell are all UnChecked
+            
             string SkipStateExpected = "Unchecked";
-            foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all UnChecked
             {
+                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
                 SkipStateExpected.ShouldEqualTo(SkipState);
             }
+            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            //{
+            //    SkipStateExpected.ShouldEqualTo(SkipState);
+            //}
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -7741,30 +7715,33 @@ namespace PP5AutoUITests
         //B4-3_3
         public void TIEditor_ChooseMultipleCommandAndCheckSkipBySelectAll_VerifyAllSkipChecked()
         {
-            // Switch to test item context window
-            TestItemTabNavi(TestItemTabType.TIContext);
+            TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", addCount: 3);                        // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
 
-            // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
-            AddCommandBy("AC Source", "ReadAC_Current", addCount: 3);
+            Logger.LogMessage("LeftClick on second row > Skip checkbox");
+            //GetCellBy("PGGrid", 1, "Skip").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@Skip]", ClickType.LeftClick);                      // LeftClick on second row > Skip checkbox
 
-            // LeftClick on second row > Skip checkbox
-            Console.WriteLine("LeftClick on second row > Skip checkbox");
-            GetCellBy("PGGrid", 1, "Skip").LeftClick();
-
-            // Select all commands
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
-
-            // LeftClick on first row to check all Skip checkbox
-            Console.WriteLine("LeftClick on first row to uncheck all Skip checkbox");
-            GetCellBy("PGGrid", 0, "Skip").LeftClick();
-
-            // Verify Skip cell are all Checked
+            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
+            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);               
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@TestCommand]", InputType.SelectAllContent, null);  // Select all commands
+            
+            Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");                       
+            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row to check all Skip checkbox
+            
             string SkipStateExpected = "Checked";
-            foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all Checked
             {
+                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
                 SkipStateExpected.ShouldEqualTo(SkipState);
             }
+            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            //{
+            //    SkipStateExpected.ShouldEqualTo(SkipState);
+            //}
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -7929,37 +7906,53 @@ namespace PP5AutoUITests
             //}
         }
 
+        [TestMethod("B4-4")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-4
+        public void TIEditor_AddCommandAndInputInLabel_CheckLabelIsModified()
+        {
+            // Arrange
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string commandName = "ReadAC_Current";
+            string LabelExpected = "Test";
+            AddCommandBy(cgt, commandName);                                                                 // Add command with name: ReadAC_Current
+
+            TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Label]", InputType.SendContent, LabelExpected);    // Input "Test" string in "Label" in TI context page
+
+            // Assert
+            string LabelActual = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Label]").GetCellValue(); // Check Label has "Test"
+            LabelExpected.ShouldEqualTo(LabelActual);
+        }
+
         [TestMethod("B4-5")]
         [TestCategory("測試命令編輯(B4)")]
         //B4-5
         public void TIEditor_SameLabelAndShowWrongMessage()
         {
-            // Switch to test item context window
-            TestItemTabNavi(TestItemTabType.TIContext);
+            TestItemTabNavi(TestItemTabType.TIContext);                                             // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", addCount: 2);                // Add 2 repeated commands: group: "AC Source", command name: "ReadAC_Current"
 
-            // Add 2 repeated commands: group: "AC Source", command name: "ReadAC_Current"
-            AddCommandBy("AC Source", "ReadAC_Current", addCount: 2);
-
-            // SendKey: "a" on first row > Label checkbox
-            Console.WriteLine("SendKey: \"a\" on first row > Label checkbox");
-            GetCellBy("PGGrid", 0, "Label").SendSingleKeys("a");
+            Logger.LogMessage("SendKey: \"a\" on first row > Label checkbox");
+            //GetCellBy("PGGrid", 0, "Label").SendSingleKeys("a");
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Label]", InputType.SendSingleKeys, "a");   // SendKey: "a" on first row > Label checkbox
             
-            // SendKey the same: "a" on second row > Label checkbox
-            Console.WriteLine("SendKey the same: \"a\" on second row > Label checkbox");
-            GetCellBy("PGGrid", 1, "Label").SendSingleKeys("a");
+            Logger.LogMessage("SendKey the same: \"a\" on second row > Label checkbox");
+            //GetCellBy("PGGrid", 1, "Label").SendSingleKeys("a");
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@Label]", InputType.SendSingleKeys, "a");   // SendKey the same: "a" on second row > Label checkbox
+            Press(Keys.Enter);                                                                      // Press enter to show result
 
-            // Click enter to show result
-            GetCellBy("PGGrid", 1, "Label").SendSingleKeys(Keys.Enter);
-
-            // Repeated label name, error on both Label cells, inspect the first error tooltip, verify the error tooltip message
-            GetCellBy("PGGrid", 0, "Label").MoveToElement();
-            Executor.GetInstance().SwitchTo(SessionType.Desktop);
-            string errorToolTip = CurrentDriver.GetElement(10000, By.ClassName("Popup"), By.ClassName("ToolTip"))
-                                               .GetElement(By.TagName("Text")).Text;
-
+            
+            //GetCellBy("PGGrid", 0, "Label").MoveToElement();
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Label]").MoveToElement();             // Repeated label name, error on both Label cells,
+                                                                                                    // inspect the first error tooltip, verify the error tooltip message
+            AutoUIExecutor.SwitchTo(SessionType.Desktop);
+            //string errorToolTip = CurrentDriver.GetElementFromWebElement(10000, By.ClassName("Popup"), By.ClassName("ToolTip"))
+            //                                   .GetElementFromWebElement(By.TagName("Text")).Text;
+            string errorToolTip = CurrentDriver.PerformGetElement("/ByClass[Popup]/ToolTip[0]/Text[0]").Text;
             string expectedErrorToolTip = "Label Repeat";
-            expectedErrorToolTip.ShouldEqualTo(errorToolTip);
-
+            expectedErrorToolTip.ShouldEqualTo(errorToolTip);                                       // Check error tooltip has message: "Label Repeat"
+            AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
 
@@ -8098,46 +8091,108 @@ namespace PP5AutoUITests
             //}
         }
 
+        [TestMethod("B4-6")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-6
+        public void TIEditor_TestCommandCellNotEditable()
+        {
+            TestItemTabNavi(TestItemTabType.TIContext);                                                 // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current");                                 // Add command with group: "AC Source", command name: "ReadAC_Current"
+
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftDoubleClick);    // double click on cell "TestCommand"
+            Thread.Sleep(10);
+            //driverLogger.DumpDriverLog(LogType.Driver);
+
+            //System.Windows.Forms.Cursor expectedCursor = System.Windows.Forms.Cursors.Arrow;          // Check the cursor is still in Arrow type (cell not editable)
+            //System.Windows.Forms.Cursor currentCursor = System.Windows.Forms.Cursor.Current;
+            Cursor expectedCursor = Cursor.Arrow;                                                       // Check the cursor is still in Arrow type (cell not editable)
+            Cursor currentCursor = DllHelper.GetCursor();
+            expectedCursor.ShouldEqualTo(currentCursor);
+        }
+
+        [TestMethod("B4-7")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-7
+        public void TIEditor_ParametersCellNotEditable()
+        {
+            TestItemTabNavi(TestItemTabType.TIContext);                                                 // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current");                                 // Add command with group: "AC Source", command name: "ReadAC_Current"
+
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Parameters]", ClickType.LeftDoubleClick);      // double click on cell "Parameters"
+            Thread.Sleep(10);
+
+            Cursor expectedCursor = Cursor.Arrow;                                                       // Check the cursor is still in Arrow type (cell not editable)
+            Cursor currentCursor = DllHelper.GetCursor();
+            expectedCursor.ShouldEqualTo(currentCursor);
+        }
+
+        [TestMethod("B4-8")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-8
+        public void TIEditor_DescriptionCellInputRandomText()
+        {
+            string textToInput = "Test";
+            TestItemTabNavi(TestItemTabType.TIContext);                                                         // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current");                                         // Add command with group: "AC Source", command name: "ReadAC_Current"
+
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Description]", InputType.SendContent, textToInput);    // Input "Test" on cell "Description"
+            string textToInputActual = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Description]").GetCellValue();
+
+            textToInput.ShouldEqualTo(textToInputActual);
+        }
+
         [TestMethod("B4-9_LeftClick")]
         [TestCategory("測試命令編輯(B4)")]
         //B4-9_LeftClick
-        public void TIEditor_LeftClickTestCommandListItem_ShouldShowParameterPage()
+        public void TIEditor_LeftClickTestCommand_ShouldShowParameterPage()
         {
             // Command name: "ReadAC_Current"
             string cmdName = "ReadAC_Current";
-            string groupName = "AC Source";
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Add 1 command: group: "AC Source", command name: "ReadAC_Current"
             //GetCommandBy("ReadAC_Current").DoubleClick();
-            AddCommandBy(groupName, cmdName);
+            AddCommandBy(cgt, cmdName);
 
             // Cancel command selection, parameter page is empty
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
+            //PP5IDEWindow.GetExtendedElement(PP5By.Chained(PP5By.Id("PGGrid"), PP5By.Id("dataPresenter"))).LeftClick();
+            //PP5IDEWindow.PerformClick("/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);  // from UI recorder 
 
             // If parameter page is empty, grid table will be empty
-            int CmdNotSelectedGridItemCount = CurrentDriver.GetElement(MobileBy.AccessibilityId("ParameterGrid"))
-                                                           .GetElement(By.Name("DataPanel"))
-                                                           .GetChildElements().Count;
-
+            //int CmdNotSelectedGridItemCount = PP5IDEWindow.GetExtendedElement(PP5By.Id("ParameterGrid"))
+            //                                              .GetExtendedElement(PP5By.Name("DataPanel"))
+            //                                              .GetChildElements().Count;
+            int CmdNotSelectedGridItemCount = PP5IDEWindow.PerformGetElement("/ByIdOrName[ParameterGrid,DataPanel]")
+                                                          .GetChildElementsCount();
             int CmdNotSelectedGridItemCountExpected = 0;
             CmdNotSelectedGridItemCountExpected.ShouldEqualTo(CmdNotSelectedGridItemCount);
 
             // LeftClick to select the command, parameter page should show up
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //GetCellBy("PGGrid", 1, "Test Command").LeftClick();
+            //PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ById[PGGrid,dataPresenter,CommandName]", ClickType.LeftClick);  // from UI recorder 
 
             // re-check parameter grid table, command name and grid table should be filled
-            int CmdSelectedGridItemCount = CurrentDriver.GetElement(MobileBy.AccessibilityId("ParameterGrid"))
-                                               .GetElement(By.Name("DataPanel"))
-                                               .GetChildElements().Count;
+            //int CmdSelectedGridItemCount = PP5IDEWindow.GetExtendedElement(PP5By.Id("ParameterGrid"))
+            //                                           .GetExtendedElement(PP5By.Name("DataPanel"))
+            //                                           .GetChildElements().Count;
+            int CmdSelectedGridItemCount = PP5IDEWindow.PerformGetElement("/ByIdOrName[ParameterGrid,DataPanel]")
+                                                       .GetChildElementsCount();
 
-            string cmdNameActual = CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                                                .GetElement(By.ClassName("TextBox")).Text;
-            
+            //string cmdNameActual = PP5IDEWindow.GetExtendedElement(PP5By.Id("editParamAreaView"))
+            //                                   .GetExtendedElement(PP5By.ClassName("TextBox")).Text;
+            //string cmdNameActual = PP5IDEWindow.PerformGetElement("/ById[editParamAreaView]/ByClassName[TextBox]")
+            //                                   .GetText();
+            string cmdNameActual = PP5IDEWindow.PerformGetElement("/ById[editParamAreaView]/ByClass[ScrollViewer,TextBox]")          // from UI recorder 
+                                               .GetText();                                                                            
+
             true.ShouldEqualTo(CmdSelectedGridItemCount > 0);
             cmdName.ShouldEqualTo(cmdNameActual);
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -8192,40 +8247,40 @@ namespace PP5AutoUITests
         [TestMethod("B4-9_RightClick")]
         [TestCategory("測試命令編輯(B4)")]
         //B4-9_RightClick
-        public void TIEditor_RightClickTestCommandListItem()
+        public void TIEditor_RightClickTestCommand()
         {
             // Command name: "ReadAC_Current"
             string cmdName = "ReadAC_Current";
-            string groupName = "AC Source";
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Add 1 command: group: "AC Source", command name: "ReadAC_Current"
             //GetCommandBy("ReadAC_Current").DoubleClick();
-            AddCommandBy(groupName, cmdName);
+            AddCommandBy(cgt, cmdName);
 
             // Cancel command selection, parameter page is empty
-            CurrentDriver.GetElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
 
             // If parameter page is empty, grid table will be empty
-            int CmdNotSelectedGridItemCount = CurrentDriver.GetElement(MobileBy.AccessibilityId("ParameterGrid"))
-                                                           .GetElement(By.Name("DataPanel"))
-                                                           .GetChildElements().Count;
+            int CmdNotSelectedGridItemCount = PP5IDEWindow.GetExtendedElement(PP5By.Id("ParameterGrid"))
+                                                          .GetExtendedElement(PP5By.Name("DataPanel"))
+                                                          .GetChildElements().Count;
 
             int CmdNotSelectedGridItemCountExpected = 0;
             CmdNotSelectedGridItemCountExpected.ShouldEqualTo(CmdNotSelectedGridItemCount);
 
             // RightClick to select the command, parameter page should show up
-            GetCellBy("PGGrid", 0, "Test Command").RightClick();
+            GetCellBy("PGGrid", 1, "Test Command").RightClick();
 
             // re-check parameter grid table, command name and grid table should be filled
-            int CmdSelectedGridItemCount = CurrentDriver.GetElement(MobileBy.AccessibilityId("ParameterGrid"))
-                                               .GetElement(By.Name("DataPanel"))
-                                               .GetChildElements().Count;
+            int CmdSelectedGridItemCount = PP5IDEWindow.GetExtendedElement(PP5By.Id("ParameterGrid"))
+                                                       .GetExtendedElement(PP5By.Name("DataPanel"))
+                                                       .GetChildElements().Count;
 
-            string cmdNameActual = CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                                                .GetElement(By.ClassName("TextBox")).Text;
+            string cmdNameActual = PP5IDEWindow.GetExtendedElement(PP5By.Id("editParamAreaView"))
+                                               .GetExtendedElement(PP5By.ClassName("TextBox")).Text;
 
             true.ShouldEqualTo(CmdSelectedGridItemCount > 0);
             cmdName.ShouldEqualTo(cmdNameActual);
@@ -8281,220 +8336,87 @@ namespace PP5AutoUITests
             //}
         }
 
-        [TestMethod("B4-12_Found")]
+        [TestMethod("B4-10")]
         [TestCategory("測試命令編輯(B4)")]
-        //B4-12_Found
-        public void TIEditor_SearchTestCommandListAndFound()
+        //B4-10
+        public void TIEditor_LeftClickTestCommand_ShouldLocateToTestCommandInTestGroupList()
         {
-            // Add 2 Commands with names: "ReadAC_Current", "ReadAC_Frequency" in group: "AC Source"
-            string cmdName1 = "ReadAC_Current";
-            string cmdName2 = "ReadAC_Frequency";
-            string groupName = "AC Source";
+            // Steps:
+            // 1. Add Command: ReadAC_Current in tc group page
+            // 2. click on the test command, then click on place not on the edit command in edit page.
+            // 3. Check test command is located in tc group list page
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current");
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ById[PGGrid,dataPresenter,CommandName]", ClickType.LeftClick);
 
-            string searchPattern = cmdName2;
-
-            // Switch to test item context window
-            TestItemTabNavi(TestItemTabType.TIContext);
-
-            // Add 2 commands
-            AddCommandsBy(groupName, cmdName1, cmdName2);
-
-            // Get the Command Edit page search box
-            IWebElement testCmdEditSearchTextBox = CurrentDriver.GetElement(By.ClassName("SettingAeraView"))
-                                                                .GetElement(MobileBy.AccessibilityId("SearchBox"));
-
-            // Clean up text in search box
-            testCmdEditSearchTextBox.ClearContent();
-
-            // Command Edit Search box sendkey: cmdName2
-            testCmdEditSearchTextBox.SendComboKeys(searchPattern, Keys.Enter);
-
-            // After searching, the matched command row will be selected, check the Test Command Cell value
-            cmdName2.ShouldEqualTo(CurrentDriver.GetCellElementByColumnIndex("PGGrid", 4).Text);
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (79,16)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (79,16)");
-            //    string xpath_LeftClickEdit_79_16 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_79_16 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_79_16);
-            //    if (winElem_LeftClickEdit_79_16 != null)
-            //    {
-            //        winElem_LeftClickEdit_79_16.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_79_16}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "r" + Keys.LeftShift"ead"Keys.LeftShift + "r" + "f" + "m" + Keys.LeftShiftKeys.LeftShift + "-" + Keys.LeftShiftKeys.LeftShift + "v" + Keys.LeftShift"oltage"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"r\" + Keys.LeftShift\"ead\"Keys.LeftShift + \"r\" + \"f\" + \"m\" + Keys.LeftShiftKeys.LeftShift + \"-\" + Keys.LeftShiftKeys.LeftShift + \"v\" + Keys.LeftShift\"oltage\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_79_16.SendKeys(Keys.LeftShift + "r" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_79_16.SendKeys("ead");
-            //    winElem_LeftClickEdit_79_16.SendKeys(Keys.LeftShift + "r" + "f" + "m" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_79_16.SendKeys(Keys.LeftShift + "-" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_79_16.SendKeys(Keys.LeftShift + "v" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_79_16.SendKeys("oltage");
-
-
-            //    // LeftClick on Image "" at (12,11)
-            //    Console.WriteLine("LeftClick on Image \"\" at (12,11)");
-            //    string xpath_LeftClickImage_12_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_12_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_12_11);
-            //    if (winElem_LeftClickImage_12_11 != null)
-            //    {
-            //        winElem_LeftClickImage_12_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_12_11}");
-            //        return;
-            //    }
-
-
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //    AutoUIExtension.TakeScreenshotPNGformat(bSuccess, "B4-12_Found");
-            //}
+            bool commandIsLocated = true;                                                        // Check the command is located in the test command group
+            bool commandIsSelected = GetCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current").Selected;
+            commandIsLocated.ShouldEqualTo(commandIsSelected);
         }
 
-        [TestMethod("B4-12_NotFound")]
+        [TestMethod("B4-11")]
         [TestCategory("測試命令編輯(B4)")]
-        //B4-12_NotFound
-        public void TIEditor_SearchTestCommandListAndNotFound()
+        //B4-11
+        public void TIEditor_SetParametersInTestCommand_ShouldShowParametersSeperatedWithCommaInListItem()
         {
-            // Set group name and command name
-            string cmdName = "ReadAC_Current";
-            string groupName = "AC Source";
+            // Steps:
+            // 1. Add Command: SetAC_Frequency in tc group page
+            // 2. Set all paraters in parameter page (each param use constant type)
+            // 3. Check on the parameter info has shown Parameters Seperated With Comma ('p1,p2,p3') in edit page
+            AddCommandBy(TestCmdGroupType.AC_Source, "SetAC_Frequency");
 
-            string searchPattern = "NotFoundCommand";
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);                         
+            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[1,3]", ClickType.LeftClick);                        // Edit 1st parameter
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
+            System.Threading.Thread.Sleep(100);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[1,3]", InputType.SendContent, "0");
+            Press(Keys.Enter);
 
-            // Switch to test item context window
-            TestItemTabNavi(TestItemTabType.TIContext);
-
-            // Add 1 command with group and command name
-            AddCommandBy(groupName, cmdName);
-
-            // Get the Command Edit page search box
-            IWebElement testCmdEditSearchTextBox = PP5IDEWindow.GetElement(By.ClassName("SettingAeraView"))
-                                                                .GetElement(MobileBy.AccessibilityId("SearchBox"));
-
-            // Clean up text in search box
-            testCmdEditSearchTextBox.ClearContent();
-
-            // Command Edit Search box sendkey: cmdName2
-            testCmdEditSearchTextBox.SendComboKeys(searchPattern, Keys.Enter);
-
-            // Check TI not found warning message box popuped
-            Executor.GetInstance().SwitchTo(SessionType.Desktop);
-            Assert.AreEqual("Search Result", CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog")).Text);
-
-            // Close the warning message box
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("No"))
-                         .LeftClick();
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (72,18)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (72,18)");
-            //    string xpath_LeftClickEdit_72_18 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_72_18 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_72_18);
-            //    if (winElem_LeftClickEdit_72_18 != null)
-            //    {
-            //        winElem_LeftClickEdit_72_18.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_72_18}");
-            //        return;
-            //    }
+            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[2,3]", ClickType.LeftClick);                         // Edit 2nd parameter
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
+            System.Threading.Thread.Sleep(100);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "1");
+            Press(Keys.Enter);
 
 
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "r" + Keys.LeftShift"ead"Keys.LeftShift + "r" + "f" + "m" + Keys.LeftShiftKeys.LeftShift + "-" + Keys.LeftShiftKeys.LeftShift + "v" + Keys.LeftShift"oltage333"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"r\" + Keys.LeftShift\"ead\"Keys.LeftShift + \"r\" + \"f\" + \"m\" + Keys.LeftShiftKeys.LeftShift + \"-\" + Keys.LeftShiftKeys.LeftShift + \"v\" + Keys.LeftShift\"oltage333\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_72_18.SendKeys(Keys.LeftShift + "r" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_72_18.SendKeys("ead");
-            //    winElem_LeftClickEdit_72_18.SendKeys(Keys.LeftShift + "r" + "f" + "m" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_72_18.SendKeys(Keys.LeftShift + "-" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_72_18.SendKeys(Keys.LeftShift + "v" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_72_18.SendKeys("oltage333");
+            string parameterValues = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,6]").GetText();   // parameterValues: 'p1,p2,p3'
+            CollectionAssert.AreEqual(new string[2] { "0", "1" }, parameterValues.Split(','));
+        }
 
+        //[TestMethod("B4-12_CommandIsFound")]
+        //[TestCategory("測試命令編輯(B4)")]
+        ////B4-12_CommandIsFound
+        //public void TIEditor_SearchSpecificTestCommandInfoInSearchBox_ShouldSelectOnTheCommandIfFound()
+        //{
 
-            //    // LeftClick on Image "" at (6,15)
-            //    Console.WriteLine("LeftClick on Image \"\" at (6,15)");
-            //    string xpath_LeftClickImage_6_15 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_6_15 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_6_15);
-            //    if (winElem_LeftClickImage_6_15 != null)
-            //    {
-            //        winElem_LeftClickImage_6_15.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_6_15}");
-            //        return;
-            //    }
+        //}
 
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B4-12_NotFound");
+        //[TestMethod("B4-12_CommandIsNotFound")]
+        //[TestCategory("測試命令編輯(B4)")]
+        ////B4-12_CommandIsNotFound
+        //public void TIEditor_SearchSpecificTestCommandInfoInSearchBox_ShouldPopupMessageBoxIfNotFound()
+        //{
 
-            //    // LeftClick on Text "Yes" at (5,9)
-            //    Console.WriteLine("LeftClick on Text \"Yes\" at (5,9)");
-            //    string xpath_LeftClickTextYes_5_9 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@Name=\"Search Result\"][@AutomationId=\"MessageBoxExDialog\"]/Button[@Name=\"Yes\"][@AutomationId=\"btnYes\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Yes\"]";
-            //    var winElem_LeftClickTextYes_5_9 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextYes_5_9);
-            //    if (winElem_LeftClickTextYes_5_9 != null)
-            //    {
-            //        winElem_LeftClickTextYes_5_9.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextYes_5_9}");
-            //        return;
-            //    }
+        //}
 
+        [TestMethod("B4-13")]
+        [TestCategory("測試命令編輯(B4)")]
+        //B4-13
+        public void TIEditor_AddOneThreadTITestCommand_ShouldBeAddedAndShowCorrectParameters()
+        {
+            // Steps:
+            // 1. Add any Thread Command in tc group page,
+            // 2. click on the test command and check test command string are same in parameter page and edit page
 
-            //    // LeftClick on Text "No" at (11,9)
-            //    Console.WriteLine("LeftClick on Text \"No\" at (11,9)");
-            //    string xpath_LeftClickTextNo_11_9 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@Name=\"Search Result\"][@AutomationId=\"MessageBoxExDialog\"]/Button[@Name=\"No\"][@AutomationId=\"btnNo\"]/Text[@ClassName=\"TextBlock\"][@Name=\"No\"]";
-            //    var winElem_LeftClickTextNo_11_9 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextNo_11_9);
-            //    if (winElem_LeftClickTextNo_11_9 != null)
-            //    {
-            //        winElem_LeftClickTextNo_11_9.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextNo_11_9}");
-            //        return;
-            //    }
+            string threadTICmdTitle = "RunThread_TI";
 
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            AddCommandBy(TestCmdGroupType.Thread_TI, 1);
+            string cmdName = GetCommandBy(TestCmdGroupType.Thread_TI, 1).GetText();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            threadTICmdTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ById[editParamAreaView]/ByClass[ScrollViewer,TextBox]").GetText());
+            cmdName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,3]").GetText());
+            "\"\"".ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[2,3]").GetText());
+            "\"\"".ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[3,3]").GetText());
         }
 
         [TestMethod("B4-14")]
@@ -8504,10 +8426,11 @@ namespace PP5AutoUITests
         {
             // Add first command in group "AC Source"
             //AddCommandBy("AC Source", 1, TestCommandSourceType.Device);
-            AddCommandBy("AC Source", 1);
+            AddCommandBy(TestCmdGroupType.AC_Source, 1);
 
             // CLick on command edit page first
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("PGGrid")).LeftClick();
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid]", ClickType.LeftClick);
+            //PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("PGGrid")).LeftClick();
 
             // Repeat copy and paste the command until warning window: "Exceed Limit" popup
             for (int i = 0; i < 12; i++) 
@@ -8518,12 +8441,10 @@ namespace PP5AutoUITests
 
             // Check warning message box title is: "Exceed Limit" 
             string expectedTitle = "Exceed Limit";
-            expectedTitle.ShouldEqualTo(PP5IDEWindow.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog")).Text);
+            expectedTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]").GetText());
 
             // Click OK to close the warning message box
-            PP5IDEWindow.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("OK"))
-                         .LeftClick();
+            PP5IDEWindow.PerformClick("/ByIdOrName[MessageBoxExDialog,OK]", ClickType.LeftClick);
 
             //GetSingleColumnValues("PGGrid", "Test Command");
 
@@ -8974,12 +8895,12 @@ namespace PP5AutoUITests
         //B4-15_1
         public void TIEditor_RandomlyAddCommandCase1()
         {
-            Dictionary<string, string[]> groupCommands = new Dictionary<string, string[]>
+            Dictionary<TestCmdGroupType, string[]> groupCommands = new Dictionary<TestCmdGroupType, string[]>
             {
-                { "AC Source",  new[] { "ReadAC_Current", "ReadAC_Frequency" } },
-                { "DC Source",  new[] { "GetDCDev_EQInformation", "GetDCDev_IVCStatus" } },
-                { "XYZ Table",  new[] { "GetXYZtable_Slope_RotationAngle", "GetXYZtable_XYZCoordinate" } },
-                { "String",     new[] { "ATOF", "ATOI" } },
+                { TestCmdGroupType.AC_Source,  new[] { "ReadAC_Current", "ReadAC_Frequency" } },
+                { TestCmdGroupType.DC_Source,  new[] { "GetDCDev_EQInformation", "GetDCDev_IVCStatus" } },
+                { TestCmdGroupType.XYZ_Table,  new[] { "GetXYZtable_Slope_RotationAngle", "GetXYZtable_XYZCoordinate" } },
+                { TestCmdGroupType.String,     new[] { "ATOF", "ATOI" } },
             };
 
             foreach (var kvp in groupCommands)
@@ -8987,6 +8908,9 @@ namespace PP5AutoUITests
                 // TODO: Get command source type
                 AddCommandsBy(kvp.Key, kvp.Value);
             }
+
+            // Check parameters page show correct test command info
+            // Steps: Click on any Test Command in editor page (seq: 3 > 4 > 1), inspect the test command string in parameter page
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -9316,13 +9240,13 @@ namespace PP5AutoUITests
         //B4-15_2
         public void TIEditor_RandomlyAddCommandCase2()
         {
-            Dictionary<string, string[]> groupCommands = new Dictionary<string, string[]>
+            Dictionary<TestCmdGroupType, string[]> groupCommands = new Dictionary<TestCmdGroupType, string[]>
             {
-                { "AC Source",  new[] { "ReadAC_Current", "ReadAC_Frequency" } },
-                { "DC Source",  new[] { "GetDCDev_EQInformation", "GetDCDev_IVCStatus" } },
-                { "XYZ Table",  new[] { "GetXYZtable_Slope_RotationAngle", "GetXYZtable_XYZCoordinate" } },
-                { "String",     new[] { "ATOF", "ATOI" } },
-                { "Dll",        new[] { "MDO_Convert_F", "MDO3014WFDConvert2" } },
+                { TestCmdGroupType.AC_Source,  new[] { "ReadAC_Current", "ReadAC_Frequency" } },
+                { TestCmdGroupType.DC_Source,  new[] { "GetDCDev_EQInformation", "GetDCDev_IVCStatus" } },
+                { TestCmdGroupType.XYZ_Table,  new[] { "GetXYZtable_Slope_RotationAngle", "GetXYZtable_XYZCoordinate" } },
+                { TestCmdGroupType.String,     new[] { "ATOF", "ATOI" } },
+                { TestCmdGroupType.HexString,  new[] { "HexStringCat", "HexStringSum" } },
             };
 
             for (int i = 0; i < 2; i++)
@@ -9333,6 +9257,10 @@ namespace PP5AutoUITests
                     AddCommandsBy(kvp.Key, kvp.Value[i]);
                 }
             }
+
+            // Check parameters page show correct test command info
+            // Steps: Click on any Test Command in editor page (seq: 1 > 5 > 3), inspect the test command string in parameter page
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -9827,25 +9755,33 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
             //GetCommandBy(CommandName, GroupName).DoubleClick();
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
             //AddCommandBy(GroupName, 17);
 
             // LeftClick on Text "ABS"
-            Console.WriteLine("LeftClick on Text \"ABS\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on Text \"ABS\"");
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
 
             // Copy and paste by clicking on the buttons (not from menu)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
-            functionBtns[11].LeftClick();
+            //var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+            //                                .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
+            //functionBtns[10].LeftClick();
+            //functionBtns[11].LeftClick();
+
+            // Copy and paste by clicking on the buttons (not from menu)
+            //PP5IDEWindow.PerformGetElements("/ByClass@PGGrid[ToolBar,RadioButton]", ClickType.LeftClick);
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
+
 
             // Check same test item command is added
-            CommandName.ShouldEqualTo(GetCellBy("PGGrid", 1, "Test Command").Text);
+            CommandName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,5]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10026,16 +9962,17 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName);
+            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
 
             string copiedCallName = CallName + "-Copy_1";
-            copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
+            string condVarDataGridId = VariableTabType.Condition.GetDescription();
+            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10264,16 +10201,17 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName);
+            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
 
             string copiedCallName = CallName + "-Copy_1";
-            copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
+            string resVarDataGridId = VariableTabType.Result.GetDescription();
+            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10472,16 +10410,17 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName);
+            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
 
             string copiedCallName = CallName + "-Copy_1";
-            copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            string tmpVarDataGridId = VariableTabType.Temp.GetDescription();
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10679,18 +10618,22 @@ namespace PP5AutoUITests
         {
             // Select the first row on callname
             VariableTabNavi(VariableTabType.Global);
-            string CallName = GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name");
 
-            GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
+            string glbVarDataGridId = VariableTabType.Global.GetDescription();
+            //string CallName = GetCellValue(glbVarDataGridId, 0, "Call Name");
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
+
+            //GetCellBy(glbVarDataGridId, 0, "Call Name").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
 
             string copiedCallName = CallName + "-Copy_1";
-            copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
+            //copiedCallName.ShouldEqualTo(GetCellValue(glbVarDataGridId, 0, "Call Name"));
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10827,32 +10770,34 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            Console.WriteLine("LeftClick on Text \"ABS\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on Text \"ABS\"");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // copy selected command by clicking on Copy button from toolbar
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[10].LeftClick();
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
 
             // Open new TI editor
             // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            WaitUntil(() => GetPP5Window() != null);
+            //MenuSelect("Functions", "TI Editor");
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Paste the copied command by clicking on Paste button
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[11].LeftClick();
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
 
             // Check same test item command is added
-            Assert.AreEqual(CommandName, GetCellBy("PGGrid", 0, "Test Command").Text);
+            //Assert.AreEqual(CommandName, GetCellBy("PGGrid", 0, "Test Command").Text);
+            CommandName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,5]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -11077,25 +11022,26 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName);
+            string condVarDataGridId = VariableTabType.Condition.GetDescription();
+            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy the command by clicking on the Copy button (from toolbar)
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[10].LeftClick();
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
 
             // Open new TI editor
             // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            WaitUntil(() => GetPP5Window() != null);
+            //MenuSelect("Functions", "TI Editor");
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Paste the copied command by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Condition);
-            GetCellBy(VariableTabType.Condition.GetDescription(), 0, "Call Name").LeftClick();
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[11].LeftClick();
+            //GetCellBy(condVarDataGridId, 0, "Call Name").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{condVarDataGridId}[1,3]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
 
-            CallName.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
+            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
+            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -11412,25 +11358,26 @@ namespace PP5AutoUITests
         {
             // Create new result variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName);
+            string resVarDataGridId = VariableTabType.Result.GetDescription();
+            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy the command by clicking on the Copy button (from toolbar)
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[10].LeftClick();
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
 
             // Open new TI editor
-            // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            WaitUntil(() => GetPP5Window() != null);
+            //// Left Click Menu item: Functions > TI Editor
+            //MenuSelect("Functions", "TI Editor");
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Paste the copied command by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Result);
-            GetCellBy(VariableTabType.Result.GetDescription(), 0, "Call Name").LeftClick();
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[11].LeftClick();
+            //GetCellBy(VariableTabType.Result.GetDescription(), 0, "Call Name").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{resVarDataGridId}[1,3]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
 
-            CallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
+            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
+            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -11720,25 +11667,26 @@ namespace PP5AutoUITests
         {
             // Create new result variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName);
+            string tmpVarDataGridId = VariableTabType.Temp.GetDescription();
+            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy the command by clicking on the Copy button (from toolbar)
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[10].LeftClick();
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
 
             // Open new TI editor
             // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            WaitUntil(() => GetPP5Window() != null);
+            //MenuSelect("Functions", "TI Editor");
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Paste the copied command by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Temp);
-            GetCellBy(VariableTabType.Temp.GetDescription(), 0, "Call Name").LeftClick();
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[11].LeftClick();
+            //GetCellBy(VariableTabType.Temp.GetDescription(), 0, "Call Name").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{tmpVarDataGridId}[1,3]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
 
-            CallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -12027,28 +11975,32 @@ namespace PP5AutoUITests
         {
             // Select the first row on callname
             VariableTabNavi(VariableTabType.Global);
-            string CallName = GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name");
+            string glbVarDataGridId = VariableTabType.Global.GetDescription();
+            //string CallName = GetCellValue(glbVarDataGridId, 0, "Call Name");
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
 
-            GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
+
+            //GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
 
             // Copy the command by clicking on the Copy button (from toolbar)
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[10].LeftClick();
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
 
             // Open new TI editor
             // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            WaitUntil(() => GetPP5Window() != null);
+            //MenuSelect("Functions", "TI Editor");
+            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Paste the copied command by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Global);
-            GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[11].LeftClick();
+            //GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
 
             string copiedCallName = CallName + "-Copy_1";
-            copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
+            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -12248,6 +12200,132 @@ namespace PP5AutoUITests
             //}
         }
 
+        [TestMethod("B5-5_Condition")]
+        [TestCategory("編輯動作(B5)")]
+        //B5-5_Condition
+        public void TIEditor_TICopyAndPasteVarCondition_ShouldPasteOnPreviousPositionOfCurrentSelection()
+        {
+            // Steps:
+            // 1. Add one variable in condition page
+            // 2. Click copy and paste on toolbar
+            // 3. Check variable is inserted in the previous position, verify each part of the variable
+            //    (give row number: 1 and each of the column name)
+
+            // Step 1. 
+            string CallName = "CAP";
+            string condVarDataGridId = VariableTabType.Condition.GetDescription();
+            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
+
+            // Step 2.
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
+
+            // Step 3.
+            string copiedCallName = CallName + "-Copy_1";
+            string showNameExpected = CallName;
+            string dataTypeExpected = VariableDataType.Float.ToString();
+            string editTypeExpected = VariableEditType.EditBox.ToString();
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());        // Call Name
+            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,2]").GetText());      // Show Name
+            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,4]").GetText());      // Data Type
+            editTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,5]").GetText());      // Edit Type
+        }
+
+        [TestMethod("B5-5_Result")]
+        [TestCategory("編輯動作(B5)")]
+        //B5-5_Result
+        public void TIEditor_TICopyAndPasteVarResult_ShouldPasteOnPreviousPositionOfCurrentSelection()
+        {
+            // Steps:
+            // 1. Add one variable in Result page
+            // 2. Click copy and paste on toolbar
+            // 3. Check variable is inserted in the previous position, verify each part of the variable
+            //    (give row number: 1 and each of the column name)
+
+            // Step 1. 
+            string CallName = "CAP";
+            string resVarDataGridId = VariableTabType.Result.GetDescription();
+            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
+
+            // Step 2.
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
+
+            // Step 3.
+            string copiedCallName = CallName + "-Copy_1";
+            string showNameExpected = CallName;
+            string dataTypeExpected = VariableDataType.Float.ToString();
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());        // Call Name
+            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,2]").GetText());      // Show Name
+            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,4]").GetText());      // Data Type
+        }
+
+        [TestMethod("B5-5_Tmp")]
+        [TestCategory("編輯動作(B5)")]
+        //B5-5_Temp
+        public void TIEditor_TICopyAndPasteVarTemp_ShouldPasteOnPreviousPositionOfCurrentSelection()
+        {
+            // Steps:
+            // 1. Add one variable in Temp page
+            // 2. Click copy and paste on toolbar
+            // 3. Check variable is inserted in the previous position, verify each part of the variable
+            //    (give row number: 1 and each of the column name)
+
+            // Step 1. 
+            string CallName = "CAP";
+            string tmpVarDataGridId = VariableTabType.Temp.GetDescription();
+            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
+
+            // Step 2.
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
+
+            // Step 3.
+            string copiedCallName = CallName + "-Copy_1";
+            string showNameExpected = CallName;
+            string dataTypeExpected = VariableDataType.Float.ToString();
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,3]").GetText());        // Call Name
+            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,2]").GetText());      // Show Name
+            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,4]").GetText());      // Data Type
+        }
+
+        [TestMethod("B5-5_Global")]
+        [TestCategory("編輯動作(B5)")]
+        //B5-5_Global
+        public void TIEditor_TICopyAndPasteVarGlobal_ShouldPasteOnPreviousPositionOfCurrentSelection()
+        {
+            // Steps:
+            // 1. Select the first variable in Global page
+            // 2. Click copy and paste on toolbar
+            // 3. Check variable is inserted in the previous position, verify each part of the variable
+            //    (give row number: 1 and each of the column name)
+
+            // Step 1. 
+            VariableTabNavi(VariableTabType.Global);
+            string glbVarDataGridId = VariableTabType.Global.GetDescription();
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
+            string showNameExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,2]").GetText();
+            string dataTypeExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,4]").GetText();
+            string editTypeExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,5]").GetText();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
+            //CreateNewVariable1(VariableTabType.Global, ShowName: CallName, CallName);
+
+            // Step 2.
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
+            toolbarFunction.ToolBarSelect(11);
+
+            // Step 3.
+            string copiedCallName = CallName + "-Copy_1";
+            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());        // Call Name
+            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,2]").GetText());      // Show Name
+            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,4]").GetText());      // Data Type
+            editTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,5]").GetText());      // Edit Type
+        }
+
         [TestMethod("B5-6")]
         [TestCategory("編輯動作(B5)")]
         //B5-6
@@ -12258,25 +12336,28 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
+            //string CommandNameAfterCut = null;
 
             // Add the command
             //GetCommandBy(CommandName, GroupName).DoubleClick();
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
             //AddCommandBy(GroupName, 17);
 
             // LeftClick on Text "ABS"
-            Console.WriteLine("LeftClick on Text \"ABS\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on Text \"ABS\"");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Cut and paste by clicking on the buttons (not from menu)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[8].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(8);
+            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").GetText().ShouldBeNull();
 
             // Check same test item command is added
-            CommandName.ShouldEqualTo(GetCellBy("PGGrid", 0, "Test Command").Text);
+            //CommandName.ShouldEqualTo(GetCellBy("PGGrid", 0, "Test Command").Text);
+            toolbarFunction.ToolBarSelect(11);
+            CommandName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -12444,15 +12525,18 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName);
+            string condVarDataGridId = VariableTabType.Condition.GetDescription();
+            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[8].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(8);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText().ShouldBeNull();
 
-            CallName.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
+
+            //CallName.ShouldEqualTo(GetCellValue(condVarDataGridId, 0, "Call Name"));
+            toolbarFunction.ToolBarSelect(11);
+            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -12793,15 +12877,17 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName);
+            string resVarDataGridId = VariableTabType.Result.GetDescription();
+            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[8].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(8);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText().ShouldBeNull();
 
-            CallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
+            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
+            toolbarFunction.ToolBarSelect(11);
+            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -13144,15 +13230,17 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName);
+            string tempVarDataGridId = VariableTabType.Temp.GetDescription();
+            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[8].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(8);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,3]").GetText().ShouldBeNull();
 
-            CallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            toolbarFunction.ToolBarSelect(11);
+            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,3]").GetText());
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -13447,17 +13535,21 @@ namespace PP5AutoUITests
         {
             // Select the first row on callname
             VariableTabNavi(VariableTabType.Global);
-            string CallName = GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name");
+            string glbVarDataGridId = VariableTabType.Global.GetDescription();
+            //string CallName = GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name");
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
 
-            GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
+            //GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[8].LeftClick();
-            functionBtns[11].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(8);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText().ShouldNotEqualTo(CallName);
 
-            CallName.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
+            toolbarFunction.ToolBarSelect(11);
+            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
+            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -13611,22 +13703,23 @@ namespace PP5AutoUITests
             // Input Command name: "ABS"
             string CommandName1 = "ABS";
             string CommandName2 = "ADD";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandsBy(GroupName, CommandName1, CommandName2);
+            AddCommandsBy(cgt, CommandName1, CommandName2);
 
             // LeftClick on Text "ADD"
-            Console.WriteLine("LeftClick on Text \"ADD\"");
-            GetCellBy("PGGrid", 1, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on Text \"ADD\"");
+            //GetCellBy("PGGrid", 1, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Insert command "ADD" by clicking on the buttons (not from menu)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[9].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(9);
 
             // Check command "ADD" is inserted
-            CommandName2.ShouldEqualTo(GetCellBy("PGGrid", 2, "Test Command").Text);
+            //CommandName2.ShouldEqualTo(GetCellBy("PGGrid", 2, "Test Command").Text);
+            CommandName1.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[2,5]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -13766,23 +13859,23 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string CommandNameAfterDeletion = "";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            Console.WriteLine("LeftClick on Text \"ABS\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on Text \"ABS\"");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Delete command "ABS" by clicking on the buttons (not from menu)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[12].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(12);
 
             // Check command "ABS" is deleted
-            CommandNameAfterDeletion.ShouldEqualTo(GetCellBy("PGGrid", 0, "Test Command").Text);
+            //CommandNameAfterDeletion.ShouldEqualTo(GetCellBy("PGGrid", 0, "Test Command").Text);
+            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -13900,22 +13993,23 @@ namespace PP5AutoUITests
 
         [TestMethod("B5-10_1")]
         [TestCategory("編輯動作(B5)")]
+        [DisplayName("B5-10_1")]
         //B5-10_1
         public void TIEditor_DeleteVarCondition()
         {
             // Create new condition variable
             string CallName = "CAP";
-            string ShowNameExpected = null;
-            string CallNameExpected = null;
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName);
+            string condVarDataGridId = VariableTabType.Condition.GetDescription();
+            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Delete by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[12].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(12);
 
-            ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Show Name"));
-            CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
+            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Show Name"));
+            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,2]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14111,22 +14205,23 @@ namespace PP5AutoUITests
 
         [TestMethod("B5-10_2")]
         [TestCategory("編輯動作(B5)")]
+        [DisplayName("B5-10_2")]
         //B5-10_2
         public void TIEditor_DeleteVarResult()
         {
             // Create new condition variable
             string CallName = "CAP";
-            string ShowNameExpected = null;
-            string CallNameExpected = null;
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName);
+            string resVarDataGridId = VariableTabType.Result.GetDescription();
+            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Delete by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[12].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(12);
 
-            ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
-            CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Show Name"));
+            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
+            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Show Name"));
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,2]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14290,22 +14385,24 @@ namespace PP5AutoUITests
 
         [TestMethod("B5-10_3")]
         [TestCategory("編輯動作(B5)")]
+        [Priority(1)]
+        [DisplayName("B5-10_3")]
         //B5-10_3
         public void TIEditor_DeleteVarTemp()
         {
             // Create new condition variable
             string CallName = "CAP";
-            string ShowNameExpected = null;
-            string CallNameExpected = null;
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName);
+            string tempVarDataGridId = VariableTabType.Temp.GetDescription();
+            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Delete by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[12].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(12);
 
-            ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Show Name"));
-            CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Show Name"));
+            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,2]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,3]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14469,25 +14566,30 @@ namespace PP5AutoUITests
 
         [TestMethod("B5-10_4")]
         [TestCategory("編輯動作(B5)")]
+        [DisplayName("B5-10_4")]
         //B5-10_4
         public void TIEditor_DeleteVarGlobal()
         {
-            string ShowNameExpected = null;
-            string CallNameExpected = null;
+            //string ShowNameExpected = null;
+            //string CallNameExpected = null;
+
+            string glbVarDataGridId = VariableTabType.Global.GetDescription();
 
             // Select the first row on callname
             VariableTabNavi(VariableTabType.Global);
 
             // Delete all global parameters by clicking on the buttons (from toolbar)
-            GetCellBy(VariableTabType.Global.GetDescription(), 0, "No").LeftClick();
+            //GetCellBy(VariableTabType.Global.GetDescription(), 0, "No").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,1]", ClickType.LeftClick);
             SelectAll();
 
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[12].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(12);
 
-            ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Show Name"));
-            CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
+            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Show Name"));
+            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,2]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14569,9 +14671,9 @@ namespace PP5AutoUITests
             //}
         }
 
-        [TestMethod("B5-11_1")]
+        [TestMethod("B5-11")]
         [TestCategory("編輯動作(B5)")]
-        //B5-11_1
+        //B5-11
         public void TIEditor_InsertAndUndoInTestItemContext()
         {
             // Switch to test item context window
@@ -14579,33 +14681,37 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
             int CommandCountAfterUndos = 1;
+            int maxUndoCount = 0;
+            int maxUndoCountExpected = 20;
 
             // Add the command
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            Console.WriteLine("LeftClick on Text \"ABS\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on Text \"ABS\"");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
 
             // Repeat inserting command "ABS" for 20 times
-            for (int i = 0; i < 20; i++) 
+            for (int i = 0; i < maxUndoCountExpected; i++) 
             {
-                functionBtns[9].LeftClick();
+                toolbarFunction.ToolBarSelect(9);
             }
 
             // Click undo button for 20 times (until disabled)
-            while (functionBtns[6].Enabled)
+            while (toolbarFunction.ToolBarGetSelectionState(6))
             {
-                functionBtns[6].LeftClick();
+                toolbarFunction.ToolBarSelect(6);
+                maxUndoCount++;
             }
 
             // Check "ABS" command counts after undo actions
-            CommandCountAfterUndos.ShouldEqualTo(GetRowCount(DataTableAutoIDType.PGGrid));
+            maxUndoCountExpected.ShouldEqualTo(maxUndoCount);
+            CommandCountAfterUndos.ShouldEqualTo(GetRowCount(DataTableAutoIDType.PGGrid) - 1);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14755,10 +14861,10 @@ namespace PP5AutoUITests
             //}
         }
 
-        [TestMethod("B5-11_2")]
+        [TestMethod("B5-12")]
         [TestCategory("編輯動作(B5)")]
         //continue last step
-        //B5-11_2
+        //B5-12
         public void TIEditor_RedoInTestItemContext()
         {
             // Switch to test item context window
@@ -14766,40 +14872,43 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
             int CommandCountAfterUndosAndRedos = 21;
+            int maxRedoCountExpected = 20;
+            int maxRedoCount = 0;
 
             // Add the command
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            Console.WriteLine("LeftClick on Text \"ABS\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on Text \"ABS\"");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
 
             // Repeat inserting command "ABS" for 20 times
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < maxRedoCountExpected; i++)
             {
-                functionBtns[9].LeftClick();
+                toolbarFunction.ToolBarSelect(9);
             }
 
             // Click undo button for 20 times (until disabled)
-            while (functionBtns[6].Enabled)
+            while (toolbarFunction.ToolBarGetSelectionState(6))
             {
-                functionBtns[6].LeftClick();
+                toolbarFunction.ToolBarSelect(6);
             }
 
             // Click redo button for 20 times (until disabled)
-            while (functionBtns[7].Enabled)
+            while (toolbarFunction.ToolBarGetSelectionState(7))
             {
-                functionBtns[7].LeftClick();
+                toolbarFunction.ToolBarSelect(7);
+                maxRedoCount++;
             }
 
             // Check "ABS" command counts after undo & redo actions
             //RefreshDataTable(DataTableAutoIDType.PGGrid);
-            CommandCountAfterUndosAndRedos.ShouldEqualTo(GetRowCount(DataTableAutoIDType.PGGrid));
+            CommandCountAfterUndosAndRedos.ShouldEqualTo(GetRowCount(DataTableAutoIDType.PGGrid) - 1);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14858,80 +14967,54 @@ namespace PP5AutoUITests
             //}
         }
 
-        [TestMethod("B5-12")]
-        [TestCategory("編輯動作(B5)")]
-        //B5-12
-        //variable can't do insert
-        public void TIEditor_InsertAndUndoInVar()
-        {
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-
-            //    AutoUIExtension.TakeScreenshotPNGformat(true, "B5-11_VarBefore");
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
-        }
-
         [TestMethod("B5-13")]
         [TestCategory("編輯動作(B5)")]
         //B5-13
-        public void TIEditor_CopySubTICommandAndPasteInSubTI()
+        public void TIEditor_CopySubTICommandAndPasteInSubTI_CheckPasteFailedMessageCorrect()
         {
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input 1st Sub Command
-            string GroupName = "Sub TI";
+            TestCmdGroupType cgt = TestCmdGroupType.Sub_TI;
 
             // Add the command
-            AddCommandBy(GroupName, 1);
+            AddCommandBy(cgt, 1);
 
             // LeftClick on 1st command
-            Console.WriteLine("LeftClick on 1st command");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on 1st command");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Copy the command by clicking on the button (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
 
             // Open new sub TI
             // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            System.Threading.Thread.Sleep(2000);
+            //MenuSelect("Functions", "TI Editor");
+            //System.Threading.Thread.Sleep(2000);
             PerformOpenNewTI(TestItemType.SubTI, TestItemRunType.UUT);
 
             // LeftClick on first command
-            Console.WriteLine("LeftClick on first command");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on first command");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Paste the command by clicking on the buttons (from toolbar)
-            functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                        .GetElements(By.ClassName("RadioButton"));
-            functionBtns[11].LeftClick();
+            toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(11);
 
             // Check warning message box shows message: "Past abort!! Sub TI cannot be included SubTI Command" 
             string expectedTitle = "Past abort!! Repeat Varaible";
             string expectedMessage = "Past abort!! Sub TI cannot be included SubTI Command";
-            var warningBox = CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"));
-            expectedTitle.ShouldEqualTo(warningBox.Text);
-            expectedMessage.ShouldEqualTo(warningBox.GetFirstPaneElement().GetFirstEditContent());
+            //var warningBox = PP5IDEWindow.GetExtendedElement(PP5By.Id("MessageBoxExDialog"));
+            var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
+            expectedTitle.ShouldEqualTo(warningBox.GetText());
+            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
 
             // Click OK to close the warning message box
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("OK"))
-                         .LeftClick();
+            warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -15183,52 +15266,51 @@ namespace PP5AutoUITests
         [TestMethod("B5-14")]
         [TestCategory("編輯動作(B5)")]
         //B5-14
-        public void TIEditor_CopySubTICommandAndPasteInThreadTI()
+        public void TIEditor_CopySubTICommandAndPasteInThreadTI_CheckPasteFailedMessageCorrect()
         {
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input 1st Sub Command
-            string GroupName = "Sub TI";
+            TestCmdGroupType cgt = TestCmdGroupType.Sub_TI;
 
             // Add the command
-            AddCommandBy(GroupName, 1);
+            AddCommandBy(cgt, 1);
 
             // LeftClick on 1st command
-            Console.WriteLine("LeftClick on 1st command");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on 1st command");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Copy the command by clicking on the button (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
 
             // Open new Thread TI
             // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            System.Threading.Thread.Sleep(2000);
+            //MenuSelect("Functions", "TI Editor");
+            //System.Threading.Thread.Sleep(2000);
             PerformOpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);
 
             // LeftClick on first command
-            Console.WriteLine("LeftClick on first command");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            //Console.WriteLine("LeftClick on first command");
+            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Paste the command by clicking on the buttons (from toolbar)
-            functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                        .GetElements(By.ClassName("RadioButton"));
-            functionBtns[11].LeftClick();
+            toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(11);
 
             // Check warning message box shows message: "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command" 
             string expectedTitle = "Past abort!! Repeat Varaible";
             string expectedMessage = "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command";
-            var warningBox = CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"));
-            expectedTitle.ShouldEqualTo(warningBox.Text);
-            expectedMessage.ShouldEqualTo(warningBox.GetFirstPaneElement().GetFirstEditContent());
+            var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
+            expectedTitle.ShouldEqualTo(warningBox.GetText());
+            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
 
             // Click OK to close the warning message box
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("OK"))
-                         .LeftClick();
+            warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -15479,52 +15561,46 @@ namespace PP5AutoUITests
         [TestMethod("B5-15")]
         [TestCategory("編輯動作(B5)")]
         //B5-15
-        public void TIEditor_CopyThreadTICommandAndPasteInThreadTI()
+        public void TIEditor_CopyThreadTICommandAndPasteInThreadTI_CheckPasteFailedMessageCorrect()
         {
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input 1st Thread Command
-            string GroupName = "Thread TI";
+            TestCmdGroupType cgt = TestCmdGroupType.Thread_TI;
 
             // Add the command
-            AddCommandBy(GroupName, 1);
+            AddCommandBy(cgt, 1);
 
             // LeftClick on 1st command
-            Console.WriteLine("LeftClick on 1st command");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Copy the command by clicking on the button (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
 
             // Open new Thread TI
             // Left Click Menu item: Functions > TI Editor
-            MenuSelect("Functions", "TI Editor");
-            System.Threading.Thread.Sleep(2000);
+            //MenuSelect("Functions", "TI Editor");
+            //System.Threading.Thread.Sleep(2000);
             PerformOpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);
 
             // LeftClick on first command
-            Console.WriteLine("LeftClick on first command");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Paste the command by clicking on the buttons (from toolbar)
-            functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                        .GetElements(By.ClassName("RadioButton"));
-            functionBtns[11].LeftClick();
+            toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(11);
 
             // Check warning message box shows message: "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command" 
             string expectedTitle = "Past abort!! Repeat Varaible";
             string expectedMessage = "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command";
-            var warningBox = CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"));
-            expectedTitle.ShouldEqualTo(warningBox.Text);
-            expectedMessage.ShouldEqualTo(warningBox.GetFirstPaneElement().GetFirstEditContent());
+            var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
+            expectedTitle.ShouldEqualTo(warningBox.GetText());
+            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
 
             // Click OK to close the warning message box
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("OK"))
-                         .LeftClick();
+            warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -15779,15 +15855,14 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName: CallName);
+            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName: CallName, VariableDataType.String);
 
             // Copy And Paste 5 times by clicking on the buttons (from toolbar)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[10].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(10);
 
             for (int i = 0; i < 5; i++)
-                functionBtns[11].LeftClick();
+                toolbarFunction.ToolBarSelect(11);
 
             //StringBuilder copiedCallName = new StringBuilder(CallName + "-Copy_");
             string[] copiedCallNames = new string[5];
@@ -16035,23 +16110,21 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
             bool IsFocusedAfterDeletion = true;
 
             // Add the command
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            Console.WriteLine("LeftClick on Text \"ABS\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Delete command "ABS" by clicking on the buttons (not from menu)
-            var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                            .GetElements(By.ClassName("RadioButton"));
-            functionBtns[12].LeftClick();
+            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            toolbarFunction.ToolBarSelect(12);
 
             // Check PG Grid area is still focused after the deletion
-            IsFocusedAfterDeletion.ShouldEqualTo(GetCellBy("PGGrid", 0, "Test Command").Selected);
+            IsFocusedAfterDeletion.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").Selected);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -16206,10 +16279,10 @@ namespace PP5AutoUITests
 
             // Input Command name: "StopEVGate_DBCData"
             string CommandName = "StopEVGate_DBCData";
-            string GroupName = "EV Gate";
+            TestCmdGroupType cgt = TestCmdGroupType.EV_Gate;
 
             // Add command: "StopEVGate_DBCData" for 3 times
-            var cmdEle = GetCommandBy(GroupName, CommandName);
+            var cmdEle = GetCommandBy(cgt, CommandName);
             for (int i = 0; i < 3; i++)
                 cmdEle.DoubleClick();
             //AddCommandBy(GroupName, CommandName, addCount: 3);
@@ -16223,65 +16296,46 @@ namespace PP5AutoUITests
             //// Map the variables to the commands' DBC Signal parameter
             // 1st StopEVGate_DBCData, specified index: 0
             // LeftClick on 1st command: "StopEVGate_DBCData"
-            Console.WriteLine("LeftClick on 1st command: \"StopEVGate_DBCData\"");
-            GetCellBy("PGGrid", 0, "Parameters").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "0", "Specified DBC signal" > select "str_EdtBx"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Constant")
-                         .LeftClick();
-
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("0");
 
-            GetCellBy("ParameterGrid", 1, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Test Condition")
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 1, "Parameter Value").SendSingleKeys("str_EdtBx");
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cndRdoBtn]/ByName[Test Condition]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_EdtBx");
             Press(Keys.Enter);
 
             // 2nd StopEVGate_DBCData, specified index: 1
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            Console.WriteLine("LeftClick on 2nd command: \"StopEVGate_DBCData\"");
-            GetCellBy("PGGrid", 1, "Parameters").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[2,5]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "1", "Specified DBC signal" > select "str_CmbBx"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Constant")
-                         .LeftClick();
-
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("1");
 
-            GetCellBy("ParameterGrid", 1, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Test Condition")
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 1, "Parameter Value").SendSingleKeys("str_CmbBx");
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cndRdoBtn]/ByName[Test Condition]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_CmbBx");
             Press(Keys.Enter);
 
             // 3rd StopEVGate_DBCData, specified index: 2
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            Console.WriteLine("LeftClick on 3rd command: \"StopEVGate_DBCData\"");
-            GetCellBy("PGGrid", 2, "Parameters").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[3,5]", ClickType.LeftClick);
+
 
             // Parameter: "Specified index" > input "2", "Specified DBC signal" > select "str_ExtSig"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Constant")
-                         .LeftClick();
-
+            //GetCellBy("ParameterGrid", 0, "No").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("2");
 
-            GetCellBy("ParameterGrid", 1, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Test Condition")
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 1, "Parameter Value").SendSingleKeys("str_ExtSig");
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cndRdoBtn]/ByName[Test Condition]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_ExtSig");
             Press(Keys.Enter);
 
             // LeftClick on Text "Utility" > "Compile"
@@ -16290,14 +16344,12 @@ namespace PP5AutoUITests
             // Check message box shows message: "Compilation is complete" with title: "Compile"
             string expectedTitle = "Compile";
             string expectedMessage = "Compilation is complete";
-            var messageBox = CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"));
-            expectedTitle.ShouldEqualTo(messageBox.Text);
-            expectedMessage.ShouldEqualTo(messageBox.GetFirstPaneElement().GetFirstEditContent());
+            var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
+            expectedTitle.ShouldEqualTo(warningBox.GetText());
+            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
 
             // Click OK to close the message box
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("OK"))
-                         .LeftClick();
+            warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -17179,10 +17231,10 @@ namespace PP5AutoUITests
 
             // Input Command name: "StopEVGate_DBCData"
             string CommandName = "StopEVGate_DBCData";
-            string GroupName = "EV Gate";
+            TestCmdGroupType cgt = TestCmdGroupType.EV_Gate;
 
             // Add command: "StopEVGate_DBCData" for 3 times
-            var cmdEle = GetCommandBy(GroupName, CommandName);
+            var cmdEle = GetCommandBy(cgt, CommandName);
             for (int i = 0; i < 3; i++)
                 cmdEle.DoubleClick();
             //AddCommandBy(GroupName, CommandName, addCount: 3);
@@ -17196,65 +17248,44 @@ namespace PP5AutoUITests
             //// Map the variables to the commands' DBC Signal parameter
             // 1st StopEVGate_DBCData, specified index: 0
             // LeftClick on 1st command: "StopEVGate_DBCData"
-            Console.WriteLine("LeftClick on 1st command: \"StopEVGate_DBCData\"");
-            GetCellBy("PGGrid", 0, "Parameters").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "0", "Specified DBC signal" > select "str_EdtBx"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Constant")
-                         .LeftClick();
-
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("0");
 
-            GetCellBy("ParameterGrid", 1, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Global Var.")
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 1, "Parameter Value").SendSingleKeys("str_EdtBx");
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_EdtBx");
             Press(Keys.Enter);
 
             // 2nd StopEVGate_DBCData, specified index: 1
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            Console.WriteLine("LeftClick on 2nd command: \"StopEVGate_DBCData\"");
-            GetCellBy("PGGrid", 1, "Parameters").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[2,5]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "1", "Specified DBC signal" > select "str_CmbBx"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Constant")
-                         .LeftClick();
-
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("1");
 
-            GetCellBy("ParameterGrid", 1, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Global Var.")
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 1, "Parameter Value").SendSingleKeys("str_CmbBx");
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_CmbBx");
             Press(Keys.Enter);
 
             // 3rd StopEVGate_DBCData, specified index: 2
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            Console.WriteLine("LeftClick on 3rd command: \"StopEVGate_DBCData\"");
-            GetCellBy("PGGrid", 2, "Parameters").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[3,5]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "2", "Specified DBC signal" > select "str_ExtSig"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Constant")
-                         .LeftClick();
-
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("2");
 
-            GetCellBy("ParameterGrid", 1, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetRdoBtnElement("Global Var.")
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 1, "Parameter Value").SendSingleKeys("str_ExtSig");
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_ExtSig");
             Press(Keys.Enter);
 
             // LeftClick on Text "Utility" > "Compile"
@@ -17263,14 +17294,12 @@ namespace PP5AutoUITests
             // Check message box shows message: "Compilation is complete" with title: "Compile"
             string expectedTitle = "Compile";
             string expectedMessage = "Compilation is complete";
-            var messageBox = CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"));
-            expectedTitle.ShouldEqualTo(messageBox.Text);
-            expectedMessage.ShouldEqualTo(messageBox.GetFirstPaneElement().GetFirstEditContent());
+            var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
+            expectedTitle.ShouldEqualTo(warningBox.GetText());
+            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
 
             // Click OK to close the message box
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("MessageBoxExDialog"))
-                         .GetElement(By.Name("OK"))
-                         .LeftClick();
+            warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -18161,144 +18190,99 @@ namespace PP5AutoUITests
             //}
         }
 
-        [TestMethod("B6-1")]
+        [TestMethod("B6-1_1")]
         [TestCategory("命令編輯頁面搜尋(B6)")]
-        //B6-1
-        public void TIEditor_SearchInTestCommandList()
+        //B6-1_1
+        public void TIEditor_SearchInTestCommandEditList_ByPressingEnter()
         {
             // Add 2 Commands with names: "ReadAC_Current", "ReadAC_Frequency" in group: "AC Source"
             string cmdName1 = "ReadAC_Current";
             string cmdName2 = "ReadAC_Frequency";
-            string groupName = "AC Source";
-
-            string searchPattern = cmdName2;
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string searchPattern = "ReadAC";
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Add 2 commands
-            AddCommandsBy(groupName, cmdName1, cmdName2);
+            AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box
-            IWebElement testCmdEditSearchTextBox = CurrentDriver.GetElement(By.ClassName("SettingAeraView"))
-                                                                .GetElement(MobileBy.AccessibilityId("SearchBox"));
-
-            // Clean up text in search box
-            testCmdEditSearchTextBox.ClearContent();
+            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
 
             // Command Edit Search box sendkey: cmdName2
-            testCmdEditSearchTextBox.SendComboKeys(searchPattern, Keys.Enter);
+            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+            Press(Keys.Return);
 
             // After searching, the matched command row will be selected, check the Test Command Cell value
-            cmdName2.ShouldEqualTo(CurrentDriver.GetCellElementByColumnIndex("PGGrid", 4).Text);
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (178,15)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (178,15)");
-            //    string xpath_LeftClickEdit_178_15 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_178_15 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_178_15);
-            //    if (winElem_LeftClickEdit_178_15 != null)
-            //    {
-            //        winElem_LeftClickEdit_178_15.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_178_15}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "s" + Keys.LeftShift"et"Keys.LeftShift + "a" + Keys.LeftShiftKeys.LeftShift + "c" + Keys.LeftShift"-"Keys.Backspace + Keys.BackspaceKeys.LeftShift + "-" + Keys.LeftShiftKeys.LeftShift + "p" + Keys.LeftShiftKeys.LeftShift + "l" + Keys.LeftShiftKeys.LeftShift + "d" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"s\" + Keys.LeftShift\"et\"Keys.LeftShift + \"a\" + Keys.LeftShiftKeys.LeftShift + \"c\" + Keys.LeftShift\"-\"Keys.Backspace + Keys.BackspaceKeys.LeftShift + \"-\" + Keys.LeftShiftKeys.LeftShift + \"p\" + Keys.LeftShiftKeys.LeftShift + \"l\" + Keys.LeftShiftKeys.LeftShift + \"d\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-
-            //    // Clear content before inputting text
-            //    if (!string.IsNullOrEmpty(winElem_LeftClickEdit_178_15.Text))
-            //        winElem_LeftClickEdit_178_15.Clear();
-
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "s" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys("et");
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "a" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "c" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "-" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "p" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "l" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-
-            //    Assert.AreEqual(winElem_LeftClickEdit_178_15.Text, "SetAC_PLD");
-
-            //    // LeftClick on Button "" at (6,22)
-            //    Console.WriteLine("LeftClick on Button \"\" at (6,22)");
-            //    string xpath_LeftClickButton_6_22 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]";
-            //    var winElem_LeftClickButton_6_22 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButton_6_22);
-            //    if (winElem_LeftClickButton_6_22 != null)
-            //    {
-            //        winElem_LeftClickButton_6_22.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButton_6_22}");
-            //        return;
-            //    }
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            cmdName1.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[5]").GetText());
         }
 
-        [TestMethod("B6-2")]
+        [TestMethod("B6-1_2")]
         [TestCategory("命令編輯頁面搜尋(B6)")]
-        //B6-2
-        public void TIEditor_SearchInTestCommandListDown()
+        //B6-1_2
+        public void TIEditor_SearchInTestCommandEditList_ByPressingSearchButton()
         {
             // Add 2 Commands with names: "ReadAC_Current", "ReadAC_Frequency" in group: "AC Source"
             string cmdName1 = "ReadAC_Current";
             string cmdName2 = "ReadAC_Frequency";
-            string groupName = "AC Source";
-
-            string searchPattern = cmdName2;
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string searchPattern = "ReadAC";
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Add 2 commands
-            AddCommandsBy(groupName, cmdName1, cmdName2);
+            AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box
-            IWebElement testCmdEditSearch = CurrentDriver.GetElement(By.ClassName("SettingAeraView"))
-                                                         .GetElement(MobileBy.AccessibilityId("SearchBox"));
-
-            // Clean up text in search box
-            testCmdEditSearch.ClearContent();
+            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
 
             // Command Edit Search box sendkey: cmdName2
-            testCmdEditSearch.SendSingleKeys(searchPattern);
-            testCmdEditSearch.GetElement(MobileBy.AccessibilityId("SearchBtn")).LeftClick();
+            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,SearchBtn]", ClickType.LeftClick);
+
+            // After searching, the matched command row will be selected, check the Test Command Cell value
+            cmdName1.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[5]").GetText());
+        }
+
+        [TestMethod("B6-2_1")]
+        [TestCategory("命令編輯頁面搜尋(B6)")]
+        //B6-2_1
+        public void TIEditor_SearchInTestCommandEditListDown_ByPressingNextButton()
+        {
+            // Add 2 Commands with names: "ReadAC_Current", "ReadAC_Frequency" in group: "AC Source"
+            string cmdName1 = "ReadAC_Current";
+            string cmdName2 = "ReadAC_Frequency";
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string searchPattern = "ReadAC";
+            bool MsgBxSearchResultShowUp = true;
+            int SearchingCountExpected = 3; 
+            int SearchingCountActual = 0;
+
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+
+            // Add 2 commands
+            AddCommandsBy(cgt, cmdName1, cmdName2);
+
+            // Get the Command Edit page search box, type in cmdName2 and click search button
+            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
 
             // Keep pressing "search Next" button until message box: "Search Result" show up
-            while (!CheckMessageBoxOpened(By.Name("Search Result")))
+            while (!CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")))
             {
-                testCmdEditSearch.GetElement(MobileBy.AccessibilityId("NextBtn")).LeftClick();
+                PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[NextBtn]", ClickType.LeftClick);
+                SearchingCountActual++;
             }
 
             // Check search to the end message box: "Search Result" show up
-            true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")));
+            SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
 
             // Close the window: "Search Result"
-            CurrentDriver.GetElement(By.Name("Search Result"))
-                         .GetElement(MobileBy.AccessibilityId("Close"))
-                         .LeftClick();
+            PP5IDEWindow.PerformClick("/ById[MessageBoxExDialog,Close]", ClickType.LeftClick);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -18440,207 +18424,152 @@ namespace PP5AutoUITests
             //}
         }
 
-        
-        [TestMethod("B6-3")]
+        [TestMethod("B6-2_2")]
         [TestCategory("命令編輯頁面搜尋(B6)")]
-        //B6-3
-        public void TIEditor_SearchInTestCommandListUp()
+        //B6-2_2
+        public void TIEditor_SearchInTestCommandEditListDown_ByPressingF3()
         {
             // Add 2 Commands with names: "ReadAC_Current", "ReadAC_Frequency" in group: "AC Source"
             string cmdName1 = "ReadAC_Current";
             string cmdName2 = "ReadAC_Frequency";
-            string groupName = "AC Source";
-
-            string searchPattern = cmdName2;
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            string searchPattern = "ReadAC";
+            bool MsgBxSearchResultShowUp = true;
+            int SearchingCountExpected = 3;
+            int SearchingCountActual = 0;
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Add 2 commands
-            AddCommandsBy(groupName, cmdName1, cmdName2);
+            AddCommandsBy(cgt, cmdName1, cmdName2);
 
-            // Get the Command Edit page search box
-            IWebElement testCmdEditSearch = CurrentDriver.GetElement(By.ClassName("SettingAeraView"))
-                                                         .GetElement(MobileBy.AccessibilityId("SearchBox"));
+            // Get the Command Edit page search box, type in cmdName2 and click search button
+            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
 
-            // Clean up text in search box
-            testCmdEditSearch.ClearContent();
-
-            // Command Edit Search box sendkey: cmdName2
-            testCmdEditSearch.SendSingleKeys(searchPattern);
-            testCmdEditSearch.GetElement(MobileBy.AccessibilityId("SearchBtn")).LeftClick();
-
-            // Keep pressing "search Previus" button until message box: "Search Result" show up
-            while (!CheckMessageBoxOpened(By.Name("Search Result")))
+            // Keep pressing "search Next" button until message box: "Search Result" show up
+            while (!CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")))
             {
-                testCmdEditSearch.GetElement(MobileBy.AccessibilityId("PreviosBtn")).LeftClick();
+                PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendSingleKeys, Keys.F3);
+                SearchingCountActual++;
             }
 
             // Check search to the end message box: "Search Result" show up
-            true.ShouldEqualTo(CheckMessageBoxOpened(By.Name("Search Result")));
+            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")));
+            SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
 
             // Close the window: "Search Result"
-            CurrentDriver.GetElement(By.Name("Search Result"))
-                         .GetElement(MobileBy.AccessibilityId("Close"))
-                         .LeftClick();
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (178,15)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (178,15)");
-            //    string xpath_LeftClickEdit_178_15 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_178_15 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_178_15);
-            //    if (winElem_LeftClickEdit_178_15 != null)
-            //    {
-            //        winElem_LeftClickEdit_178_15.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_178_15}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "s" + Keys.LeftShift"et"Keys.LeftShift + "a" + Keys.LeftShiftKeys.LeftShift + "c" + Keys.LeftShift"-"Keys.Backspace + Keys.BackspaceKeys.LeftShift + "-" + Keys.LeftShiftKeys.LeftShift + "p" + Keys.LeftShiftKeys.LeftShift + "l" + Keys.LeftShiftKeys.LeftShift + "d" + Keys.LeftShift" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"s\" + Keys.LeftShift\"et\"Keys.LeftShift + \"a\" + Keys.LeftShiftKeys.LeftShift + \"c\" + Keys.LeftShift\"-\"Keys.Backspace + Keys.BackspaceKeys.LeftShift + \"-\" + Keys.LeftShiftKeys.LeftShift + \"p\" + Keys.LeftShiftKeys.LeftShift + \"l\" + Keys.LeftShiftKeys.LeftShift + \"d\" + Keys.LeftShift\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "s" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys("et");
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "a" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "c" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "-" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "p" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "l" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_178_15.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-
-
-            //    // LeftClick on Button "" at (6,22)
-            //    Console.WriteLine("LeftClick on Button \"\" at (6,22)");
-            //    string xpath_LeftClickButton_6_22 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]";
-            //    var winElem_LeftClickButton_6_22 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButton_6_22);
-            //    if (winElem_LeftClickButton_6_22 != null)
-            //    {
-            //        winElem_LeftClickButton_6_22.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButton_6_22}");
-            //        return;
-            //    }
-
-            //    int count = 0;
-
-            //    // LeftClick on Image "" at (5,17)
-            //    Console.WriteLine("LeftClick on Image \"\" at (5,17)");
-            //    string xpath_LeftClickImage_5_17 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"PreviosBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_5_17 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_5_17);
-            //    if (winElem_LeftClickImage_5_17 != null)
-            //    {
-            //        winElem_LeftClickImage_5_17.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_5_17}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Text "No" at (14,14)
-            //    Console.WriteLine("LeftClick on Text \"No\" at (14,14)");
-            //    string xpath_LeftClickTextNo_14_14 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@Name=\"Search Result\"][@AutomationId=\"MessageBoxExDialog\"]/Button[@Name=\"No\"][@AutomationId=\"btnNo\"]/Text[@ClassName=\"TextBlock\"][@Name=\"No\"]";
-            //    var winElem_LeftClickTextNo_14_14 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextNo_14_14);
-            //    if (winElem_LeftClickTextNo_14_14 != null)
-            //    {
-            //        winElem_LeftClickTextNo_14_14.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextNo_14_14}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Image "" at (13,21)
-            //    Console.WriteLine("LeftClick on Image \"\" at (13,21)");
-            //    string xpath_LeftClickImage_13_21 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"NextBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_13_21 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_13_21);
-            //    if (winElem_LeftClickImage_13_21 != null)
-            //    {
-            //        winElem_LeftClickImage_13_21.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_13_21}");
-            //        return;
-            //    }
-            //    count++;
-
-            //    // LeftClick on Image "" at (8,15)
-            //    Console.WriteLine("LeftClick on Image \"\" at (8,15)");
-            //    string xpath_LeftClickImage_8_15 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"NextBtn\"]/Image[@ClassName=\"Image\"]";
-            //    var winElem_LeftClickImage_8_15 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickImage_8_15);
-            //    if (winElem_LeftClickImage_8_15 != null)
-            //    {
-            //        winElem_LeftClickImage_8_15.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickImage_8_15}");
-            //        return;
-            //    }
-            //    count++;
-
-
-            //    Assert.AreEqual(count, 2);
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            PP5IDEWindow.PerformClick("/ById[MessageBoxExDialog,Close]", ClickType.LeftClick);
         }
 
-        [TestMethod("B7-1")]
-        [TestCategory("參數編輯(B7)")]
-        //B7-1
-        public void TIEditor_EditVariableWithParameterTypeConstant()
+        [TestMethod("B6-3_1")]
+        [TestCategory("命令編輯頁面搜尋(B6)")]
+        //B6-3_1
+        public void TIEditor_SearchInTestCommandEditListUp_ByPressingPreviousButton()
         {
-            // Arrange
-            string constantValue = "0";
+            // Add 2 Commands with names: "ReadAC_Current", "ReadAC_Frequency" in group: "AC Source"
+            string cmdName1 = "ReadAC_Current";
+            string cmdName2 = "ReadAC_Frequency";
+            string searchPattern = "ReadAC";
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            bool MsgBxSearchResultShowUp = true;
+            int SearchingCountExpected = 3;
+            int SearchingCountActual = 0;
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
-            // Input Command name: "ABS"
-            string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            // Add 2 commands
+            AddCommandsBy(cgt, cmdName1, cmdName2);
 
-            // Add command: "ABS"
-            AddCommandBy(GroupName, CommandName);
+            // Get the Command Edit page search box, type in cmdName2 and click search button
+            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
 
-            // LeftClick on command: "ABS"
-            Console.WriteLine("LeftClick on 1st command: \"ABS\"");
-            GetCellBy("PGGrid", 0, "Parameters").LeftClick();
+            // Keep pressing "search Previus" button until message box: "Search Result" show up
+            while (!CheckMessageBoxOpened(PP5By.Name("Search Result")))
+            {
+                PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[PreviosBtn]", ClickType.LeftClick);
+                SearchingCountActual++;
+            }
+
+            // Check search to the end message box: "Search Result" show up
+            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Name("Search Result")));
+            SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
+
+            // Close the window: "Search Result"
+            PP5IDEWindow.PerformClick("/ByIdOrName[Search Result,Close]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B6-3_2")]
+        [TestCategory("命令編輯頁面搜尋(B6)")]
+        //B6-3_2
+        public void TIEditor_SearchInTestCommandEditListUp_ByPressingShiftAndF3()
+        {
+            // Add 2 Commands with names: "ReadAC_Current", "ReadAC_Frequency" in group: "AC Source"
+            string cmdName1 = "ReadAC_Current";
+            string cmdName2 = "ReadAC_Frequency";
+            string searchPattern = "ReadAC";
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+            bool MsgBxSearchResultShowUp = true;
+            int SearchingCountExpected = 3;
+            int SearchingCountActual = 0;
+
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+
+            // Add 2 commands
+            AddCommandsBy(cgt, cmdName1, cmdName2);
+
+            // Get the Command Edit page search box, type in cmdName2 and click search button
+            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+
+            // Keep pressing "search Previus" button until message box: "Search Result" show up
+            while (!CheckMessageBoxOpened(PP5By.Name("Search Result")))
+            {
+                PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendComboKeys, new string[] { Keys.Shift, Keys.F3 });
+                SearchingCountActual++;
+            }
+
+            // Check search to the end message box: "Search Result" show up
+            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Name("Search Result")));
+            SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
+
+            // Close the window: "Search Result"
+            PP5IDEWindow.PerformClick("/ByIdOrName[Search Result,Close]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B7-1_1")]
+        [TestCategory("參數編輯(B7)")]
+        [DataRow("0", typeof(object), DisplayName = "Constant value is 0")]                                // zero
+        [DataRow("-2147483648", typeof(object), DisplayName = "Constant value is Int32 min value")]        // Int32 min value
+        [DataRow("2147483647", typeof(object), DisplayName = "Constant value is Int32 max value")]         // Int32 max value
+        //B7-1_1
+        public void TIEditor_EditVariableWithParameterTypeConstant_VerifyWithCorrectConstantValue(string ConstantValue, object dummy)
+        {
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+
+            // Input Command name: "EXP"
+            string CommandName = "EXP";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
+
+
+            // Add command: "EXP"
+            AddCommandBy(cgt, CommandName);
+
+            // LeftClick on command: "EXP"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Parameter: "Variable and constant, pvoid" > input constantValue: "0"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Constant"))
-                         .LeftClick();
-
-            SendSingleKeys(constantValue);
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
+            SendSingleKeys(ConstantValue);
 
             // Verify the constant value same as in parameter value
-            constantValue.ShouldEqualTo(GetCellValue("ParameterGrid", 0, "Parameter Value"));
+            ConstantValue.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -18761,42 +18690,70 @@ namespace PP5AutoUITests
             //}
         }
 
-        [TestMethod("B7-2")]
+        [TestMethod("B7-1_2")]
         [TestCategory("參數編輯(B7)")]
-        //B7-2
-        public void TIEditor_EditVariableWithParameterTypeTestCondition()
+        [DataRow("a", typeof(object), DisplayName = "Constant value is an alphabet")]           // alphabet
+        [DataRow(".", typeof(object), DisplayName = "Constant value is a Special character")]   // Special character
+        [DataRow("1.5", typeof(object), DisplayName = "Constant value is a float number")]      // float number
+        //B7-1_2
+        public void TIEditor_EditVariableWithParameterTypeConstant_VerifyWithIncorrectValues(string ConstantValue, object dummy)
         {
             // Arrange
-            string condVarCallName = "str_EdtBx";
+            string errorTooltipMsg = "Value must be Integer Format";
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
-            // Input Command name: "ABS"
-            string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            // Input Command name: "EXP"
+            string CommandName = "EXP";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
-            // Add command: "ABS"
-            AddCommandBy(GroupName, CommandName);
+
+            // Add command: "EXP"
+            AddCommandBy(cgt, CommandName);
+
+            // LeftClick on command: "EXP"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+
+            // first Parameter, input constantValue: "0"
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
+            SendSingleKeys(ConstantValue);
+
+            // Verify the tooltip message that indicate the error format of ConstantValue
+            AutoUIExecutor.SwitchTo(SessionType.Desktop);
+            errorTooltipMsg.ShouldEqualTo(CurrentDriver.GetToolTipMessage(((PP5Element)CurrentDriver.PerformGetElement($"/ByCell@ParameterGrid[1,3]"))));
+            //PP5IDEWindowRefresh();
+        }
+
+        [TestMethod("B7-2_1")]
+        [TestCategory("參數編輯(B7)")]
+        [DataRow("EXP", TestCmdGroupType.Arithmetic, "baseNumber_int", VariableDataType.Integer, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: EXP)")]         // Cmd is EXP
+        [DataRow("FLOOR", TestCmdGroupType.Arithmetic, "input_float", VariableDataType.Float, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: FLOOR)")]          // Cmd is FLOOR
+        [DataRow("ATOF", TestCmdGroupType.String, "ASCIIChar_string", VariableDataType.String, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: ATOF)")]          // Cmd is ATOF
+        //B7-2_1
+        public void TIEditor_EditVariableWithParameterTypeTestCondition_VerifyWithCorrectValue(string cmdName, TestCmdGroupType groupType, string condVarCallName, VariableDataType dataType, object dummy)
+        {
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+
+            // Add command
+            AddCommandBy(groupType, cmdName);
 
             // Add condition variable, where datatype: string and EditType: EditBox
-            CreateNewVariable1(VariableTabType.Condition, "str_EditBox", condVarCallName, VariableDataType.String, VariableEditType.EditBox);
+            CreateNewVariable1(VariableTabType.Condition, condVarCallName, condVarCallName, dataType, VariableEditType.EditBox);
 
-            // LeftClick on command: "ABS"
-            Console.WriteLine("LeftClick on 1st command: \"ABS\"");
-            GetCellBy("PGGrid", 0, "Parameters").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
-            // Parameter: "Variable and constant, pvoid" > select condVarCallName
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Test Condition"))
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 0, "Parameter Value").SendSingleKeys(condVarCallName);
-            Press(Keys.Enter);
+            // first Parameter, select condVarCallName
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cndRdoBtn]/ByName[Test Condition]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]")
+                        .SelectComboBoxItemByName2(condVarCallName);
 
             // Verify the condition variable is mapped to the parameter value cell
-            condVarCallName.ShouldEqualTo(GetCellValue("ParameterGrid", 0, "Parameter Value"));
+            condVarCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -19087,770 +19044,92 @@ namespace PP5AutoUITests
 
         [TestMethod("B7-3")]
         [TestCategory("參數編輯(B7)")]
+        [DataRow("EXP", TestCmdGroupType.Arithmetic, "baseNumber_int", VariableDataType.Integer, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: EXP)")]         // Cmd is EXP
+        [DataRow("FLOOR", TestCmdGroupType.Arithmetic, "input_float", VariableDataType.Float, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: FLOOR)")]          // Cmd is FLOOR
+        [DataRow("ATOF", TestCmdGroupType.String, "ASCIIChar_string", VariableDataType.String, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: ATOF)")]          // Cmd is ATOF
         //B7-3
-        public void TIEditor_EditVariableWithParameterTypeTestResult()
+        public void TIEditor_EditVariableWithParameterTypeTestResult_VerifyWithCorrectValue(string cmdName, TestCmdGroupType groupType, string resVarCallName, VariableDataType dataType, object dummy)
         {
-            // Arrange
-            string resVarCallName = "str_cn";
-
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
-            // Input Command name: "ABS"
-            string CommandName = "ABS";
-            string GroupName = "Arithmetic";
-
-            // Add command: "ABS"
-            AddCommandBy(GroupName, CommandName);
+            // Add command
+            AddCommandBy(groupType, cmdName);
 
             // Add condition variable, where datatype: string
-            CreateNewVariable2(VariableTabType.Result, "str_sn", resVarCallName, VariableDataType.String);
+            CreateNewVariable2(VariableTabType.Result, resVarCallName, resVarCallName, dataType);
 
-            // LeftClick on command: "ABS"
-            Console.WriteLine("LeftClick on 1st command: \"ABS\"");
-            GetCellBy("PGGrid", 0, "Parameters").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
-            // Parameter: "Variable and constant, pvoid" > select resVarCallName: "str_cn"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Test Result"))
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 0, "Parameter Value").SendSingleKeys(resVarCallName);
-            Press(Keys.Enter);
+            // first Parameter, select resVarCallName
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[rstRdoBtn]/ByName[Test Result]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]")
+                        .SelectComboBoxItemByName2(resVarCallName);
 
             // Verify the result variable is mapped to the parameter value cell
-            resVarCallName.ShouldEqualTo(GetCellValue("ParameterGrid", 0, "Parameter Value"));
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (92,12)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (92,12)");
-            //    string xpath_LeftClickEdit_92_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_92_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_92_12);
-            //    if (winElem_LeftClickEdit_92_12 != null)
-            //    {
-            //        winElem_LeftClickEdit_92_12.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_92_12}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "s" + Keys.LeftShift"top"Keys.LeftShift + "e" + "v" + "g" + Keys.LeftShift"ate"Keys.LeftShift + "-" + Keys.LeftShiftKeys.LeftShift + "d" + "b" + "c" + Keys.LeftShiftKeys.LeftShift + "d" + Keys.LeftShift"ata"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"s\" + Keys.LeftShift\"top\"Keys.LeftShift + \"e\" + \"v\" + \"g\" + Keys.LeftShift\"ate\"Keys.LeftShift + \"-\" + Keys.LeftShiftKeys.LeftShift + \"d\" + \"b\" + \"c\" + Keys.LeftShiftKeys.LeftShift + \"d\" + Keys.LeftShift\"ata\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "s" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("top");
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "e" + "v" + "g" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("ate");
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "-" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "d" + "b" + "c" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("ata");
-
-
-            //    // LeftClick on Button "" at (28,8)
-            //    Console.WriteLine("LeftClick on Button \"\" at (28,8)");
-            //    string xpath_LeftClickButton_28_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]";
-            //    var winElem_LeftClickButton_28_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButton_28_8);
-            //    if (winElem_LeftClickButton_28_8 != null)
-            //    {
-            //        winElem_LeftClickButton_28_8.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButton_28_8}");
-            //        return;
-            //    }
-
-
-            //    // LeftDblClick on Text "StopEVGate_DBCData" at (71,10)
-            //    Console.WriteLine("LeftDblClick on Text \"StopEVGate_DBCData\" at (71,10)");
-            //    string xpath_LeftDblClickTextStopEVGate_71_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Tree[@AutomationId=\"DeivceCmdTree\"]/TreeItem[@ClassName=\"TreeViewItem\"][starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.CmdTreeViewItemRoo\")]/TreeItem[@ClassName=\"TreeViewItem\"][starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.CmdTreeViewItemNod\")]/Text[@Name=\"StopEVGate_DBCData\"][@AutomationId=\"cmdTxtBlk\"]";
-            //    var winElem_LeftDblClickTextStopEVGate_71_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextStopEVGate_71_10);
-            //    if (winElem_LeftDblClickTextStopEVGate_71_10 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextStopEVGate_71_10.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextStopEVGate_71_10}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom "StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement." at (259,7)
-            //    Console.WriteLine("LeftClick on Custom \"StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement.\" at (259,7)");
-            //    string xpath_LeftClickCustomStopEVGate_259_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"LeftDockPanel\"][@AutomationId=\"LeftDockPanel\"]/Custom[@ClassName=\"PGGridAeraView\"]/DataGrid[@AutomationId=\"PGGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.PGGridRowViewModel\")]/Custom[starts-with(@Name,\"StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement.\")][@AutomationId=\"CommandName\"]";
-            //    var winElem_LeftClickCustomStopEVGate_259_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomStopEVGate_259_7);
-            //    if (winElem_LeftClickCustomStopEVGate_259_7 != null)
-            //    {
-            //        winElem_LeftClickCustomStopEVGate_259_7.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomStopEVGate_259_7}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG" at (120,11)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\" at (120,11)");
-            //    string xpath_LeftClickCustomItemChroma_120_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/DataGrid[@AutomationId=\"ParameterGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.ParameterGridRowVi\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\")]";
-            //    var winElem_LeftClickCustomItemChroma_120_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_120_11);
-            //    if (winElem_LeftClickCustomItemChroma_120_11 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_120_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_120_11}");
-            //        return;
-            //    }
-
-            //    // LeftClick on Text "Result" at (25,14)
-            //    Console.WriteLine("LeftClick on Text \"Result\" at (25,14)");
-            //    string xpath_LeftClickTextResult_25_14 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/RadioButton[@Name=\"Result\"][@AutomationId=\"RstRdoBtn\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Result\"]";
-            //    var winElem_LeftClickTextResult_25_14 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextResult_25_14);
-            //    if (winElem_LeftClickTextResult_25_14 != null)
-            //    {
-            //        winElem_LeftClickTextResult_25_14.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextResult_25_14}");
-            //        return;
-            //    }
-
-
-            //    // LeftDblClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow" at (59,15)
-            //    Console.WriteLine("LeftDblClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\" at (59,15)");
-            //    string xpath_LeftDblClickCustomItemChroma_59_15 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"RstGridView\"]/DataGrid[@AutomationId=\"RstGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.RstGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\")][@AutomationId=\"CallName\"]";
-            //    var winElem_LeftDblClickCustomItemChroma_59_15 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickCustomItemChroma_59_15);
-            //    if (winElem_LeftDblClickCustomItemChroma_59_15 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickCustomItemChroma_59_15.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickCustomItemChroma_59_15}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow" at (125,11)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\" at (125,11)");
-            //    string xpath_LeftClickCustomItemChroma_125_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"RstGridView\"]/DataGrid[@AutomationId=\"RstGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.RstGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\")][@AutomationId=\"CallName\"]";
-            //    var winElem_LeftClickCustomItemChroma_125_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_125_11);
-            //    if (winElem_LeftClickCustomItemChroma_125_11 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_125_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_125_11}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "r" + Keys.LeftShift"esult"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"r\" + Keys.LeftShift\"esult\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickCustomItemChroma_125_11.SendKeys(Keys.LeftShift + "r" + Keys.LeftShift);
-            //    winElem_LeftClickCustomItemChroma_125_11.SendKeys("esult");
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow" at (33,10)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\" at (33,10)");
-            //    string xpath_LeftClickCustomItemChroma_33_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"RstGridView\"]/DataGrid[@AutomationId=\"RstGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.RstGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\")][@AutomationId=\"DisplayedType\"]";
-            //    var winElem_LeftClickCustomItemChroma_33_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_33_10);
-            //    if (winElem_LeftClickCustomItemChroma_33_10 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_33_10.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_33_10}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Text "Integer" at (21,9)
-            //    Console.WriteLine("LeftClick on Text \"Integer\" at (21,9)");
-            //    string xpath_LeftClickTextInteger_21_9 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@ClassName=\"Popup\"]/Custom/List[@AutomationId=\"PART_Content\"]/ListItem[@ClassName=\"ListBoxItem\"][@Name=\"Integer\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Integer\"]";
-            //    var winElem_LeftClickTextInteger_21_9 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextInteger_21_9);
-            //    if (winElem_LeftClickTextInteger_21_9 != null)
-            //    {
-            //        winElem_LeftClickTextInteger_21_9.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextInteger_21_9}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow" at (122,12)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\" at (122,12)");
-            //    string xpath_LeftClickCustomItemChroma_122_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"RstGridView\"]/DataGrid[@AutomationId=\"RstGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.RstGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.RstGridRow\")][@AutomationId=\"ShowName\"]";
-            //    var winElem_LeftClickCustomItemChroma_122_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_122_12);
-            //    if (winElem_LeftClickCustomItemChroma_122_12 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_122_12.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_122_12}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys=""rr"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"rr\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickCustomItemChroma_122_12.SendKeys("rr");
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG" at (37,8)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\" at (37,8)");
-            //    string xpath_LeftClickCustomItemChroma_37_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/DataGrid[@AutomationId=\"ParameterGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.ParameterGridRowVi\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\")][@AutomationId=\"Value\"]";
-            //    var winElem_LeftClickCustomItemChroma_37_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_37_8);
-            //    if (winElem_LeftClickCustomItemChroma_37_8 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_37_8.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_37_8}");
-            //        return;
-            //    }
-
-
-            //    // LeftDblClick on RadioButton "Test Result" at (7,6)
-            //    Console.WriteLine("LeftDblClick on RadioButton \"Test Result\" at (7,6)");
-            //    string xpath_LeftDblClickRadioButtonTestResult_7_6 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/Pane[@ClassName=\"ScrollViewer\"]/RadioButton[@Name=\"Test Result\"][@AutomationId=\"rstRdoBtn\"]";
-            //    var winElem_LeftDblClickRadioButtonTestResult_7_6 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickRadioButtonTestResult_7_6);
-            //    if (winElem_LeftDblClickRadioButtonTestResult_7_6 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickRadioButtonTestResult_7_6.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickRadioButtonTestResult_7_6}");
-            //        return;
-            //    }
-
-
-
-            //    // LeftClick on Pane "DataPanel" at (473,107)
-            //    Console.WriteLine("LeftClick on Pane \"DataPanel\" at (473,107)");
-            //    string xpath_LeftClickPaneDataPanel_473_107 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/DataGrid[@AutomationId=\"ParameterGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]";
-            //    var winElem_LeftClickPaneDataPanel_473_107 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickPaneDataPanel_473_107);
-            //    if (winElem_LeftClickPaneDataPanel_473_107 != null)
-            //    {
-            //        winElem_LeftClickPaneDataPanel_473_107.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickPaneDataPanel_473_107}");
-            //        return;
-            //    }
-
-
-
-
-            //    Assert.AreEqual(4, 4);
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            resVarCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
         }
 
         [TestMethod("B7-4")]
         [TestCategory("參數編輯(B7)")]
+        [DataRow("EXP", TestCmdGroupType.Arithmetic, "baseNumber_int", VariableDataType.Integer, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: EXP)")]         // Cmd is EXP
+        [DataRow("FLOOR", TestCmdGroupType.Arithmetic, "input_float", VariableDataType.Float, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: FLOOR)")]          // Cmd is FLOOR
+        [DataRow("ATOF", TestCmdGroupType.String, "ASCIIChar_string", VariableDataType.String, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: ATOF)")]          // Cmd is ATOF
         //B7-4
-        public void TIEditor_EditVariableWithParameterTypeTemporaryVar()
+        public void TIEditor_EditVariableWithParameterTypeTemporaryVar_VerifyWithCorrectValue(string cmdName, TestCmdGroupType groupType, string tempVarCallName, VariableDataType dataType, object dummy)
         {
-            // Arrange
-            string tempVarCallName = "str_cn";
-
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
-            // Input Command name: "ABS"
-            string CommandName = "ABS";
-            string GroupName = "Arithmetic";
-
             // Add command: "ABS"
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(groupType, cmdName);
 
             // Add condition variable, where datatype: string
-            CreateNewVariable2(VariableTabType.Temp, "str_sn", tempVarCallName, VariableDataType.String);
+            CreateNewVariable2(VariableTabType.Temp, tempVarCallName, tempVarCallName, dataType);
 
-            // LeftClick on command: "ABS"
-            Console.WriteLine("LeftClick on 1st command: \"ABS\"");
-            GetCellBy("PGGrid", 0, "Parameters").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
-            // Parameter: "Variable and constant, pvoid" > select tempVarCallName: "str_cn"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Temporary Var."))
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 0, "Parameter Value").SendSingleKeys(tempVarCallName);
-            Press(Keys.Enter);
+            // first Parameter, select resVarCallName
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[tmpRdoBtn]/ByName[Temporary Var.]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]")
+                        .SelectComboBoxItemByName2(tempVarCallName);
 
             // Verify the temperary variable is mapped to the parameter value cell
-            tempVarCallName.ShouldEqualTo(GetCellValue("ParameterGrid", 0, "Parameter Value"));
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (92,12)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (92,12)");
-            //    string xpath_LeftClickEdit_92_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_92_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_92_12);
-            //    if (winElem_LeftClickEdit_92_12 != null)
-            //    {
-            //        winElem_LeftClickEdit_92_12.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_92_12}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "s" + Keys.LeftShift"top"Keys.LeftShift + "e" + "v" + "g" + Keys.LeftShift"ate"Keys.LeftShift + "-" + Keys.LeftShiftKeys.LeftShift + "d" + "b" + "c" + Keys.LeftShiftKeys.LeftShift + "d" + Keys.LeftShift"ata"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"s\" + Keys.LeftShift\"top\"Keys.LeftShift + \"e\" + \"v\" + \"g\" + Keys.LeftShift\"ate\"Keys.LeftShift + \"-\" + Keys.LeftShiftKeys.LeftShift + \"d\" + \"b\" + \"c\" + Keys.LeftShiftKeys.LeftShift + \"d\" + Keys.LeftShift\"ata\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "s" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("top");
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "e" + "v" + "g" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("ate");
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "-" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "d" + "b" + "c" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("ata");
-
-
-            //    // LeftClick on Button "" at (28,8)
-            //    Console.WriteLine("LeftClick on Button \"\" at (28,8)");
-            //    string xpath_LeftClickButton_28_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]";
-            //    var winElem_LeftClickButton_28_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButton_28_8);
-            //    if (winElem_LeftClickButton_28_8 != null)
-            //    {
-            //        winElem_LeftClickButton_28_8.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButton_28_8}");
-            //        return;
-            //    }
-
-
-            //    // LeftDblClick on Text "StopEVGate_DBCData" at (71,10)
-            //    Console.WriteLine("LeftDblClick on Text \"StopEVGate_DBCData\" at (71,10)");
-            //    string xpath_LeftDblClickTextStopEVGate_71_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Tree[@AutomationId=\"DeivceCmdTree\"]/TreeItem[@ClassName=\"TreeViewItem\"][starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.CmdTreeViewItemRoo\")]/TreeItem[@ClassName=\"TreeViewItem\"][starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.CmdTreeViewItemNod\")]/Text[@Name=\"StopEVGate_DBCData\"][@AutomationId=\"cmdTxtBlk\"]";
-            //    var winElem_LeftDblClickTextStopEVGate_71_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextStopEVGate_71_10);
-            //    if (winElem_LeftDblClickTextStopEVGate_71_10 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextStopEVGate_71_10.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextStopEVGate_71_10}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom "StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement." at (259,7)
-            //    Console.WriteLine("LeftClick on Custom \"StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement.\" at (259,7)");
-            //    string xpath_LeftClickCustomStopEVGate_259_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"LeftDockPanel\"][@AutomationId=\"LeftDockPanel\"]/Custom[@ClassName=\"PGGridAeraView\"]/DataGrid[@AutomationId=\"PGGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.PGGridRowViewModel\")]/Custom[starts-with(@Name,\"StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement.\")][@AutomationId=\"CommandName\"]";
-            //    var winElem_LeftClickCustomStopEVGate_259_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomStopEVGate_259_7);
-            //    if (winElem_LeftClickCustomStopEVGate_259_7 != null)
-            //    {
-            //        winElem_LeftClickCustomStopEVGate_259_7.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomStopEVGate_259_7}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG" at (120,11)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\" at (120,11)");
-            //    string xpath_LeftClickCustomItemChroma_120_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/DataGrid[@AutomationId=\"ParameterGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.ParameterGridRowVi\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\")]";
-            //    var winElem_LeftClickCustomItemChroma_120_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_120_11);
-            //    if (winElem_LeftClickCustomItemChroma_120_11 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_120_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_120_11}");
-            //        return;
-            //    }
-
-            //    // LeftClick on Text "Temp" at (16,7)
-            //    Console.WriteLine("LeftClick on Text \"Temp\" at (16,7)");
-            //    string xpath_LeftClickTextTemp_16_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/RadioButton[@Name=\"Temp\"][@AutomationId=\"TmpRdoBtn\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Temp\"]";
-            //    var winElem_LeftClickTextTemp_16_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextTemp_16_7);
-            //    if (winElem_LeftClickTextTemp_16_7 != null)
-            //    {
-            //        winElem_LeftClickTextTemp_16_7.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextTemp_16_7}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow" at (41,11)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\" at (41,11)");
-            //    string xpath_LeftClickCustomItemChroma_41_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"TmpGridView\"]/DataGrid[@AutomationId=\"TmpGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.TmpGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\")][@AutomationId=\"CallName\"]";
-            //    var winElem_LeftClickCustomItemChroma_41_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_41_11);
-            //    if (winElem_LeftClickCustomItemChroma_41_11 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_41_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_41_11}");
-            //        return;
-            //    }
-
-
-            //    // LeftDblClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow" at (31,8)
-            //    Console.WriteLine("LeftDblClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\" at (31,8)");
-            //    string xpath_LeftDblClickCustomItemChroma_31_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"TmpGridView\"]/DataGrid[@AutomationId=\"TmpGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.TmpGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\")][@AutomationId=\"CallName\"]";
-            //    var winElem_LeftDblClickCustomItemChroma_31_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickCustomItemChroma_31_8);
-            //    if (winElem_LeftDblClickCustomItemChroma_31_8 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickCustomItemChroma_31_8.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickCustomItemChroma_31_8}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow" at (72,10)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\" at (72,10)");
-            //    string xpath_LeftClickCustomItemChroma_72_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"TmpGridView\"]/DataGrid[@AutomationId=\"TmpGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.TmpGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\")][@AutomationId=\"CallName\"]";
-            //    var winElem_LeftClickCustomItemChroma_72_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_72_10);
-            //    if (winElem_LeftClickCustomItemChroma_72_10 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_72_10.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_72_10}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys=""temp"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"temp\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickCustomItemChroma_72_10.SendKeys("temp");
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow" at (50,11)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\" at (50,11)");
-            //    string xpath_LeftClickCustomItemChroma_50_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"TmpGridView\"]/DataGrid[@AutomationId=\"TmpGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.TmpGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\")][@AutomationId=\"DisplayedType\"]";
-            //    var winElem_LeftClickCustomItemChroma_50_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_50_11);
-            //    if (winElem_LeftClickCustomItemChroma_50_11 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_50_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_50_11}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Text "Integer" at (15,12)
-            //    Console.WriteLine("LeftClick on Text \"Integer\" at (15,12)");
-            //    string xpath_LeftClickTextInteger_15_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Window[@ClassName=\"Popup\"]/Custom/List[@AutomationId=\"PART_Content\"]/ListItem[@ClassName=\"ListBoxItem\"][@Name=\"Integer\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Integer\"]";
-            //    var winElem_LeftClickTextInteger_15_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickTextInteger_15_12);
-            //    if (winElem_LeftClickTextInteger_15_12 != null)
-            //    {
-            //        winElem_LeftClickTextInteger_15_12.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickTextInteger_15_12}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow" at (151,3)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\" at (151,3)");
-            //    string xpath_LeftClickCustomItemChroma_151_3 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"TmpGridView\"]/DataGrid[@AutomationId=\"TmpGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.TmpGridRowViewMode\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.TmpGridRow\")][@AutomationId=\"ShowName\"]";
-            //    var winElem_LeftClickCustomItemChroma_151_3 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_151_3);
-            //    if (winElem_LeftClickCustomItemChroma_151_3 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_151_3.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_151_3}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys=""tt"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"\"tt\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickCustomItemChroma_151_3.SendKeys("tt");
-
-
-            //    // LeftDblClick on RadioButton "Temporary Var." at (11,10)
-            //    Console.WriteLine("LeftDblClick on RadioButton \"Temporary Var.\" at (11,10)");
-            //    string xpath_LeftDblClickRadioButtonTemporaryV_11_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/Pane[@ClassName=\"ScrollViewer\"]/RadioButton[@Name=\"Temporary Var.\"][@AutomationId=\"tmpRdoBtn\"]";
-            //    var winElem_LeftDblClickRadioButtonTemporaryV_11_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickRadioButtonTemporaryV_11_10);
-            //    if (winElem_LeftDblClickRadioButtonTemporaryV_11_10 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickRadioButtonTemporaryV_11_10.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickRadioButtonTemporaryV_11_10}");
-            //        return;
-            //    }
-
-
-
-            //    Assert.AreEqual(4, 4);
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            tempVarCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
         }
 
         [TestMethod("B7-5")]
         [TestCategory("參數編輯(B7)")]
+        [DataRow("EXP", TestCmdGroupType.Arithmetic, "baseNumber_int", VariableDataType.Integer, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: EXP)")]         // Cmd is EXP
+        [DataRow("FLOOR", TestCmdGroupType.Arithmetic, "input_float", VariableDataType.Float, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: FLOOR)")]          // Cmd is FLOOR
+        [DataRow("ATOF", TestCmdGroupType.String, "ASCIIChar_string", VariableDataType.String, typeof(object), DisplayName = "Verify Test condition callName on parameter cell (cmd: ATOF)")]          // Cmd is ATOF
         //B7-5
-        public void TIEditor_EditVariableWithParameterTypeGlobalVar()
+        public void TIEditor_EditVariableWithParameterTypeGlobalVar_VerifyWithCorrectValue(string cmdName, TestCmdGroupType groupType, string glbVarCallName, VariableDataType dataType, object dummy)
         {
-            // Arrange
-            string glbVarCallName = "str_cn";
-
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
-            // Input Command name: "ABS"
-            string CommandName = "ABS";
-            string GroupName = "Arithmetic";
-
             // Add command: "ABS"
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(groupType, cmdName);
 
             // Add condition variable, where datatype: string
-            CreateNewVariable1(VariableTabType.Global, "str_sn", glbVarCallName, VariableDataType.String, VariableEditType.EditBox);
+            CreateNewVariable1(VariableTabType.Global, glbVarCallName, glbVarCallName, dataType, VariableEditType.EditBox);
 
-            // LeftClick on command: "ABS"
-            Console.WriteLine("LeftClick on 1st command: \"ABS\"");
-            GetCellBy("PGGrid", 0, "Parameters").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
-            // Parameter: "Variable and constant, pvoid" > select glbVarCallName: "str_cn"
-            GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            CurrentDriver.GetElement(MobileBy.AccessibilityId("editParamAreaView"))
-                         .GetElement(By.Name("Global Var."))
-                         .LeftClick();
-
-            GetCellBy("ParameterGrid", 0, "Parameter Value").SendSingleKeys(glbVarCallName);
-            Press(Keys.Enter);
+            // first Parameter, select resVarCallName
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]")
+                        .SelectComboBoxItemByName2(glbVarCallName);
 
             // Verify the global variable is mapped to the parameter value cell
-            glbVarCallName.ShouldEqualTo(GetCellValue("ParameterGrid", 0, "Parameter Value"));
-
-            ////MainPanel_TIEditor_OpenNewTI();
-            //TimeSpan.FromSeconds(2);
-
-            //bool bSuccess = false;
-
-            //try
-            //{
-            //    // LeftClick on Edit "" at (92,12)
-            //    Console.WriteLine("LeftClick on Edit \"\" at (92,12)");
-            //    string xpath_LeftClickEdit_92_12 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Edit[@AutomationId=\"searchText\"]";
-            //    var winElem_LeftClickEdit_92_12 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickEdit_92_12);
-            //    if (winElem_LeftClickEdit_92_12 != null)
-            //    {
-            //        winElem_LeftClickEdit_92_12.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickEdit_92_12}");
-            //        return;
-            //    }
-
-
-            //    // KeyboardInput VirtualKeys="Keys.LeftShift + "s" + Keys.LeftShift"top"Keys.LeftShift + "e" + "v" + "g" + Keys.LeftShift"ate"Keys.LeftShift + "-" + Keys.LeftShiftKeys.LeftShift + "d" + "b" + "c" + Keys.LeftShiftKeys.LeftShift + "d" + Keys.LeftShift"ata"" CapsLock=False NumLock=True ScrollLock=False
-            //    Console.WriteLine("KeyboardInput VirtualKeys=\"Keys.LeftShift + \"s\" + Keys.LeftShift\"top\"Keys.LeftShift + \"e\" + \"v\" + \"g\" + Keys.LeftShift\"ate\"Keys.LeftShift + \"-\" + Keys.LeftShiftKeys.LeftShift + \"d\" + \"b\" + \"c\" + Keys.LeftShiftKeys.LeftShift + \"d\" + Keys.LeftShift\"ata\"\" CapsLock=False NumLock=True ScrollLock=False");
-            //    System.Threading.Thread.Sleep(100);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "s" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("top");
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "e" + "v" + "g" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("ate");
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "-" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "d" + "b" + "c" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys(Keys.LeftShift + "d" + Keys.LeftShift);
-            //    winElem_LeftClickEdit_92_12.SendKeys("ata");
-
-
-            //    // LeftClick on Button "" at (28,8)
-            //    Console.WriteLine("LeftClick on Button \"\" at (28,8)");
-            //    string xpath_LeftClickButton_28_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@AutomationId=\"searchBox\"]/Button[@AutomationId=\"SearchBtn\"]";
-            //    var winElem_LeftClickButton_28_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickButton_28_8);
-            //    if (winElem_LeftClickButton_28_8 != null)
-            //    {
-            //        winElem_LeftClickButton_28_8.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickButton_28_8}");
-            //        return;
-            //    }
-
-
-            //    // LeftDblClick on Text "StopEVGate_DBCData" at (71,10)
-            //    Console.WriteLine("LeftDblClick on Text \"StopEVGate_DBCData\" at (71,10)");
-            //    string xpath_LeftDblClickTextStopEVGate_71_10 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem2\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"CmdTreeView\"]/Pane[@ClassName=\"ScrollViewer\"]/Tree[@AutomationId=\"DeivceCmdTree\"]/TreeItem[@ClassName=\"TreeViewItem\"][starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.CmdTreeViewItemRoo\")]/TreeItem[@ClassName=\"TreeViewItem\"][starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.CmdTreeViewItemNod\")]/Text[@Name=\"StopEVGate_DBCData\"][@AutomationId=\"cmdTxtBlk\"]";
-            //    var winElem_LeftDblClickTextStopEVGate_71_10 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextStopEVGate_71_10);
-            //    if (winElem_LeftDblClickTextStopEVGate_71_10 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextStopEVGate_71_10.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextStopEVGate_71_10}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom "StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement." at (259,7)
-            //    Console.WriteLine("LeftClick on Custom \"StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement.\" at (259,7)");
-            //    string xpath_LeftClickCustomStopEVGate_259_7 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"LeftDockPanel\"][@AutomationId=\"LeftDockPanel\"]/Custom[@ClassName=\"PGGridAeraView\"]/DataGrid[@AutomationId=\"PGGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.PGGridRowViewModel\")]/Custom[starts-with(@Name,\"StopEVGate_DBCData, Item: Chroma.TestItemEditor.ComposedElement.\")][@AutomationId=\"CommandName\"]";
-            //    var winElem_LeftClickCustomStopEVGate_259_7 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomStopEVGate_259_7);
-            //    if (winElem_LeftClickCustomStopEVGate_259_7 != null)
-            //    {
-            //        winElem_LeftClickCustomStopEVGate_259_7.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomStopEVGate_259_7}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom ", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG" at (120,11)
-            //    Console.WriteLine("LeftClick on Custom \", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\" at (120,11)");
-            //    string xpath_LeftClickCustomItemChroma_120_11 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/DataGrid[@AutomationId=\"ParameterGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.ParameterGridRowVi\")]/Custom[starts-with(@Name,\", Item: Chroma.TestItemEditor.ComposedElement.Default.ParameterG\")]";
-            //    var winElem_LeftClickCustomItemChroma_120_11 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomItemChroma_120_11);
-            //    if (winElem_LeftClickCustomItemChroma_120_11 != null)
-            //    {
-            //        winElem_LeftClickCustomItemChroma_120_11.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomItemChroma_120_11}");
-            //        return;
-            //    }
-
-            //    // LeftDblClick on Text "Global" at (17,8)
-            //    Console.WriteLine("LeftDblClick on Text \"Global\" at (17,8)");
-            //    string xpath_LeftDblClickTextGlobal_17_8 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/RadioButton[@Name=\"Global\"][@AutomationId=\"GlbRdoBtn\"]/Text[@ClassName=\"TextBlock\"][@Name=\"Global\"]";
-            //    var winElem_LeftDblClickTextGlobal_17_8 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickTextGlobal_17_8);
-            //    if (winElem_LeftDblClickTextGlobal_17_8 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickTextGlobal_17_8.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickTextGlobal_17_8}");
-            //        return;
-            //    }
-
-
-            //    // LeftClick on Custom "Insrc_Type, Item: Chroma.TestItemEditor.ComposedElement.Default." at (121,13)
-            //    Console.WriteLine("LeftClick on Custom \"Insrc_Type, Item: Chroma.TestItemEditor.ComposedElement.Default.\" at (121,13)");
-            //    string xpath_LeftClickCustomInsrc_Type_121_13 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem8\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@ClassName=\"GlbGridView\"]/DataGrid[@AutomationId=\"GlbGrid\"]/Pane[@Name=\"DataPanel\"][@AutomationId=\"dataPresenter\"]/DataItem[starts-with(@Name,\"Chroma.TestItemEditor.ComposedElement.Default.GlbGridRowViewMode\")]/Custom[starts-with(@Name,\"Insrc_Type, Item: Chroma.TestItemEditor.ComposedElement.Default.\")][@AutomationId=\"CallName\"]";
-            //    var winElem_LeftClickCustomInsrc_Type_121_13 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftClickCustomInsrc_Type_121_13);
-            //    if (winElem_LeftClickCustomInsrc_Type_121_13 != null)
-            //    {
-            //        winElem_LeftClickCustomInsrc_Type_121_13.Click();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftClickCustomInsrc_Type_121_13}");
-            //        return;
-            //    }
-
-
-            //    // LeftDblClick on RadioButton "Global Var." at (8,6)
-            //    Console.WriteLine("LeftDblClick on RadioButton \"Global Var.\" at (8,6)");
-            //    string xpath_LeftDblClickRadioButtonGlobalVar_8_6 = "/Pane[@ClassName=\"#32769\"][@Name=\"桌面 1\"]/Window[@ClassName=\"Window\"]/Custom[@AutomationId=\"Container\"]/Pane[@ClassName=\"ScrollViewer\"]/Custom[@ClassName=\"MainControl\"]/Group[@Name=\"dockManager\"][@AutomationId=\"dockManager\"]/Group[@Name=\"dockItem1\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem4\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem5\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem6\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem3\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem9\"][starts-with(@AutomationId,\"dockItem\")]/Group[@Name=\"dockItem7\"][starts-with(@AutomationId,\"dockItem\")]/Custom[@AutomationId=\"editParamAreaView\"]/Pane[@ClassName=\"ScrollViewer\"]/RadioButton[@Name=\"Global Var.\"][@AutomationId=\"glbRdoBtn\"]";
-            //    var winElem_LeftDblClickRadioButtonGlobalVar_8_6 = AutoUIExecutor.FindElementByAbsoluteXPath(xpath_LeftDblClickRadioButtonGlobalVar_8_6);
-            //    if (winElem_LeftDblClickRadioButtonGlobalVar_8_6 != null)
-            //    {
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.MouseMove(winElem_LeftDblClickRadioButtonGlobalVar_8_6.Coordinates);
-            //        AutoUIExecutor.DesktopSessionElement.Mouse.DoubleClick(null);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Failed to find element using xpath: {xpath_LeftDblClickRadioButtonGlobalVar_8_6}");
-            //        return;
-            //    }
-
-
-
-            //    Assert.AreEqual(4, 4);
-
-
-            //    bSuccess = true;
-            //}
-
-            //finally
-            //{
-            //    Assert.AreEqual(bSuccess, true);
-            //}
+            glbVarCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
         }
 
         [TestMethod("B7-6")]
@@ -19866,59 +19145,52 @@ namespace PP5AutoUITests
 
             // Input Command name: "If_Then"
             string CommandName = "If_Then";
-            string GroupName = "System, Flow Control";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
 
             // Add command: "If_Then"
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
-            // LeftClick on Text "If_Then"
-            Console.WriteLine("LeftClick on Text \"If_Then\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Edit the 2nd parameter of this command > select operator item: ">"
-            GetCellBy("ParameterGrid", 1, "Parameter Value").DoubleClick();
-            ComboBoxSelectByName("PART_Content", expectedOperator);
+            //PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,3]", ClickType.LeftDoubleClick);
+            //ComboBoxSelectByName("PART_Content", expectedOperator);
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[2,3]")
+                        .SelectComboBoxItemByName2(expectedOperator);
 
             // Check the operator is ">"
-            expectedOperator.ShouldEqualTo(GetCellValue("ParameterGrid", 1, "Parameter Value"));
+            //expectedOperator.ShouldEqualTo(GetCellValue("ParameterGrid", 1, "Parameter Value"));
+            expectedOperator.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[2,3]").GetText());
         }
 
         [TestMethod("B7-7")]
         [TestCategory("參數編輯(B7)")]
+        [DataRow("TestFAIL", typeof(object), DisplayName = "Verify label is TestFAIL")]     // label is TestFAIL
+        [DataRow("TestPASS", typeof(object), DisplayName = "Verify label is TestPASS")]     // label is TestPASS
         //B7-7
-        public void TIEditor_EditVariableWithParameterTypeLabel()
+        public void TIEditor_EditVariableWithParameterTypeLabel(string label, object dummy)
         {
-            // Arrange
-            string TestFailLabel = "TestFAIL";
-            string TestPassLabel = "TestPASS";
-
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input Command name: "If_Then"
             string CommandName = "If_Then";
-            string GroupName = "System, Flow Control";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
 
             // Add command: "If_Then"
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
-            // LeftClick on Text "If_Then"
-            Console.WriteLine("LeftClick on Text \"If_Then\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Edit the 4th parameter of this command > Label selection on TestFail and TestPass
-            GetCellBy("ParameterGrid", 3, "No").LeftClick();
-            GetCellBy("ParameterGrid", 3, "Parameter Value").LeftClick();
-            ComboBoxSelectByName("PART_Content", TestFailLabel);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[4,@No]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[4,@Parameter Value]")
+                        .SelectComboBoxItemByName2(label);
 
-            // Check the label is "TestFail"
-            TestFailLabel.ShouldEqualTo(GetCellValue("ParameterGrid", 3, "Parameter Value"));
-
-            GetCellBy("ParameterGrid", 3, "Parameter Value").LeftClick();
-            ComboBoxSelectByName("PART_Content", TestPassLabel);
-
-            // Check the label is "TestPass"
-            TestPassLabel.ShouldEqualTo(GetCellValue("ParameterGrid", 3, "Parameter Value"));
+            // Check the label is same as input
+            label.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[4,@Parameter Value]").GetText());
         }
 
         [TestMethod("B7-8")]
@@ -19927,208 +19199,5624 @@ namespace PP5AutoUITests
         public void TIEditor_EditVariableWithParameterTypeExpression()
         {
             // Arrange
-            string expressionText = "\"\"Insrc_Type\"+1\"";
+            string expressionText = "\"\"Input_Power\"+1>0\"";
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input Command name: "If"
             string CommandName = "If";
-            string GroupName = "System, Flow Control";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
 
             // Add command: "If"
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
-            // LeftClick on Text "If"
-            Console.WriteLine("LeftClick on Text \"If\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Edit the 1st parameter of this command > input the expression: "Insrc_Type+1
-            GetCellBy("ParameterGrid", 0, "Parameter Value").LeftClick();
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@Parameter Value]", ClickType.LeftClick);
 
-            IWebElement expressionWindow = CurrentDriver.GetElement(By.Name(PowerPro5Config.IDE_TIEditorWindowName))
-                                                        .GetFirstChildOfControlType(ElementControlType.Window);
+            IElement expressionWindow = PP5IDEWindow.PerformGetElement("/Window[Expression Editor]");
 
-            expressionWindow.GetElement(MobileBy.AccessibilityId("UI_textbox")).LeftClick();
+            expressionWindow.PerformClick("/ById[TB_Value,UI_textbox]", ClickType.LeftClick);
+
             SendSingleKeys("\"");
-            ComboBoxSelectByIndex("UI_combobox", 0, supportKeyInputSearch: false);
-            SendSingleKeys("+");
-            ComboBoxSelectByIndex("UI_combobox", 0, supportKeyInputSearch: false);
-            SendSingleKeys("1");
+            expressionWindow.PerformGetElement("/ById[UI_combobox]")
+                            .ComboBoxSelectByIndex(0);
+            SendSingleKeys("\"");
+            SendSingleKeys("+1>0");
 
-            var okButton = expressionWindow.GetBtnElement("Ok");
-            while (!okButton.Enabled)
-            {
-                expressionWindow.GetBtnElement("Check").LeftClick();
-            }
+            var okButton = expressionWindow.PerformGetElement("/ByName[Ok]");
+            expressionWindow.PerformClick("/ByName[Check]", ClickType.LeftClick);
             okButton.LeftClick();
 
             // Check the expression string is selected
-            expressionText.ShouldEqualTo(GetCellValue("ParameterGrid", 0, "Parameter Value"));
+            expressionText.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,@Parameter Value]").GetText());
+            //Assert.That.StringEquals(expressionText, PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,@Parameter Value]").GetText());
         }
 
-        [TestMethod("B7-9")]
+        [TestMethod("B7-9_1")]
         [TestCategory("參數編輯(B7)")]
-        //B7-9
-        public void TIEditor_EditVariableWithParameterTypeFuncPar()
+        [DataRow(1, typeof(object), DisplayName = "Verify parameter mapping with 1 parameter (Data Type: Constant)")]
+        [DataRow(2, typeof(object), DisplayName = "Verify parameter mapping with 2 parameters (Data Type: Constant)")]
+        //B7-9_1
+        public void TIEditor_EditVariableWithParameterTypeFuncPar_MapConstantParameter(int paramCount, object dummy)
         {
-            // Arrange
-            string expressionText = "\"1\"";
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+
+            // Input Command name: "Call_Dll"
+            string CommandName = "Call_Dll";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
+
+            // Add command: "Call_Dll"
+            AddCommandBy(cgt, CommandName);
+
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+
+            // Edit the 1st parameter of this command > input the expression: "Insrc_Type+1
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@Parameter Value]", InputType.SendSingleKeys, paramCount.ToString());
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@Parameter Value]", ClickType.LeftClick);
+
+            IElement funcParEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Func Parameter Editor]");
+
+            for (int iter = 1; iter <= paramCount; iter++)
+            {
+                funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
+                funcParEdtWindow.PerformClick("/ById[CntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
+                funcParEdtWindow.PerformInput($"/ByCell@MappingGrid[{iter},@Mapping Parameter]", InputType.SendSingleKeys, iter.ToString());
+                Press(Keys.Enter);
+            }
+
+            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            // Check the expression string is selected
+            StringBuilder expTextSb = new StringBuilder();
+            string expText;
+            for (int iter = 1; iter <= paramCount; iter++)
+                expTextSb.AppendFormat("{0},", iter);
+            expTextSb.Remove(expTextSb.Length - 1, 1);
+            expText = "\"" + expTextSb.ToString() + "\"";
+
+            expText.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[5,@Parameter Value]").GetText());
+        }
+
+        [TestMethod("B7-9_2")]
+        [TestCategory("參數編輯(B7)")]
+        [DataRow(1, "param1", typeof(object), DisplayName = "Verify parameter mapping with 1 parameter (Data Type: Condition)")]
+        [DataRow(2, "param1,param2", typeof(object), DisplayName = "Verify parameter mapping with 2 parameters (Data Type: Condition)")]
+        //B7-9_2
+        public void TIEditor_EditVariableWithParameterTypeFuncPar_MapConditionParameter(int paramCount, string condVarNameStr, object dummy)
+        {
+            // Add 1 condition variable
+            string[] condVarNames = condVarNameStr.Split(',');
+            for (int iter = 0; iter < paramCount; iter++)
+                CreateNewVariable1(VariableTabType.Condition, condVarNames[iter], condVarNames[iter], VariableDataType.String, VariableEditType.EditBox);
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input Command name: "Call_Dll"
             string CommandName = "Call_Dll";
-            string GroupName = "System, Flow Control";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
 
             // Add command: "Call_Dll"
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
-            // LeftClick on Text "Call_Dll"
-            Console.WriteLine("LeftClick on Text \"Call_Dll\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
             // Edit the 1st parameter of this command > input the expression: "Insrc_Type+1
-            GetCellBy("ParameterGrid", 3, "Parameter Value").SendSingleKeys("1");
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@Parameter Value]", InputType.SendSingleKeys, paramCount.ToString());
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@Parameter Value]", ClickType.LeftClick);
 
-            GetCellBy("ParameterGrid", 4, "Parameter Value").LeftClick();
+            IElement funcParEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Func Parameter Editor]");
 
-            IWebElement funcParEdtWindow = CurrentDriver.GetElement(By.Name(PowerPro5Config.IDE_TIEditorWindowName))
-                                                        .GetFirstChildOfControlType(ElementControlType.Window);
-
-            var dgFuncPar = funcParEdtWindow.GetFirstDataGridElement();
-
-            dgFuncPar.GetCellBy(rowNo: 1, colName: "No").LeftClick();
-            funcParEdtWindow.GetElement(By.Name("Constant")).LeftClick();
-
-            dgFuncPar.GetCellBy(rowNo: 1, colName: "Mapping Parameter")
-                     .SendSingleKeys(expressionText.Trim('\"'));
-
-            var okButton = funcParEdtWindow.GetBtnElement("Ok");
-            while (!okButton.Enabled)
+            for (int iter = 1; iter <= paramCount; iter++)
             {
-                Press(Keys.Enter);
+                funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
+                funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+                funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
+                                .ComboBoxSelectByName(condVarNames[iter - 1]);
             }
-            okButton.LeftClick();
+
+            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
 
             // Check the expression string is selected
-            expressionText.ShouldEqualTo(GetCellValue("ParameterGrid", 4, "Parameter Value"));
+            StringBuilder expTextSb = new StringBuilder();
+            string expText;
+            for (int iter = 0; iter < paramCount; iter++)
+                expTextSb.AppendFormat("{0},", condVarNames[iter]);
+            expTextSb.Remove(expTextSb.Length - 1, 1);
+            expText = "\"" + expTextSb.ToString() + "\"";
+
+            expText.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[5,@Parameter Value]").GetText());
         }
 
-        [TestMethod("B7-11")]
+        [TestMethod("B7-9_3")]
         [TestCategory("參數編輯(B7)")]
-        //B7-11
-        public void TIEditor_EditVariableWithParameterTypeTICondition()
+        [DataRow(1, "param1", typeof(object), DisplayName = "Verify parameter mapping with 1 parameter (Data Type: Result)")]
+        [DataRow(2, "param1,param2", typeof(object), DisplayName = "Verify parameter mapping with 2 parameters (Data Type: Result)")]
+        //B7-9_3
+        public void TIEditor_EditVariableWithParameterTypeFuncPar_MapResultParameter(int paramCount, string resVarNameStr, object dummy)
         {
+            // Add 1 Result variable
+            string[] resVarNames = resVarNameStr.Split(',');
+            for (int iter = 0; iter < paramCount; iter++)
+                CreateNewVariable2(VariableTabType.Result, resVarNames[iter], resVarNames[iter], VariableDataType.String);
+
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
 
-            // Input Command name: "LoadIntArrayToBinaryStringArray"
-            string CommandName = "LoadIntArrayToBinaryStringArray";
-            string GroupName = "Sub TI";
+            // Input Command name: "Call_Dll"
+            string CommandName = "Call_Dll";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
 
-            // Add command: "LoadIntArrayToBinaryStringArray"
-            AddCommandBy(GroupName, CommandName);
+            // Add command: "Call_Dll"
+            AddCommandBy(cgt, CommandName);
 
-            // LeftClick on Text "LoadIntArrayToBinaryStringArray"
-            Console.WriteLine("LeftClick on Text \"LoadIntArrayToBinaryStringArray\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
 
-            // Edit the 2nd parameter of this command > Test Item Var Editor popup
-            GetCellBy("ParameterGrid", 1, "Parameter Value").LeftClick();
+            // Edit the 1st parameter of this command > input the expression: "Insrc_Type+1
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@Parameter Value]", InputType.SendSingleKeys, paramCount.ToString());
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@Parameter Value]", ClickType.LeftClick);
 
-            IWebElement tiVarEdtWindow = CurrentDriver.GetElement(By.Name(PowerPro5Config.IDE_TIEditorWindowName))
-                                                      .GetFirstChildOfControlType(ElementControlType.Window);
+            IElement funcParEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Func Parameter Editor]");
 
-            IWebElement dgMapping = tiVarEdtWindow.GetFirstDataGridElement();
-
-            // Get default values of the mapping parameters
-            tiVarEdtWindow.GetBtnElement("Default").LeftClick();
-            string mappingValuePara1 = dgMapping.GetCellValue(rowNo: 1, colName: "Mapping Parameter");
-            string mappingValuePara2 = dgMapping.GetCellValue(rowNo: 2, colName: "Mapping Parameter");
-
-            tiVarEdtWindow.GetBtnElement("Scan").LeftClick();
-            string mappingPara1 = dgMapping.GetCellValue(rowNo: 1, colName: "New Parameter");
-            string mappingPara2 = dgMapping.GetCellValue(rowNo: 2, colName: "New Parameter");
-
-            IWebElement okButton = tiVarEdtWindow.GetBtnElement("Ok");
-            while (!okButton.Enabled)
+            for (int iter = 1; iter <= paramCount; iter++)
             {
-                Press(Keys.Enter);
+                funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
+                funcParEdtWindow.PerformClick("/ById[RstRdoBtn]/ByName[Result]", ClickType.LeftClick);
+                funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
+                                .ComboBoxSelectByName(resVarNames[iter - 1]);
             }
-            okButton.LeftClick();
 
-            // Check the 2nd parameter string is correct
-            string conditionText = $"\"\"{mappingPara1},{mappingPara2}\"\"";
-            conditionText.ShouldEqualTo(GetCellValue("ParameterGrid", 1, "Parameter Value"));
+            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
 
+            // Check the expression string is selected
+            StringBuilder expTextSb = new StringBuilder();
+            string expText;
+            for (int iter = 0; iter < paramCount; iter++)
+                expTextSb.AppendFormat("{0},", resVarNames[iter]);
+            expTextSb.Remove(expTextSb.Length - 1, 1);
+            expText = "\"" + expTextSb.ToString() + "\"";
+
+            expText.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[5,@Parameter Value]").GetText());
+        }
+
+        [TestMethod("B7-9_4")]
+        [TestCategory("參數編輯(B7)")]
+        [DataRow(1, "param1", typeof(object), DisplayName = "Verify parameter mapping with 1 parameter (Data Type: Temp)")]
+        [DataRow(2, "param1,param2", typeof(object), DisplayName = "Verify parameter mapping with 2 parameters (Data Type: Temp)")]
+        //B7-9_4
+        public void TIEditor_EditVariableWithParameterTypeFuncPar_MapTempParameter(int paramCount, string tempVarNameStr, object dummy)
+        {
+            // Add 1 Temp variable
+            string[] tempVarNames = tempVarNameStr.Split(',');
+            for (int iter = 0; iter < paramCount; iter++)
+                CreateNewVariable2(VariableTabType.Temp, tempVarNames[iter], tempVarNames[iter], VariableDataType.String);
+
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+
+            // Input Command name: "Call_Dll"
+            string CommandName = "Call_Dll";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
+
+            // Add command: "Call_Dll"
+            AddCommandBy(cgt, CommandName);
+
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+
+            // Edit the 1st parameter of this command > input the expression: "Insrc_Type+1
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@Parameter Value]", InputType.SendSingleKeys, paramCount.ToString());
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@Parameter Value]", ClickType.LeftClick);
+
+            IElement funcParEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Func Parameter Editor]");
+
+            for (int iter = 1; iter <= paramCount; iter++)
+            {
+                funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
+                PP5IDEWindow.PerformClick("/ById[TmpRdoBtn]/ByName[Temporary]", ClickType.LeftClick);
+                funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
+                                .ComboBoxSelectByName(tempVarNames[iter - 1]);
+            }
+
+            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            // Check the expression string is selected
+            StringBuilder expTextSb = new StringBuilder();
+            string expText;
+            for (int iter = 0; iter < paramCount; iter++)
+                expTextSb.AppendFormat("{0},", tempVarNames[iter]);
+            expTextSb.Remove(expTextSb.Length - 1, 1);
+            expText = "\"" + expTextSb.ToString() + "\"";
+
+            expText.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[5,@Parameter Value]").GetText());
+        }
+
+        [TestMethod("B7-9_5")]
+        [TestCategory("參數編輯(B7)")]
+        [DataRow(1, "param1", typeof(object), DisplayName = "Verify parameter mapping with 1 parameter (Data Type: Global)")]
+        [DataRow(2, "param1,param2", typeof(object), DisplayName = "Verify parameter mapping with 2 parameters (Data Type: Global)")]
+        //B7-9_5
+        public void TIEditor_EditVariableWithParameterTypeFuncPar_MapGlobalParameter(int paramCount, string glbVarNameStr, object dummy)
+        {
+            // Add 1 Global variable
+            string[] glbVarNames = glbVarNameStr.Split(',');
+            for (int iter = 0; iter < paramCount; iter++)
+                CreateNewVariable1(VariableTabType.Global, glbVarNames[iter], glbVarNames[iter], VariableDataType.String, VariableEditType.EditBox);
+
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+
+            // Input Command name: "Call_Dll"
+            string CommandName = "Call_Dll";
+            TestCmdGroupType cgt = TestCmdGroupType.System_Flow_Control;
+
+            // Add command: "Call_Dll"
+            AddCommandBy(cgt, CommandName);
+
+            // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+
+            // Edit the 1st parameter of this command > input the expression: "Insrc_Type+1
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@Parameter Value]", InputType.SendSingleKeys, paramCount.ToString());
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@Parameter Value]", ClickType.LeftClick);
+
+            IElement funcParEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Func Parameter Editor]");
+
+            for (int iter = 1; iter <= paramCount; iter++)
+            {
+                funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
+                funcParEdtWindow.PerformClick("/ById[GlbRdoBtn]/ByName[Global]", ClickType.LeftClick);
+                funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
+                                .ComboBoxSelectByName(glbVarNames[iter - 1]);
+            }
+
+            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            // Check the expression string is selected
+            StringBuilder expTextSb = new StringBuilder();
+            string expText;
+            for (int iter = 0; iter < paramCount; iter++)
+                expTextSb.AppendFormat("{0},", glbVarNames[iter]);
+            expTextSb.Remove(expTextSb.Length - 1, 1);
+            expText = "\"" + expTextSb.ToString() + "\"";
+
+            expText.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[5,@Parameter Value]").GetText());
+        }
+
+        [TestMethod("B7-10")]
+        [TestCategory("參數編輯(B7)")]
+        public void TIEditor_EditVariableWithParameterTypeTiCondition_MapNewConditionParameter()
+        {
+            // Steps:
+            // 1. Create a thread TI, add a condition variable then save the TI, close it.
+            //    1-1. Condition variable showName and callName set to "newCondParam", DataType set to "Float", Edit Type set to "EditBox".
+            //    1-2. Save the threadTI with name: ""
+            // 2. Switch to management, activate the ThreadTI (Active set to true).
+            // 3. Open a new TI window with type: TI, include the threadTI, edit on parameter: Condition Parameters, string.
+            // 4. Test Item Var Editor window showup, map the condition variable in threadTI to that in current TI.
+            //    4-1. Click "Scan" to find the condition variable in threadTI, should showup in "New Parameter" column.
+            //    4-2. Click "Ok" to confirm the mapping.
+            // 5. Verify the threadTI condition parameter is mapped in the current TI.
+            //    5-1. Check the new parameter is added into Condition Variable datagrid.
+            //    5-2. Check the new parameter's callName same as Parameter Value column in Test Command Parameter datagrid, on parameter: Condition Parameters, string.
+
+            // Step 1.
+            //string ThreadTIName = "ThreadTICondVar";
+            TIName = "ThreadTICondVar";
+            string ThreadTICondShowName = "newCondParam";
+            string ThreadTICondCallName = "newCondParam";
+            VariableDataType ThreadTICondDataType = VariableDataType.Float;
+            VariableEditType ThreadTICondEditType = VariableEditType.EditBox;
+            PerformCloseTI();
+           
+            MenuSelect("Functions", "TI Editor");
+            OpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);
+            CreateNewVariable1(VariableTabType.Condition, ThreadTICondShowName, ThreadTICondCallName, ThreadTICondDataType, ThreadTICondEditType);
+            SaveAsNewTI(TIName);
+            PerformCloseTI();
+
+            // Step 2.
+            TIExecuteAction(TIAction.SetTIActive, TIName);
+
+            // Step 3.
+            MenuSelect("Functions", "TI Editor");
+            OpenNewTI(TestItemType.TI, TestItemRunType.UUT);
+            AddCommandBy(TestCmdGroupType.Thread_TI, TIName);
+
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);                         // Select on the command
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@Parameter Value]", ClickType.LeftClick);   // Select on the parameter
+
+            // Step 4.
+            IElement tiVarEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Test Item Var Editor]");
+            tiVarEdtWindow.PerformClick($"/ByName[Scan]", ClickType.LeftClick);
+            tiVarEdtWindow.PerformClick($"/ByName[Ok]", ClickType.LeftClick);
+
+            // Step 5.
             VariableTabNavi(VariableTabType.Condition);
-            IWebElement dgCnd = CurrentDriver.GetElement(MobileBy.AccessibilityId(DataTableAutoIDType.CndGrid.ToString()));
-            //IWebElement dgCnd = CurrentDriver.GetElement(MobileBy.AccessibilityId("dockItem8"))
-            //                                 .GetFirstDataGridElement();
+            PP5IDEWindow.PerformGetElement("/ByCell@CndGrid[1,@Show Name]").GetText().ShouldContain(ThreadTICondShowName);                      // Compare the parameter in condition variable
+            PP5IDEWindow.PerformGetElement("/ByCell@CndGrid[1,@Call Name]").GetText().ShouldContain(ThreadTICondCallName);
+            ThreadTICondDataType.GetDescription().ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@CndGrid[1,@Data Type]").GetText());
+            ThreadTICondEditType.GetDescription().ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@CndGrid[1,@Edit Type]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[2,@Parameter Value]").GetText().ShouldContain(ThreadTICondCallName);
+        }
 
-            string mappingValuePara1Actual = dgCnd.GetCellValue(rowNo: 1, colName: "Default");
-            string mappingValuePara2Actual = dgCnd.GetCellValue(rowNo: 2, colName: "Default");
-            string mappingCallNamePara1Actual = dgCnd.GetCellValue(rowNo: 1, colName: "Call Name");
-            string mappingCallNamePara2Actual = dgCnd.GetCellValue(rowNo: 2, colName: "Call Name");
-            mappingValuePara1.ShouldEqualTo(mappingValuePara1Actual);
-            mappingValuePara2.ShouldEqualTo(mappingValuePara2Actual);
-            mappingPara1.ShouldEqualTo(mappingCallNamePara1Actual);
-            mappingPara2.ShouldEqualTo(mappingCallNamePara2Actual);
+        //[TestMethod("B7-11")]
+        //[TestCategory("參數編輯(B7)")]
+        ////B7-11
+        //public void TIEditor_EditVariableWithParameterTypeTICondition()
+        //{
+        //    // Switch to test item context window
+        //    TestItemTabNavi(TestItemTabType.TIContext);
+
+        //    // Input Command name: "LoadIntArrayToBinaryStringArray"
+        //    string CommandName = "LoadIntArrayToBinaryStringArray";
+        //    string GroupName = "Sub TI";
+
+        //    // Add command: "LoadIntArrayToBinaryStringArray"
+        //    AddCommandBy(GroupName, CommandName);
+
+        //    // LeftClick on Text "LoadIntArrayToBinaryStringArray"
+        //    //Console.WriteLine("LeftClick on Text \"LoadIntArrayToBinaryStringArray\"");
+        //    PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);                         // Select on the command
+        //    //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+
+        //    // Edit the 2nd parameter of this command > Test Item Var Editor popup
+        //    //GetCellBy("ParameterGrid", 1, "Parameter Value").LeftClick();
+        //    PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[1,@Parameter Value]", ClickType.LeftClick);
+
+        //    //IElement tiVarEdtWindow = PP5IDEWindow.GetFirstChildOfControlType(ElementControlType.Window);
+        //    IElement tiVarEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Test Item Var Editor]");
+        //    IElement dgMapping = tiVarEdtWindow.GetFirstDataGridElement();
+
+        //    // Get default values of the mapping parameters
+        //    tiVarEdtWindow.PerformClick($"/ByName[Default]", ClickType.LeftClick);
+        //    //string mappingValuePara1 = dgMapping.GetCellValue(rowNo: 1, colName: "Mapping Parameter");
+        //    //string mappingValuePara2 = dgMapping.GetCellValue(rowNo: 2, colName: "Mapping Parameter");
+        //    string mappingValuePara1 = dgMapping.PerformGetElement("/ByCell[1,@Mapping Parameter]").GetText();
+        //    string mappingValuePara2 = dgMapping.PerformGetElement("/ByCell[2,@Mapping Parameter]").GetText();
+
+        //    tiVarEdtWindow.PerformClick($"/ByName[Scan]", ClickType.LeftClick);
+        //    //string mappingPara1 = dgMapping.GetCellValue(rowNo: 1, colName: "New Parameter");
+        //    //string mappingPara2 = dgMapping.GetCellValue(rowNo: 2, colName: "New Parameter");
+        //    string mappingPara1 = dgMapping.PerformGetElement("/ByCell[1,@New Parameter]").GetText();
+        //    string mappingPara2 = dgMapping.PerformGetElement("/ByCell[2,@New Parameter]").GetText();
+
+        //    //IElement okButton = tiVarEdtWindow.GetBtnElement("Ok");
+        //    //while (!okButton.Enabled)
+        //    //{
+        //    //    Press(Keys.Enter);
+        //    //}
+        //    //okButton.LeftClick();
+        //    tiVarEdtWindow.PerformClick($"/ByName[Ok]", ClickType.LeftClick);
+
+        //    // Check the 2nd parameter string is correct
+        //    //string conditionText = $"\"\"{mappingPara1},{mappingPara2}\"\"";
+        //    //conditionText.ShouldEqualTo(GetCellValue("ParameterGrid", 1, "Parameter Value"));
+        //    string conditionText = $"{mappingPara1},{mappingPara2}";
+        //    //GetCellValue("ParameterGrid", 1, "Parameter Value").ShouldContain(conditionText);
+        //    PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]").GetText().ShouldContain(conditionText);
+
+        //    VariableTabNavi(VariableTabType.Condition);
+        //    //IElement dgCnd = PP5IDEWindow.GetExtendedElement(PP5By.Id(DataTableAutoIDType.CndGrid.ToString()));
+        //    IElement dgCnd = PP5IDEWindow.PerformGetElement("/ByCell@CndGrid[1,@Parameter Value]");
+        //    //IWebElement dgCnd = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("dockItem8"))
+        //    //                                 .GetFirstDataGridElement();
+
+        //    //string mappingValuePara1Actual = dgCnd.GetCellValue(rowNo: 1, colName: "Default");
+        //    //string mappingValuePara2Actual = dgCnd.GetCellValue(rowNo: 2, colName: "Default");
+        //    //string mappingCallNamePara1Actual = dgCnd.GetCellValue(rowNo: 1, colName: "Call Name");
+        //    //string mappingCallNamePara2Actual = dgCnd.GetCellValue(rowNo: 2, colName: "Call Name");
+        //    string mappingValuePara1Actual = dgCnd.PerformGetElement("/ByCell[1,@Default]").GetText();
+        //    string mappingValuePara2Actual = dgCnd.PerformGetElement("/ByCell[2,@Default]").GetText();
+        //    string mappingCallNamePara1Actual = dgCnd.PerformGetElement("/ByCell[1,@Call Name]").GetText();
+        //    string mappingCallNamePara2Actual = dgCnd.PerformGetElement("/ByCell[2,@Call Name").GetText();
+        //    mappingValuePara1.ShouldEqualTo(mappingValuePara1Actual);
+        //    mappingValuePara2.ShouldEqualTo(mappingValuePara2Actual);
+        //    mappingPara1.ShouldEqualTo(mappingCallNamePara1Actual);
+        //    mappingPara2.ShouldEqualTo(mappingCallNamePara2Actual);
+        //}
+
+        [TestMethod("B7-11")]
+        [TestCategory("參數編輯(B7)")]
+        public void TIEditor_EditVariableWithParameterTypeTIResult()
+        {
+            // Steps:
+            // 1. Create a thread TI, add a result variable then save the TI, close it.
+            //    1-1. Result variable showName and callName set to "newCondParam", DataType set to "Float", Edit Type set to "EditBox".
+            //    1-2. Save the threadTI with name: ""
+            // 2. Switch to management, activate the ThreadTI (Active set to true).
+            // 3. Open a new TI window with type: TI, include the threadTI, edit on parameter: Result Parameters, string.
+            // 4. Test Item Var Editor window showup, map the Result variable in threadTI to that in current TI.
+            //    4-1. Click "Scan" to find the Result variable in threadTI, should showup in "New Parameter" column.
+            //    4-2. Click "Ok" to confirm the mapping.
+            // 5. Verify the threadTI Result parameter is mapped in the current TI.
+            //    5-1. Check the new parameter is added into Result Variable datagrid.
+            //    5-2. Check the new parameter's callName same as Parameter Value column in Test Command Parameter datagrid, on parameter: Result Parameters, string.
+
+            // Step 1.
+            TIName = "ThreadTIResVar";
+            string ThreadTIResShowName = "newResParam";
+            string ThreadTIResCallName = "newResParam";
+            VariableDataType ThreadTIResDataType = VariableDataType.Float;
+            PerformCloseTI();
+
+            MenuSelect("Functions", "TI Editor");
+            OpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);
+            CreateNewVariable2(VariableTabType.Result, ThreadTIResShowName, ThreadTIResCallName, ThreadTIResDataType);
+            SaveAsNewTI(TIName);
+            PerformCloseTI();
+
+            // Step 2.
+            TIExecuteAction(TIAction.SetTIActive, TIName);
+
+            // Step 3.
+            MenuSelect("Functions", "TI Editor");
+            OpenNewTI(TestItemType.TI, TestItemRunType.UUT);
+            AddCommandBy(TestCmdGroupType.Thread_TI, TIName);
+
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);             // Select on the command
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[3,@Parameter Value]", ClickType.LeftClick);   // Select on the parameter
+
+            // Step 4.
+            IElement tiVarEdtWindow = PP5IDEWindow.PerformGetElement("/Window[Test Item Var Editor]");
+            tiVarEdtWindow.PerformClick($"/ByName[Scan]", ClickType.LeftClick);
+            tiVarEdtWindow.PerformClick($"/ByName[Ok]", ClickType.LeftClick);
+
+            // Step 5.
+            VariableTabNavi(VariableTabType.Result);
+            PP5IDEWindow.PerformGetElement("/ByCell@RstGrid[1,@Show Name]").GetText().ShouldContain(ThreadTIResShowName);                      // Compare the parameter in condition variable
+            PP5IDEWindow.PerformGetElement("/ByCell@RstGrid[1,@Call Name]").GetText().ShouldContain(ThreadTIResCallName);
+            ThreadTIResDataType.GetDescription().ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@RstGrid[1,@Data Type]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[3,@Parameter Value]").GetText().ShouldContain(ThreadTIResCallName);
         }
 
         [TestMethod("B7-12")]
         [TestCategory("參數編輯(B7)")]
         //B7-12
-        public void TIEditor_EditVariableWithParameterTypeTIResult()
+        public void TIEditor_EditVariableWithParameterTypeByte()
         {
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.HexString, "SetHexStringElement");
 
-            // Input Command name: "LoadIntArrayToBinaryStringArray"
-            string CommandName = "LoadIntArrayToBinaryStringArray";
-            string GroupName = "Sub TI";
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);             // Select on the command
+            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[1,@Parameter Value]", ClickType.LeftClick);   // Select on the parameter
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ByClass[ScrollViewer]/ById[byteRdoBtn]/ByName[Byte]").Selected.ShouldBeTrue();
 
-            // Add command: "LoadIntArrayToBinaryStringArray"
-            AddCommandBy(GroupName, CommandName);
+            // Input "ff" in the 1st parameter of this command: Element to be set, byte
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[1,@Parameter Value]", InputType.SendContent, "ff");
+            Press(Keys.Enter);
 
-            // LeftClick on Text "LoadIntArrayToBinaryStringArray"
-            Console.WriteLine("LeftClick on Text \"LoadIntArrayToBinaryStringArray\"");
-            GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-
-            // Edit the 3rd parameter of this command > Test Item Var Editor popup
-            GetCellBy("ParameterGrid", 2, "Parameter Value").LeftClick();
-
-            IWebElement tiVarEdtWindow = CurrentDriver.GetElement(By.Name(PowerPro5Config.IDE_TIEditorWindowName))
-                                                      .GetFirstChildOfControlType(ElementControlType.Window);
-
-            IWebElement dgMapping = tiVarEdtWindow.GetFirstDataGridElement();
-
-            // Get default values of the mapping parameters
-            tiVarEdtWindow.GetBtnElement("Scan").LeftClick();
-            string mappingPara1 = dgMapping.GetCellValue(rowNo: 1, colName: "New Parameter");
-
-            IWebElement okButton = tiVarEdtWindow.GetBtnElement("Ok");
-            while (!okButton.Enabled)
-            {
-                Press(Keys.Enter);
-            }
-            okButton.LeftClick();
-
-            // Check the 2nd parameter string is correct
-            string conditionText = $"\"\"{mappingPara1}\"\"";
-            conditionText.ShouldEqualTo(GetCellValue("ParameterGrid", 2, "Parameter Value"));
-
-            VariableTabNavi(VariableTabType.Result);
-            IWebElement dgRst = CurrentDriver.GetElement(MobileBy.AccessibilityId(DataTableAutoIDType.RstGrid.ToString()));
-            //IWebElement dgRst = CurrentDriver.GetElement(MobileBy.AccessibilityId("dockItem8"))
-            //                                 .GetFirstDataGridElement();
-
-            string mappingCallNamePara1Actual = dgRst.GetCellValue(rowNo: 1, colName: "Call Name");
-            mappingPara1.ShouldEqualTo(mappingCallNamePara1Actual);
+            // Check the Parameter in show as 0xff in TIContext
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Parameters]").GetText().ShouldContain("0xff");
         }
 
+        [TestMethod("B7-13")]
+        [TestCategory("參數編輯(B7)")]
+        [DataRow("TestPASS", typeof(object), DisplayName = "Verify Goto Command Label: \"TestPASS\"")]
+        [DataRow("TestFAIL", typeof(object), DisplayName = "Verify Goto Command Label: \"TestFAIL\"")]
+        //B7-13
+        public void TIEditor_SetGotoCommandByLabel_CheckLabelName(string label, object dummy)
+        {
+            // Switch to test item context window
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Goto");
+
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);             // Select on the command
+            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[1,@Parameter Value]", ClickType.LeftClick);   // Select on the parameter
+
+            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]")
+                        .ComboBoxSelectByName(label);
+
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Parameters]").GetText().ShouldEqualTo(label);
+        }
+
+        [TestMethod("B7-14")]
+        [TestCategory("參數編輯(B7)")]
+        //B7-14
+        public void TIEditor_SetSETCommandByLineInVector_CheckParameterIsCorrect()
+        {
+            // Switch to test item context window
+            string vecCallName = "lineVec";
+            string Voltage = "Voltage";
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.Arithmetic, "SET");
+            CreateNewVariable1(VariableTabType.Condition, "", vecCallName, VariableDataType.LineInVector, VariableEditType.ComboBox);
+
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);                                  // Select on the command
+            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[2,@Parameter Value]").ComboBoxSelectByName(vecCallName);      // Select on the parameter
+
+            PP5IDEWindow.PerformClick($"/ByName[Vector Member]/ById[VectorListBox]/ByName[{Voltage}]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Vector Member,Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[2,@Parameter Value]").GetText().ShouldEqualTo($"{vecCallName}.{Voltage}");
+        }
+
+        [TestMethod("B7-15")]
+        [TestCategory("參數編輯(B7)")]
+        //B7-15
+        public void TIEditor_SetCommandReadEVCAN_DBCData4ByDBCSignal_CheckParameterIsCorrect()
+        {
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.CAN_Card, "ReadEVCAN_DBCData4");
+
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);              // Select on the command
+            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[3,@Parameter Value]", ClickType.LeftClick);    // Select on the parameter
+
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[dbcSignalRdoBtn]/ByName[DBC Signal]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[3,@Parameter Value]", ClickType.LeftClick);    // Select on the parameter again to open the dbc window
+
+            //Logger.LogMessage($"DBC treeview element: {PP5IDEWindow.PerformGetElement("/ById[tvCluster]")}");
+
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+        }
+
+        [TestMethod("B8-1")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-1
+        public void TIEditor_SetShowNameInConditionVariable_CheckShowNameIsSet()
+        {
+            string ShowName = "B8-1";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, ShowName);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Show Name").SendSingleKeys(ShowName);
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Show Name").GetText().ShouldEqualTo(ShowName);
+        }
+
+        [TestMethod("B8-2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(1, typeof(object), DisplayName = "Verify CallName is set properly (single variable)")]
+        [DataRow(2, typeof(object), DisplayName = "Verify CallName is set properly (two variables)")]
+        //B8-2
+        public void TIEditor_SetCallNameInConditionVariable(int varCount, object dummy)
+        {
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            for (int rowNo = 1; rowNo <= varCount; rowNo++)
+            {
+                string CallName = $"B8-2_{rowNo}";
+                //varDataGrid.GetCellBy(rowNo, "Show Name").DoubleClick();
+                //varDataGrid.GetCellBy(rowNo, "Call Name").SendSingleKeys(CallName);
+                //Press(Keys.Enter);
+                PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName);
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(rowNo, "Call Name").GetText());
+            }
+        }
+
+        [TestMethod("B8-2_1")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-2_1
+        public void TIEditor_SetCallNameInConditionVariable_CheckCallNameIsRepeated()
+        {
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            PP5DataGrid varDataGrid = null;
+            for (int rowNo = 1; rowNo <= 2; rowNo++)
+            {
+                string CallName = "B8-2_1";
+                varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName);
+                //varDataGrid.GetCellBy(rowNo, "Show Name").DoubleClick();
+                //varDataGrid.GetCellBy(rowNo, "Call Name").SendSingleKeys(CallName);
+                //Press(Keys.Enter);
+            }
+            
+            string errorTooltipMsg = "CallName repeat";
+            errorTooltipMsg.ShouldEqualTo(varDataGrid.PerformGetElement($"/ByCell[1,@Call Name]").GetToolTipMessage());
+            errorTooltipMsg.ShouldEqualTo(varDataGrid.PerformGetElement($"/ByCell[2,@Call Name]").GetToolTipMessage());
+        }
+
+        [TestMethod("B8-3_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, typeof(object), DisplayName = "Verify DataType is \"Float\"")]
+        [DataRow(VariableDataType.Integer, typeof(object), DisplayName = "Verify DataType is \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, typeof(object), DisplayName = "Verify DataType is \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, typeof(object), DisplayName = "Verify DataType is \"Short\"")]
+        [DataRow(VariableDataType.String, typeof(object), DisplayName = "Verify DataType is \"String\"")]
+        [DataRow(VariableDataType.Byte, typeof(object), DisplayName = "Verify DataType is \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, typeof(object), DisplayName = "Verify DataType is \"HexString\"")]
+        [DataRow(VariableDataType.LineInVector, typeof(object), DisplayName = "Verify DataType is \"LineInVector\"")]
+        [DataRow(VariableDataType.LoadVector, typeof(object), DisplayName = "Verify DataType is \"LoadVector\"")]
+        [DataRow(VariableDataType.SpecVector, typeof(object), DisplayName = "Verify DataType is \"SpecVector\"")]
+        [DataRow(VariableDataType.ExtMeasVector, typeof(object), DisplayName = "Verify DataType is \"ExtMeasVector\"")]
+        [DataRow(VariableDataType.ACLoadVector, typeof(object), DisplayName = "Verify DataType is \"ACLoadVector\"")]
+        [DataRow(VariableDataType.ACSpecVector, typeof(object), DisplayName = "Verify DataType is \"ACSpecVector\"")]
+        [DataRow(VariableDataType.ConstantVector, typeof(object), DisplayName = "Verify DataType is \"ConstantVector\"")]
+        [DataRow(VariableDataType.Double, typeof(object), DisplayName = "Verify DataType is \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, typeof(object), DisplayName = "Verify DataType is \"Long\"")]
+        //B8-3_1
+        public void TIEditor_SetDataTypeInConditionVariable_VerifyRegularDataTypes(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-3_1";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            varDataType.GetDescription().ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-3_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", typeof(object), DisplayName = "Verify DataType is \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", typeof(object), DisplayName = "Verify DataType is \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", typeof(object), DisplayName = "Verify DataType is \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", typeof(object), DisplayName = "Verify DataType is \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", typeof(object), DisplayName = "Verify DataType is \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", typeof(object), DisplayName = "Verify DataType is \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", typeof(object), DisplayName = "Verify DataType is \"HexStringArray\"")]
+        //B8-3_2
+        public void TIEditor_SetDataTypeInConditionVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, object dummy)
+        {
+            string CallName = "B8-3_2";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            string dataTypeShowName = string.Format("{0}[{1}]", varDataType.GetDescription().Replace("[]", ""), arrSize1);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-3_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-3_3
+        public void TIEditor_SetDataTypeInConditionVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-3_3";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, arrSize1, arrSize2);
+
+            string dataTypeShowName = string.Format("{0}[{1},{2}]", varDataType.GetDescription().Replace("[,]", ""), arrSize1, arrSize2);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-4")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, typeof(object), DisplayName = "Verify EditType is \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.ComboBox, typeof(object), DisplayName = "Verify EditType is \"ComboBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.External_Signal, typeof(object), DisplayName = "Verify EditType is \"External_Signal\"")]
+        //B8-4
+        public void TIEditor_SetEditTypeInConditionVariable(VariableDataType varDataType, VariableEditType varEditType, object dummy)
+        {
+            string CallName = "B8-4";
+            IElement varDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            varEditType.ToString().ShouldEqualTo(varDataGrid.GetCellBy(1, "Edit Type").GetText());
+
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+        }
+
+        [TestMethod("B8-5")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Integer\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Short, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Short\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Byte\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        //[DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        //[DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, VariableEditType.EditBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"HexString\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LineInVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"LineInVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.LoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"LoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.SpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"SpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ExtMeasVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ExtMeasVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACLoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ACLoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACSpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ACSpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ConstantVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ConstantVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Double\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Long\" variable with EditType \"EditBox\"")]
+        //B8-5
+        public void TIEditor_SetMinimumInConditionVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, bool canSetMinimum, object dummy)
+        {
+            string CallName = "B8-5";
+            string minValue = "0";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            PP5DataGrid varDataGrid = CreateNewVariableWithMinValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, minValue);
+
+            varDataGrid.RefreshSelectedCell();
+            varDataGrid.SelectedCellInfo.SelectedCell.LeftClick();
+            //varDataGrid.GetCellBy(1, "Min.").LeftClick();
+            Cursor expectedCursor = canSetMinimum ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            Cursor currentCursor = DllHelper.GetCursor();
+            expectedCursor.ShouldEqualTo(currentCursor);
+
+            //minValue = canSetMinimum ? minValue : "";
+            if (canSetMinimum)
+            {
+                //string minValue = "0";
+                //varDataGrid.GetCellBy(1, "Min.").SendText(minValue);
+                //Press(Keys.Enter);
+                //minValue.ShouldEqualTo(varDataGrid.GetCellBy(1, "Min.").GetText());
+                minValue.ShouldEqualTo(varDataGrid.SelectedCellInfo.SelectedCell.GetText());
+            }
+        }
+
+        [TestMethod("B8-5_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Integer[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Double[L]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        //B8-5_1
+        public void TIEditor_SetMinimumInConditionVariable_VerifyArrayDataTypes(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-5_1";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);0,0,0,0,0,0,
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Min.").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int sizeExpected = 640;
+            string valuePattern = string.Format("{0}[{1}]", value, sizeExpected);
+            IElement varDataGrid = CreateNewVariableWithMinValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, sizeExpected.ToString());
+            sizeExpected.ShouldEqualTo(varDataGrid.GetCellBy(1, "Min.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-5_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.ByteArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.HexStringArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"HexString[]\" variable with EditType \"EditBox\"")]
+        //B8-5_2
+        public void TIEditor_SetMinimumInConditionVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, char value, object dummy)
+        {
+            string CallName = "B8-5_2";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Min.").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            string valuePattern = string.Format("{0}[{1}]", value, arrSize1);
+            IElement varDataGrid = CreateNewVariableWithMinValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, arrSize1);
+            int size = int.Parse(arrSize1);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(1, "Min.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-5_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Integer[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.Byte2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Byte[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.String2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"String[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.HexString2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"HexString[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Long[,]\" variable with EditType \"EditBox\"")]
+        //B8-5_3
+        public void TIEditor_SetMinimumInConditionVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-5_3";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Min.").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            string valuePattern = string.Format("{0}[{1},{2}]", value, arrSize1, arrSize2);
+            IElement varDataGrid = CreateNewVariableWithMinValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, arrSize1, arrSize2);
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(1, "Min.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-6")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Integer\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Short, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Short\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Byte\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        //[DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        //[DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.LineInVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"LineInVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.LoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"LoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.SpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"SpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ExtMeasVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ExtMeasVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACLoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ACLoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACSpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ACSpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ConstantVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ConstantVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Double\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Long\" variable with EditType \"EditBox\"")]
+        //B8-6
+        public void TIEditor_SetMaximumInConditionVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, bool canSetMaximum, object dummy)
+        {
+            string CallName = "B8-6";
+            string maxValue = "100";
+            PP5DataGrid varDataGrid = CreateNewVariableWithMaxValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, maxValue);
+
+            if (canSetMaximum)
+                maxValue.ShouldEqualTo(varDataGrid.GetCellBy(1, "Max.").GetText());
+
+            //varDataGrid.RefreshSelectedCell();
+            //varDataGrid.SelectedCellInfo.SelectedCell.LeftClick();
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Max.").LeftClick();
+            //Cursor expectedCursor = canSetMaximum ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+        }
+
+        [TestMethod("B8-6_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, '9', typeof(object), DisplayName = "Verify Maximum can be set in \"Float[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, '9', typeof(object), DisplayName = "Verify Maximum can be set in \"Integer[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, '9', typeof(object), DisplayName = "Verify Maximum can be set in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, '9', typeof(object), DisplayName = "Verify Maximum can be set in \"Double[L]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, '0', VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        //B8-6_1
+        public void TIEditor_SetMaximumInConditionVariable_VerifyArrayDataTypes(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-6_1";
+            //PP5DataGrid varDataGrid = CreateNewVariableWithMaxValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, value);
+
+            //varDataGrid.RefreshSelectedCell();
+            //varDataGrid.SelectedCellInfo.SelectedCell.LeftClick();
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Max.").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int sizeExpected = 640;
+            string valuePattern = string.Format("{0}[{1}]", value, sizeExpected);
+            IElement varDataGrid = CreateNewVariableWithMaxValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, sizeExpected.ToString());
+            sizeExpected.ShouldEqualTo(varDataGrid.GetCellBy(1, "Max.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-6_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.ByteArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //B8-6_2
+        public void TIEditor_SetMaximumInConditionVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, char value, object dummy)
+        {
+            string CallName = "B8-6_2";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Max.").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int size = int.Parse(arrSize1);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(1, "Max.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-6_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Float[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Integer[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.Byte2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Byte[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.String2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"String[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Long[,]\" variable with EditType \"EditBox\"")]
+        //B8-6_3
+        public void TIEditor_SetMaximumInConditionVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-6_3";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Max.").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            string valuePattern = string.Format("{0}[{1},{2}]", value, arrSize1, arrSize2);
+            IElement varDataGrid = CreateNewVariableWithMaxValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, arrSize1, arrSize2);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(1, "Max.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-6_4")]
+        [DataRow(VariableDataType.HexString, VariableEditType.EditBox, "1", "1", '5', typeof(object), DisplayName = "Verify Maximum can not be set in \"HexString\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.HexStringArray, VariableEditType.EditBox, "5", "1", '5', typeof(object), DisplayName = "Verify Maximum can be set in \"HexString[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.HexString2DArray, VariableEditType.EditBox, "5", "5", '5', typeof(object), DisplayName = "Verify Maximum can be set in \"HexString[,]\" variable with EditType \"EditBox\"")]
+        //B8-6_4
+        public void TIEditor_SetMaximumInConditionVariable_VerifHexStringDataType(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-6_4";
+            //IElement varDataGrid;
+            //if (varDataType == VariableDataType.HexString)
+            //    varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //else if (varDataType == VariableDataType.HexStringArray)
+            //    varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
+            //else
+            //    varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //if (varDataType == VariableDataType.HexStringArray)
+            //{
+            //    PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //    PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+            //}
+            //else if (varDataType == VariableDataType.HexString2DArray)
+            //{
+            //    PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //    PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //    PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+            //}
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Max.").LeftClick();
+            //varDataGrid.GetCellBy(1, "Max.").SendText(value.ToString());
+            //Press(Keys.Enter);
+            //varDataGrid.GetCellBy(1, "Max.").GetText().ShouldEqualTo(value.ToString());
+
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            //string valuePattern;
+            //if (varDataType == VariableDataType.HexString)
+            //    valuePattern = string.Format("{0}", value);
+            //else if (varDataType == VariableDataType.HexStringArray)
+            //    valuePattern = string.Format("{0}[{1}]", value, arrSize1);
+            //else
+            //    valuePattern = string.Format("{0}[{1},{2}]", value, arrSize1, arrSize2);
+            //string valuePattern = string.Format("{0}[{1},{2}]", value, arrSize1, arrSize2);
+            IElement varDataGrid = CreateNewVariableWithMaxValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, value.ToString(), arrSize1, arrSize2);
+            string DefaultSingleValue = new string('0', int.Parse(value.ToString()) * 2);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(1, "Default").GetText(), DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-7")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Integer\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Short, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Short\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Byte\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Double\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Long\" variable with EditType \"EditBox\"")]
+        //B8-7
+        public void TIEditor_SetDefaultInConditionVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, object dummy)
+        {
+            string CallName = "B8-7";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            string defaultValue = "0";
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, defaultValue);
+            //varDataGrid.GetCellBy(1, "Default").SendText("0");
+            //Press(Keys.Enter);
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellValue(1, "Default"));
+        }
+
+        [TestMethod("B8-7_1_String")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-7_1_String
+        public void TIEditor_SetDefaultInConditionVariable_VerifyStringDataTypeWithExtSignal()
+        {
+            string CallName = "B8-7_1_String";
+            VariableDataType varDataType = VariableDataType.String;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //VariableDataType varDataType = VariableDataType.String;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            string defaultValue = varDataGrid.GetCellBy(1, "Default").GetText();
+            string DefaultSingleValue = "PhoenixonDSP.DSPSensingOFF:(0xFF).DSPSensingOFF_Signal";
+            DefaultSingleValue.ShouldEqualTo(defaultValue);
+        }
+
+        [TestMethod("B8-7_1_String1DArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-7_1_String1DArray
+        public void TIEditor_SetDefaultInConditionVariable_VerifyString1DArrayDataTypeWithExtSignal()
+        {
+            string CallName = "B8-7_1_String1DArray";
+            string arrSize1 = "5";
+            VariableDataType varDataType = VariableDataType.StringArray;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //VariableDataType varDataType = VariableDataType.StringArray;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            string defaultValue = varDataGrid.GetCellBy(1, "Default").GetText();
+            string DefaultSingleValue = @"PhoenixonDSP\.DSPSensingOFF:\(0xFF\)\.DSPSensingOFF_Signal";
+            int.Parse(arrSize1).ShouldEqualTo(Regex.Matches(defaultValue, DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-7_2_String2DArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-7_2_String2DArray
+        public void TIEditor_SetDefaultInConditionVariable_VerifyString2DArrayDataTypeWithExtSignal()
+        {
+            string CallName = "B8-7_2_String2DArray";
+            string arrSize1 = "2";
+            string arrSize2 = "2";
+            VariableDataType varDataType = VariableDataType.String2DArray;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //VariableDataType varDataType = VariableDataType.String2DArray;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            string defaultValue = varDataGrid.GetCellBy(1, "Default").GetText();
+            string DefaultSingleValue = @"PhoenixonDSP\.DSPSensingOFF:\(0xFF\)\.DSPSensingOFF_Signal";
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            size.ShouldEqualTo(Regex.Matches(defaultValue, DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-7_2_StringUUTArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-7_2_StringUUTArray
+        public void TIEditor_SetDefaultInConditionVariable_VerifyStringUUTArrayDataTypeWithExtSignal()
+        {
+            string CallName = "B8-7_2_StringUUTArray";
+            VariableDataType varDataType = VariableDataType.StringArrayOfUUTMaxSize;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //VariableDataType varDataType = VariableDataType.StringArrayOfUUTMaxSize;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            string defaultValue = varDataGrid.GetCellBy(1, "Default").GetText();
+            string DefaultSingleValue = @"PhoenixonDSP\.DSPSensingOFF:\(0xFF\)\.DSPSensingOFF_Signal";
+            int UUTSize = 640;
+            UUTSize.ShouldEqualTo(Regex.Matches(defaultValue, DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-7_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.LineInVector, typeof(object), DisplayName = "Verify Default can be set in \"LineInVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.LoadVector, typeof(object), DisplayName = "Verify Default can be set in \"LoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.SpecVector, typeof(object), DisplayName = "Verify Default can be set in \"SpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ExtMeasVector, typeof(object), DisplayName = "Verify Default can be set in \"ExtMeasVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACLoadVector, typeof(object), DisplayName = "Verify Default can be set in \"ACLoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACSpecVector, typeof(object), DisplayName = "Verify Default can be set in \"ACSpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ConstantVector, typeof(object), DisplayName = "Verify Default can be set in \"ConstantVector\" variable with EditType \"ComboBox\"")]
+        //B8-7_2
+        public void TIEditor_SetDefaultInConditionVariable_VerifyVectorDataTypes(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-7_2";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Default").LeftClick();
+
+            //List<string> expectedValues = new List<string>();
+            //string[] defaultValues;
+            //PP5DataGrid VectorDataGrid = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement("/ById[VectorGrid]"));
+            //VectorDataGrid.ScrollToSpecificColumn("Default");
+            //while (!VectorDataGrid.GetCellBy(1, "Default").IsWithinScreen)
+            //{
+            //    MoveToElementAndRightClick(VectorDataGrid, MoveToElementOffsetStartingPoint.InnerBottomRight);
+            //    PP5IDEWindow.PerformClick("/ByClass[ContextMenu]/ById[PageRight]/ByName[Page Right]", ClickType.LeftClick);
+            //}
+            //for (int i = 1; i <= VectorDataGrid.GetRowCount(); i++)
+            //    expectedValues.Add(VectorDataGrid.GetCellBy(i, "Default").GetText());
+            //PP5IDEWindow.PerformClick("/ByName[Vector Editor,Ok]", ClickType.LeftClick);
+            //defaultValues = varDataGrid.GetCellBy(1, "Default").GetText().Split('@');
+            
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, VariableEditType.ComboBox, "vector");
+            string expectedDefault = StaticData.currentDataGrid.cellValueCache;
+            string actualDefault = varDataGrid.GetCellBy(1, "Default").GetText();
+            expectedDefault.ShouldEqualTo(actualDefault);
+
+            //expectedValues.Count.ShouldEqualTo(defaultValues.Length);
+            //for (int i = 0; i < expectedValues.Count; i++)
+            //{
+            //    expectedValues[i].ShouldEqualTo(defaultValues[i]);
+            //}
+        }
+
+        [TestMethod("B8-7_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Float[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Integer[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Double[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"String[L]\" variable with EditType \"EditBox\"")]
+        //B8-7_3
+        public void TIEditor_SetDefaultInConditionVariable_VerifyUUTSizeArrayDataTypes(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-7_3";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Default").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int size = 640;
+            string valuePattern = string.Format("{0}[{1}]", value, size);
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, size.ToString());
+            size.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-7_4")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.ByteArray, VariableEditType.EditBox, "10", "00", typeof(object), DisplayName = "Verify Default can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //B8-7_4
+        public void TIEditor_SetDefaultInConditionVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string value, object dummy)
+        {
+            string CallName = "B8-7_4";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Default").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value);
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            //int size = int.Parse(arrSize1);
+            //size.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText().Count(c => c.Equals(value)));
+            string valuePattern = string.Format("{0}[{1}]", value, arrSize1);
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, arrSize1);
+            foreach (var defaultValue in varDataGrid.GetCellBy(1, "Default").GetText().Split(','))
+                defaultValue.ShouldEqualTo(value);
+        }
+
+        [TestMethod("B8-7_5")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Float[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer2DArray, VariableEditType.EditBox, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Integer[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte2DArray, VariableEditType.EditBox, "10", "10", "00", typeof(object), DisplayName = "Verify Default can be set in \"Byte[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String2DArray, VariableEditType.EditBox, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"String[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long2DArray, VariableEditType.EditBox, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Long[,]\" variable with EditType \"EditBox\"")]
+        //B8-7_5
+        public void TIEditor_SetDefaultInConditionVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, string value, object dummy)
+        {
+            string CallName = "B8-7_5";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Default").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value);
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            //int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            //size.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText().Count(c => c.Equals(value)));
+            string valuePattern = string.Format("{0}[{1},{2}]", value, arrSize1, arrSize2);
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, arrSize1, arrSize2);
+            foreach (var defaultValuesRank2 in varDataGrid.GetCellBy(1, "Default").GetText().Split(';'))
+                foreach (var defaultValue in defaultValuesRank2.Split(','))
+                    defaultValue.ShouldEqualTo(value);
+        }
+
+        [TestMethod("B8-7_6_HexString")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexString, VariableEditType.EditBox, 'f', typeof(object), DisplayName = "Verify Default can not be set in \"HexString\" variable with EditType \"EditBox\"")]
+        //B8-7_6_HexString
+        public void TIEditor_SetDefaultInConditionVariable_VerifyHexStringDataTypeWithEditBox(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-7_6_HexString";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //string valuePattern = string.Format("{0}[{1},{2}]", value, arrSize1, arrSize2);
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, new string(value, 2));
+
+            //varDataGrid.GetCellBy(1, "Default").LeftClick();
+            //PP5IDEWindow.PerformInput("/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            //PP5IDEWindow.PerformInput("/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            //PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            //int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            int maxValue = int.Parse(varDataGrid.GetCellValue(1, "Max."));
+            string DefaultSingleHexValue = new string(value, maxValue * 2);
+            DefaultSingleHexValue.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText());
+        }
+
+        [TestMethod("B8-7_6_HexString1DArray")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexStringArray, VariableEditType.EditBox, "5", 'f', typeof(object), DisplayName = "Verify Default can be set in \"HexString[]\" variable with EditType \"EditBox\"")]
+        //B8-7_6_HexString1DArray
+        public void TIEditor_SetDefaultInConditionVariable_VerifyHexString1DArrayWithEditBox(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, char value, object dummy)
+        {
+            string CallName = "B8-7_6_HexString1DArray";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Default").LeftClick();
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            //PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            //PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            //PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            //int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, new string(value, 2), arrSize1);
+            int size = int.Parse(arrSize1);
+            int maxValue = int.Parse(varDataGrid.GetCellValue(1, "Max."));
+            string DefaultSingleHexValue = new string(value, 2 * maxValue);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellValue(1, "Default"), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-7_6_HexString2DArray")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexString2DArray, VariableEditType.EditBox, "5", "5", 'f', typeof(object), DisplayName = "Verify Default can be set in \"HexString[,]\" variable with EditType \"EditBox\"")]
+        //B8-7_6_HexString2DArray
+        public void TIEditor_SetDefaultInConditionVariable_VerifyHexString2DArrayWithEditBox(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-7_6_HexString2DArray";
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Default").LeftClick();
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            //PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            //PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            //PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            //PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, new string(value, 2), arrSize1, arrSize2);
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            int maxValue = int.Parse(varDataGrid.GetCellValue(1, "Max."));
+            string DefaultSingleHexValue = new string(value, 2 * maxValue);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellValue(1, "Default"), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-8")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Double\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set from \".0~.6\" in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set from \".0~.6\" in \"Double[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set from \".0~.6\" in \"Float[L]\" variable with EditType \"EditBox\"")]
+        //B8-8
+        public void TIEditor_SetFormatInConditionVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, object dummy)
+        {
+            string CallName = "B8-8";
+            VariableDecimalPlaces[] formatArr = Enum.GetValues(typeof(VariableDecimalPlaces)).Cast<VariableDecimalPlaces>().ToArray();
+            CreateNewVariableWithFormat(VariableTabType.Condition, "", CallName, varDataType, varEditType, formatArr);
+
+            //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            //foreach (string fm in formatStr.Split(','))
+            //{
+            //    varDataGrid.GetCellBy(1, "Format").SendText(fm);
+            //    Press(Keys.Enter);
+
+            //    fm.ShouldEqualTo(varDataGrid.GetCellBy(1, "Format").GetText());
+            //}
+        }
+
+        [TestMethod("B8-8_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Double[]\" variable with EditType \"EditBox\"")]
+        //B8-8_1
+        public void TIEditor_SetFormatInConditionVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string formatStr, object dummy)
+        {
+            string CallName = "B8-8_1";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            foreach (string fm in formatStr.Split(','))
+            {
+                varDataGrid.GetCellBy(1, "Format").SendText(fm);
+                Press(Keys.Enter);
+
+                fm.ShouldEqualTo(varDataGrid.GetCellBy(1, "Format").GetText());
+            }
+        }
+
+        [TestMethod("B8-8_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "2", "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "2", "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Float[,]\" variable with EditType \"EditBox\"")]
+        //B8-8_2
+        public void TIEditor_SetFormatInConditionVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, string formatStr, object dummy)
+        {
+            string CallName = "B8-8_2";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            foreach (string fm in formatStr.Split(','))
+            {
+                varDataGrid.GetCellBy(1, "Format").SendText(fm);
+                Press(Keys.Enter);
+
+                fm.ShouldEqualTo(varDataGrid.GetCellBy(1, "Format").GetText());
+            }
+        }
+
+        [TestMethod("B8-9")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Short, Int16.MaxValue, "int16Max", typeof(object), DisplayName = "Verify enum value can be set with \"int16Max\" of datatype \"Short\"")]
+        [DataRow(VariableDataType.Short, Int16.MinValue, "int16Min", typeof(object), DisplayName = "Verify enum value can be set with \"int16Min\" of datatype \"Short\"")]
+        [DataRow(VariableDataType.Integer, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Verify enum value can be set with \"int32Max\" of datatype \"Integer\"")]
+        [DataRow(VariableDataType.Integer, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Verify enum value can be set with \"int32Min\" of datatype \"Integer\"")]
+        [DataRow(VariableDataType.Long, Int64.MaxValue, "int64Max", typeof(object), DisplayName = "Verify enum value can be set with \"int64Max\" of datatype \"Long\"")]
+        [DataRow(VariableDataType.Long, Int64.MinValue, "int64Min", typeof(object), DisplayName = "Verify enum value can be set with \"int64Min\" of datatype \"Long\"")]
+
+        [DataRow(VariableDataType.Float, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMax\" of datatype \"Float\"")]                            // Actual float.MaxValue is 3.40282347E+38f
+        [DataRow(VariableDataType.Float, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMin\" of datatype\"Float\"")]                            // Actual float.MinValue is -3.40282347E+38f
+        [DataRow(VariableDataType.FloatPercentage, "3.40282356779E+38", "Float(%)Max", typeof(object), DisplayName = "Verify enum value can be set with \"Float(%)Max\" of datatype \"FloatPercentage\"")]  // Actual float.MaxValue is 3.40282347E+38f
+        [DataRow(VariableDataType.FloatPercentage, "-3.40282356779E+38", "Float(%)Min", typeof(object), DisplayName = "Verify enum value can be set with \"Float(%)Min\" of datatype \"FloatPercentage\"")] // Actual float.MinValue is -3.40282347E+38f
+        [DataRow(VariableDataType.Double, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMax\" of datatype \"Double\"")]                // Actual double.MaxValue is 1.7976931348623157E+308
+        [DataRow(VariableDataType.Double, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMin\" of datatype \"Double\"")]               // Actual double.MinValue is -1.7976931348623157E+308
+        
+        [DataRow(VariableDataType.Byte, "ff", "ByteMax", typeof(object), DisplayName = "Verify enum value can be set with \"ByteMax\" of datatype \"Byte\"")]
+        [DataRow(VariableDataType.Byte, "00", "ByteMin", typeof(object), DisplayName = "Verify enum value can be set with \"ByteMin\" of datatype \"Byte\"")]
+
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Verify enum value can be set with \"int32Max\" of datatype \"Integer[L]\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Verify enum value can be set with \"int32Min\" of datatype \"Integer[L]\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMax\" of datatype \"Float[L]\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMin\" of datatype \"Float[L]\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMax\" of datatype \"Float(%)[L]\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMin\" of datatype \"Float(%)[L]\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMax\" of datatype \"Double[L]\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMin\" of datatype \"Double[L]\"")]
+        //B8-9
+        public void TIEditor_SetEnumItemInConditionVariable_VerifyRegularDataTypesWithValidValue(VariableDataType varDataType, object enumValue, string enumName, object dummy)
+        {
+            string CallName = "B8-9";
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type")
+            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            ////Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type")
+            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            ////Press(Keys.Enter);
+
+            AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue.ToString());
+
+            string enumStringActual = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Enum Item").GetText();
+            string enumStringExpected = string.Concat(enumName, "=", enumValue);
+            enumStringExpected.ShouldEqualTo(enumStringActual);
+        }
+
+        [TestMethod("B8-9_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.String, 'a', 1024, "StringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"StringWithMaxLength(1024)\" of datatype \"String\"")]
+        [DataRow(VariableDataType.HexString, 'f', 2048, "HexStringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"HexStringWithMaxLength(2048)\" of datatype \"HexString\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, 'a', 1024, "StringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"StringWithMaxLength(1024)\" of datatype \"String[L]\"")]
+        //B8-9_1
+        public void TIEditor_SetEnumItemInConditionVariable_VerifyStringDataTypesWithValidValue(VariableDataType varDataType, char enumValueChar, int length, string enumName, object dummy)
+        {
+            string CallName = "B8-9_1";
+            string enumValue = new string(enumValueChar, length);
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type")
+            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            ////Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type")
+            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            ////Press(Keys.Enter);
+
+            AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
+
+            string enumStringActual = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Enum Item").GetText();
+            string enumStringExpected = string.Concat(enumName, "=", enumValue);
+            enumStringExpected.ShouldEqualTo(enumStringActual);
+        }
+
+        [TestMethod("B8-10")]
+        [TestCategory("變數編輯(B8)")]
+        //[DataRow(VariableDataType.String, 'a', 1024, "StringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"StringWithMaxLength(1024)\" of datatype \"String\"")]
+        //[DataRow(VariableDataType.HexString, 'f', 2048, "HexStringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"HexStringWithMaxLength(2048)\" of datatype \"HexString\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, 'a', 1024, "StringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"StringWithMaxLength(1024)\" of datatype \"String[L]\"")]
+        //B8-10
+        public void TIEditor_SetEnumItemInConditionVariable_CheckValueIsInvalidWithSameEnumName()
+        {
+            string CallName = "B8-10";
+            string enumValue = "0";
+            string enumName = "a";
+            VariableDataType varDataType = VariableDataType.String;
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type")
+            //           .ComboBoxSelectByName(VariableDataType.String.GetDescription());
+            ////Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type")
+            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            ////Press(Keys.Enter);
+
+            bool isAdded = true;
+            for (int i = 0; i < 2; i++)
+            {
+                isAdded &= AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
+            }
+
+            if (!isAdded)
+            {
+                string errorMsg = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Creater]/Edit[0]").GetToolTipMessage();
+                string errorMsgExpected = "EnumItemName is duplicated";
+                errorMsg.ShouldNotBeNull();
+                errorMsgExpected.ShouldEqualTo(errorMsg);
+                PP5IDEWindow.PerformGetElement("/ByName[Enum Item Creater,Ok]").Enabled.ShouldBeFalse();
+            }
+
+            // Close the enum item creator/editor window
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Creater,Cancel]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Editor,Cancel]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-11")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-11
+        public void TIEditor_SetShowNameInResultVariable_CheckShowNameIsSet()
+        {
+            string ShowName = "B8-11";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, ShowName);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Show Name").SendSingleKeys(ShowName);
+            //Press(Keys.Enter);
+
+            ShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Show Name").GetText());
+        }
+
+        [TestMethod("B8-12_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(1, typeof(object), DisplayName = "Verify CallName is set properly (single variable)")]
+        [DataRow(2, typeof(object), DisplayName = "Verify CallName is set properly (two variables)")]
+        //B8-12_1
+        public void TIEditor_SetCallNameInResultVariable(int varCount, object dummy)
+        {
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            PP5DataGrid varDataGrid = null;
+            for (int rowNo = 1; rowNo <= varCount; rowNo++)
+            {
+                string CallName = $"B8-12_{rowNo}";
+                //varDataGrid.GetCellBy(rowNo, "Show Name").DoubleClick();
+                //varDataGrid.GetCellBy(rowNo, "Call Name").SendSingleKeys(CallName);
+                //Press(Keys.Enter);
+                varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName);
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(rowNo, "Call Name").GetText());
+            }
+        }
+
+        [TestMethod("B8-12_2")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-12_2
+        public void TIEditor_SetCallNameInResultVariable_CheckCallNameIsRepeated()
+        {
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            PP5DataGrid varDataGrid = null;
+            for (int rowNo = 1; rowNo <= 2; rowNo++)
+            {
+                string CallName = "B8-12_2";
+                varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName);
+                //varDataGrid.GetCellBy(rowNo, "Show Name").DoubleClick();
+                //varDataGrid.GetCellBy(rowNo, "Call Name").SendSingleKeys(CallName);
+                //Press(Keys.Enter);
+            }
+
+            string errorTooltipMsg = "CallName repeat";
+            errorTooltipMsg.ShouldEqualTo(varDataGrid.PerformGetElement($"/ByCell[1,@Call Name]").GetToolTipMessage());
+            errorTooltipMsg.ShouldEqualTo(varDataGrid.PerformGetElement($"/ByCell[2,@Call Name]").GetToolTipMessage());
+        }
+
+        [TestMethod("B8-13_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, typeof(object), DisplayName = "Verify DataType is \"Float\"")]
+        [DataRow(VariableDataType.Integer, typeof(object), DisplayName = "Verify DataType is \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, typeof(object), DisplayName = "Verify DataType is \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, typeof(object), DisplayName = "Verify DataType is \"Short\"")]
+        [DataRow(VariableDataType.String, typeof(object), DisplayName = "Verify DataType is \"String\"")]
+        [DataRow(VariableDataType.Byte, typeof(object), DisplayName = "Verify DataType is \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, typeof(object), DisplayName = "Verify DataType is \"HexString\"")]
+        [DataRow(VariableDataType.Chart, typeof(object), DisplayName = "Verify DataType is \"Chart\"")]
+        [DataRow(VariableDataType.Picture, typeof(object), DisplayName = "Verify DataType is \"Picture\"")]
+        [DataRow(VariableDataType.Double, typeof(object), DisplayName = "Verify DataType is \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, typeof(object), DisplayName = "Verify DataType is \"Long\"")]
+        //B8-13_1
+        public void TIEditor_SetDataTypeInResultVariable_VerifyRegularDataTypes(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-13_1";
+            PP5DataGrid varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            varDataType.GetDescription().ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-13_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", typeof(object), DisplayName = "Verify DataType is \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", typeof(object), DisplayName = "Verify DataType is \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", typeof(object), DisplayName = "Verify DataType is \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", typeof(object), DisplayName = "Verify DataType is \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", typeof(object), DisplayName = "Verify DataType is \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", typeof(object), DisplayName = "Verify DataType is \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", typeof(object), DisplayName = "Verify DataType is \"HexStringArray\"")]
+        //B8-13_2
+        public void TIEditor_SetDataTypeInResultVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, object dummy)
+        {
+            string CallName = "B8-13_2";
+            PP5DataGrid varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            string dataTypeShowName = string.Format("{0}[{1}]", varDataType.GetDescription().Replace("[]", ""), arrSize1);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-13_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-13_3
+        public void TIEditor_SetDataTypeInResultVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-13_3";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            string dataTypeShowName = string.Format("{0}[{1},{2}]", varDataType.GetDescription().Replace("[,]", ""), arrSize1, arrSize2);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-14_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Float\"")]
+        [DataRow(VariableDataType.Integer, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Short\"")]
+        [DataRow(VariableDataType.String, false, typeof(object), DisplayName = "Verify MinimumSpec can not be set from condition variable of DataType \"String\"")]
+        [DataRow(VariableDataType.Byte, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, false, typeof(object), DisplayName = "Verify MinimumSpec can not be set from condition variable of DataType \"HexString\"")]
+        [DataRow(VariableDataType.Chart, false, typeof(object), DisplayName = "Verify MinimumSpec can not be set from condition variable of DataType \"Chart\"")]
+        [DataRow(VariableDataType.Picture, false, typeof(object), DisplayName = "Verify MinimumSpec can not be set from condition variable of DataType \"Picture\"")]
+        [DataRow(VariableDataType.Double, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, false, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Long\"")]
+        //B8-14_1
+        public void TIEditor_SetMinimumSpecInResultVariable_VerifyRegularDataTypes(VariableDataType varDataType, bool canSetMinimumSpec, object dummy)
+        {
+            string CallName = "B8-14_1";
+            CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
+
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "MinimumSpec").LeftClick();
+            //Cursor expectedCursor = canSetMinimumSpec ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+
+            if (canSetMinimumSpec)
+            {
+                varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallName + "cond");
+                (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MinimumSpec").GetText());
+            }
+        }
+
+        [TestMethod("B8-14_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", false, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", false, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"HexStringArray\"")]
+        //B8-14_2
+        public void TIEditor_SetMinimumSpecInResultVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, bool canSetMinimumSpec, object dummy)
+        {
+            string CallName = "B8-14_2";
+            CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //// Add condition variable
+            //CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "MinimumSpec").LeftClick();
+            //Cursor expectedCursor = canSetMinimumSpec ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+
+            if (canSetMinimumSpec)
+            {
+                varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallName + "cond");
+                (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MinimumSpec").GetText());
+            }
+        }
+
+        [TestMethod("B8-14_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", false, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", false, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MinimumSpec can be set from condition variable of DataType \"Long2DArray\"")]
+        //B8-14_3
+        public void TIEditor_SetMinimumSpecInResultVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, bool canSetMinimumSpec, object dummy)
+        {
+            string CallName = "B8-14_3";
+            CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //// Add condition variable
+            //CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "MinimumSpec").LeftClick();
+            //Cursor expectedCursor = canSetMinimumSpec ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+
+            if (canSetMinimumSpec)
+            {
+                varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallName + "cond");
+                (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MinimumSpec").GetText());
+            }
+        }
+
+        [TestMethod("B8-15_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Float\"")]
+        [DataRow(VariableDataType.Integer, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Short\"")]
+        [DataRow(VariableDataType.String, false, typeof(object), DisplayName = "Verify Minimum DefectCode can not be set from condition variable of DataType \"String\"")]
+        [DataRow(VariableDataType.Byte, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, false, typeof(object), DisplayName = "Verify Minimum DefectCode can not be set from condition variable of DataType \"HexString\"")]
+        [DataRow(VariableDataType.Chart, false, typeof(object), DisplayName = "Verify Minimum DefectCode can not be set from condition variable of DataType \"Chart\"")]
+        [DataRow(VariableDataType.Picture, false, typeof(object), DisplayName = "Verify Minimum DefectCode can not be set from condition variable of DataType \"Picture\"")]
+        [DataRow(VariableDataType.Double, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, false, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Long\"")]
+        //B8-15_1
+        public void TIEditor_SetMinimumDefectCodeInResultVariable_VerifyRegularDataTypes(VariableDataType varDataType, bool canSetMinimumDefectCode, object dummy)
+        {
+            string CallName = "B8-15_1";
+            
+            int defectCode = 1;
+            string desc = "df";
+            int customerDefectCode = 1;
+            AddDefectCode(defectCode, desc, customerDefectCode);        // Add defect code
+
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, 6/*Defect Code*/).LeftClick();
+            //Cursor expectedCursor = canSetMinimumDefectCode ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+            //varDataGrid.GetCellBy(1, 6/*Defect Code*/).LeftClick();
+
+            if (canSetMinimumDefectCode)
+            {
+                varDataGrid.GetCellBy(1, 6/*Defect Code*/).ComboBoxSelectByName(defectCode.ToString());
+                defectCode.ToString().ShouldEqualTo(varDataGrid.GetCellBy(1, 6/*Defect Code*/).GetText());
+            }
+        }
+
+        [TestMethod("B8-15_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", false, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", false, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"HexStringArray\"")]
+        //B8-15_2
+        public void TIEditor_SetMinimumDefectCodeInResultVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, bool canSetMinimumDefectCode, object dummy)
+        {
+            string CallName = "B8-15_2";
+            
+            int defectCode = 1;
+            string desc = "df";
+            int customerDefectCode = 1;
+            AddDefectCode(defectCode, desc, customerDefectCode);        // Add defect code
+
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, 6/*Defect Code*/).LeftClick();
+            Cursor expectedCursor = canSetMinimumDefectCode ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            Cursor currentCursor = DllHelper.GetCursor();
+            expectedCursor.ShouldEqualTo(currentCursor);
+            varDataGrid.GetCellBy(1, 6/*Defect Code*/).LeftClick();
+
+            if (canSetMinimumDefectCode)
+            {
+                varDataGrid.GetCellBy(1, 6/*Defect Code*/).ComboBoxSelectByName(CallName);
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, 6/*Defect Code*/).GetText());
+            }
+        }
+
+        [TestMethod("B8-15_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", false, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", false, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Minimum DefectCode can be set from condition variable of DataType \"Long2DArray\"")]
+        //B8-15_3
+        public void TIEditor_SetMinimumDefectCodeInResultVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, bool canSetMinimumDefectCode, object dummy)
+        {
+            string CallName = "B8-15_3";
+            
+            int defectCode = 1;
+            string desc = "df";
+            int customerDefectCode = 1;
+            AddDefectCode(defectCode, desc, customerDefectCode);        // Add defect code
+
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, 6/*Defect Code*/).LeftClick();
+            //Cursor expectedCursor = canSetMinimumDefectCode ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+            //varDataGrid.GetCellBy(1, 6/*Defect Code*/).LeftClick();
+
+            if (canSetMinimumDefectCode)
+            {
+                varDataGrid.GetCellBy(1, 6/*Defect Code*/).ComboBoxSelectByName(CallName);
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, 6/*Defect Code*/).GetText());
+            }
+        }
+
+        [TestMethod("B8-16_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Float\"")]
+        [DataRow(VariableDataType.Integer, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Short\"")]
+        [DataRow(VariableDataType.String, false, typeof(object), DisplayName = "Verify MaximumSpec can not be set from condition variable of DataType \"String\"")]
+        [DataRow(VariableDataType.Byte, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, false, typeof(object), DisplayName = "Verify MaximumSpec can not be set from condition variable of DataType \"HexString\"")]
+        [DataRow(VariableDataType.Chart, false, typeof(object), DisplayName = "Verify MaximumSpec can not be set from condition variable of DataType \"Chart\"")]
+        [DataRow(VariableDataType.Picture, false, typeof(object), DisplayName = "Verify MaximumSpec can not be set from condition variable of DataType \"Picture\"")]
+        [DataRow(VariableDataType.Double, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, false, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Long\"")]
+        //B8-16_1
+        public void TIEditor_SetMaximumSpecInResultVariable_VerifyRegularDataTypes(VariableDataType varDataType, bool canSetMaximumSpec, object dummy)
+        {
+            string CallName = "B8-16_1";
+            CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "MaximumSpec").LeftClick();
+            //Cursor expectedCursor = canSetMaximumSpec ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+
+            if (canSetMaximumSpec)
+            {
+                varDataGrid.GetCellBy(1, "MaximumSpec").ComboBoxSelectByName(CallName + "cond");
+                (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MaximumSpec").GetText());
+            }
+        }
+
+        [TestMethod("B8-16_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", false, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", false, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"HexStringArray\"")]
+        //B8-16_2
+        public void TIEditor_SetMaximumSpecInResultVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, bool canSetMaximumSpec, object dummy)
+        {
+            string CallName = "B8-16_2";
+            CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
+
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "MaximumSpec").LeftClick();
+            //Cursor expectedCursor = canSetMaximumSpec ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+
+            if (canSetMaximumSpec)
+            {
+                varDataGrid.GetCellBy(1, "MaximumSpec").ComboBoxSelectByName(CallName + "cond");
+                (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MaximumSpec").GetText());
+            }
+        }
+
+        [TestMethod("B8-16_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", false, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", false, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", true, typeof(object), DisplayName = "Verify MaximumSpec can be set from condition variable of DataType \"Long2DArray\"")]
+        //B8-16_3
+        public void TIEditor_SetMaximumSpecInResultVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, bool canSetMaximumSpec, object dummy)
+        {
+            string CallName = "B8-16_3";
+            CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "MaximumSpec").LeftClick();
+            //Cursor expectedCursor = canSetMaximumSpec ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+
+            if (canSetMaximumSpec)
+            {
+                varDataGrid.GetCellBy(1, "MaximumSpec").ComboBoxSelectByName(CallName);
+                (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MaximumSpec").GetText());
+            }
+        }
+
+        [TestMethod("B8-17_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Float\"")]
+        [DataRow(VariableDataType.Integer, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Short\"")]
+        [DataRow(VariableDataType.String, false, typeof(object), DisplayName = "Verify Maximum DefectCode can not be set from condition variable of DataType \"String\"")]
+        [DataRow(VariableDataType.Byte, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, false, typeof(object), DisplayName = "Verify Maximum DefectCode can not be set from condition variable of DataType \"HexString\"")]
+        [DataRow(VariableDataType.Chart, false, typeof(object), DisplayName = "Verify Maximum DefectCode can not be set from condition variable of DataType \"Chart\"")]
+        [DataRow(VariableDataType.Picture, false, typeof(object), DisplayName = "Verify Maximum DefectCode can not be set from condition variable of DataType \"Picture\"")]
+        [DataRow(VariableDataType.Double, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, false, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Long\"")]
+        //B8-17_1
+        public void TIEditor_SetMaximumDefectCodeInResultVariable_VerifyRegularDataTypes(VariableDataType varDataType, bool canSetMaximumDefectCode, object dummy)
+        {
+            string CallName = "B8-17_1";
+            
+            int defectCode = 1;
+            string desc = "df";
+            int customerDefectCode = 1;
+            AddDefectCode(defectCode, desc, customerDefectCode);    // Add defect code
+
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, 8/*Defect Code*/).LeftClick();
+            //Cursor expectedCursor = canSetMaximumDefectCode ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+            //varDataGrid.GetCellBy(1, 8/*Defect Code*/).LeftClick();
+
+            if (canSetMaximumDefectCode)
+            {
+                varDataGrid.GetCellBy(1, "Defect Code").ComboBoxSelectByName(CallName);
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, 8/*Defect Code*/).GetText());
+            }
+        }
+
+        [TestMethod("B8-17_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", false, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", false, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"HexStringArray\"")]
+        //B8-17_2
+        public void TIEditor_SetMaximumDefectCodeInResultVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, bool canSetMaximumDefectCode, object dummy)
+        {
+            string CallName = "B8-17_2";
+            
+            int defectCode = 1;
+            string desc = "df";
+            int customerDefectCode = 1;
+            AddDefectCode(defectCode, desc, customerDefectCode);        // Add defect code
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, 8/*Defect Code*/).LeftClick();
+            //Cursor expectedCursor = canSetMaximumDefectCode ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+            //varDataGrid.GetCellBy(1, 8/*Defect Code*/).LeftClick();
+
+            if (canSetMaximumDefectCode)
+            {
+                varDataGrid.GetCellBy(1, "Defect Code").ComboBoxSelectByName(CallName);
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Defect Code").GetText());
+            }
+        }
+
+        [TestMethod("B8-17_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", false, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", false, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", true, typeof(object), DisplayName = "Verify Maximum DefectCode can be set from condition variable of DataType \"Long2DArray\"")]
+        //B8-17_3
+        public void TIEditor_SetMaximumDefectCodeInResultVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, bool canSetMaximumDefectCode, object dummy)
+        {
+            string CallName = "B8-17_3";
+            
+            int defectCode = 1;
+            string desc = "df";
+            int customerDefectCode = 1;
+            AddDefectCode(defectCode, desc, customerDefectCode);        // Add defect code
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Defect Code").LeftClick();
+            //Cursor expectedCursor = canSetMaximumDefectCode ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            //Cursor currentCursor = DllHelper.GetCursor();
+            //expectedCursor.ShouldEqualTo(currentCursor);
+            //varDataGrid.GetCellBy(1, "Defect Code").LeftClick();
+
+            if (canSetMaximumDefectCode)
+            {
+                varDataGrid.GetCellBy(1, "Defect Code").ComboBoxSelectByName(CallName);
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Defect Code").GetText());
+            }
+        }
+
+        [TestMethod("B8-18")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-18
+        public void TIEditor_SetShowNameInTempVariable_CheckShowNameIsSet()
+        {
+            string ShowName = "B8-18";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, ShowName);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Show Name").ComboBoxSelectByName(ShowName);
+
+            ShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Show Name").GetText());
+        }
+
+        [TestMethod("B8-19_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(1, typeof(object), DisplayName = "Verify CallName is set properly (single variable)")]
+        [DataRow(2, typeof(object), DisplayName = "Verify CallName is set properly (two variables)")]
+        //B8-19_1
+        public void TIEditor_SetCallNameInTempVariable(int varCount, object dummy)
+        {
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            IElement varDataGrid = null;
+            for (int rowNo = 1; rowNo <= varCount; rowNo++)
+            {
+                string CallName = $"B8-12_{rowNo}";
+                varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName);
+                //varDataGrid.GetCellBy(rowNo, "Show Name").DoubleClick();
+                //varDataGrid.GetCellBy(rowNo, "Call Name").SendSingleKeys(CallName);
+                //Press(Keys.Enter);
+
+                CallName.ShouldEqualTo(varDataGrid.GetCellBy(rowNo, "Call Name").GetText());
+            }
+        }
+
+        [TestMethod("B8-19_2")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-19_2
+        public void TIEditor_SetCallNameInTempVariable_CheckCallNameIsRepeated()
+        {
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            string CallName = "B8-19_2";
+            IElement varDataGrid = null;
+            for (int rowNo = 1; rowNo <= 2; rowNo++)
+            {
+                varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName);
+                //varDataGrid.GetCellBy(rowNo, "Show Name").DoubleClick();
+                //varDataGrid.GetCellBy(rowNo, "Call Name").SendSingleKeys(CallName);
+                //Press(Keys.Enter);
+            }
+
+            string errorTooltipMsg = "CallName repeat";
+            errorTooltipMsg.ShouldEqualTo(varDataGrid.PerformGetElement($"/ByCell[1,@Call Name]").GetToolTipMessage());
+            errorTooltipMsg.ShouldEqualTo(varDataGrid.PerformGetElement($"/ByCell[2,@Call Name]").GetToolTipMessage());
+        }
+
+        [TestMethod("B8-20_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, typeof(object), DisplayName = "Verify DataType is \"Float\"")]
+        [DataRow(VariableDataType.Integer, typeof(object), DisplayName = "Verify DataType is \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, typeof(object), DisplayName = "Verify DataType is \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, typeof(object), DisplayName = "Verify DataType is \"Short\"")]
+        [DataRow(VariableDataType.String, typeof(object), DisplayName = "Verify DataType is \"String\"")]
+        [DataRow(VariableDataType.Byte, typeof(object), DisplayName = "Verify DataType is \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, typeof(object), DisplayName = "Verify DataType is \"HexString\"")]
+        [DataRow(VariableDataType.Chart, typeof(object), DisplayName = "Verify DataType is \"Chart\"")]
+        [DataRow(VariableDataType.Picture, typeof(object), DisplayName = "Verify DataType is \"Picture\"")]
+        [DataRow(VariableDataType.Double, typeof(object), DisplayName = "Verify DataType is \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, typeof(object), DisplayName = "Verify DataType is \"Long\"")]
+        //B8-20_1
+        public void TIEditor_SetDataTypeInTempVariable_VerifyRegularDataTypes(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-20_1";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Data Type").GetText().ShouldEqualTo(varDataType.GetDescription());
+        }
+
+        [TestMethod("B8-20_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", typeof(object), DisplayName = "Verify DataType is \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", typeof(object), DisplayName = "Verify DataType is \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", typeof(object), DisplayName = "Verify DataType is \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", typeof(object), DisplayName = "Verify DataType is \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", typeof(object), DisplayName = "Verify DataType is \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", typeof(object), DisplayName = "Verify DataType is \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", typeof(object), DisplayName = "Verify DataType is \"HexStringArray\"")]
+        //B8-20_2
+        public void TIEditor_SetDataTypeInTempVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, object dummy)
+        {
+            string CallName = "B8-20_2";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            string dataTypeShowName = string.Format("{0}[{1}]", varDataType.GetDescription().Replace("[]", ""), arrSize1);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-20_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-20_3
+        public void TIEditor_SetDataTypeInTempVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-20_3";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            string dataTypeShowName = string.Format("{0}[{1},{2}]", varDataType.GetDescription().Replace("[,]", ""), arrSize1, arrSize2);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-21_HexString")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-21_HexString
+        public void TIEditor_SetMaxInTempVariableWithHexString_CheckDefaultCellLength()
+        {
+            string CallName = "B8-21_HexString";
+            VariableDataType varDataType = VariableDataType.HexString;
+            int maxValue = 4;
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").ComboBoxSelectByName(varDataType.GetDescription());
+
+            varDataGrid.GetCellBy(1, "Max.").SendText(maxValue.ToString());
+
+            string DefaultSingleHexValue = new string('0', maxValue * 2);
+            DefaultSingleHexValue.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText());
+        }
+
+        [TestMethod("B8-21_HexString1DArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-21_HexString1DArray
+        public void TIEditor_SetMaxInTempVariableWithHexString1DArr_CheckDefaultCellLength()
+        {
+            string CallName = "B8-21_HexString1DArray";
+            VariableDataType varDataType = VariableDataType.HexStringArray;
+            int maxValue = 4;
+            string arrSize1 = "5";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").ComboBoxSelectByName(varDataType.GetDescription());
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "Max.").SendText(maxValue.ToString());
+
+            int size = int.Parse(arrSize1);
+            string DefaultSingleHexValue = new string('0', maxValue * 2);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(1, "Default").GetText(), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-21_HexString2DArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-21_HexString2DArray
+        public void TIEditor_SetMaxInTempVariableWithHexString2DArr_CheckDefaultCellLength()
+        {
+            string CallName = "B8-21_HexString2DArray";
+            VariableDataType varDataType = VariableDataType.HexString2DArray;
+            int maxValue = 4;
+            string arrSize1 = "5";
+            string arrSize2 = "5";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").ComboBoxSelectByName(varDataType.GetDescription());
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "Max.").SendText(maxValue.ToString());
+
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            string DefaultSingleHexValue = new string('0', maxValue * 2);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(1, "Default").GetText(), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-22_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, typeof(object), DisplayName = "Verify Default can be set in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer, typeof(object), DisplayName = "Verify Default can be set in \"Integer\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, typeof(object), DisplayName = "Verify Default can be set in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Short, typeof(object), DisplayName = "Verify Default can be set in \"Short\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String, typeof(object), DisplayName = "Verify Default can be set in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte, typeof(object), DisplayName = "Verify Default can be set in \"Byte\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Double, typeof(object), DisplayName = "Verify Default can be set in \"Double\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long, typeof(object), DisplayName = "Verify Default can be set in \"Long\" variable with EditType \"EditBox\"")]
+        //B8-22_1
+        public void TIEditor_SetDefaultInTempVariable_VerifyRegularDataTypes(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-22_1";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            string defaultValue = "0";
+            varDataGrid.GetCellBy(1, "Default").SendText(defaultValue);
+            Press(Keys.Enter);
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText());
+        }
+
+        [TestMethod("B8-22_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, '0', typeof(object), DisplayName = "Verify Default can be set in \"Float[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, '0', typeof(object), DisplayName = "Verify Default can be set in \"Integer[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, '0', typeof(object), DisplayName = "Verify Default can be set in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, '0', typeof(object), DisplayName = "Verify Default can be set in \"Double[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, '0', typeof(object), DisplayName = "Verify Default can be set in \"String[L]\" variable with EditType \"EditBox\"")]
+        //B8-22_2
+        public void TIEditor_SetDefaultInTempVariable_VerifyUUTSizeArrayDataTypes(VariableDataType varDataType, char value, object dummy)
+        {
+            string CallName = "B8-22_2";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int UUTMaxSize = 640;
+            UUTMaxSize.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-22_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArray, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.ByteArray, "10", "00", typeof(object), DisplayName = "Verify Default can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //B8-22_3
+        public void TIEditor_SetDefaultInTempVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, string value, object dummy)
+        {
+            string CallName = "B8-22_3";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value);
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            //int size = int.Parse(arrSize1);
+            foreach (string defVal in varDataGrid.GetCellBy(1, "Default").GetText().Split(','))
+                value.ShouldEqualTo(defVal);
+        }
+
+        [TestMethod("B8-22_4")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Float[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Integer[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", "00", typeof(object), DisplayName = "Verify Default can be set in \"Byte[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"String[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Long[,]\" variable with EditType \"EditBox\"")]
+        //B8-22_4
+        public void TIEditor_SetDefaultInTempVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, string value, object dummy)
+        {
+            string CallName = "B8-22_4";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            //int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            foreach (string defValArr in varDataGrid.GetCellBy(1, "Default").GetText().Split(';'))
+                foreach (string defVal in defValArr.Split(','))
+                    value.ShouldEqualTo(defVal);
+        }
+
+        [TestMethod("B8-22_5_HexString")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexString, 'f', typeof(object), DisplayName = "Verify Default can not be set in \"HexString\" variable with EditType \"EditBox\"")]
+        //B8-22_5_HexString
+        public void TIEditor_SetDefaultInTempVariable_VerifyHexStringDataTypeWithEditBox(VariableDataType varDataType, char value, object dummy)
+        {
+            string CallName = "B8-22_5_HexString";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformInput("/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            //int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            string DefaultSingleHexValue = new string(value, 4);
+            DefaultSingleHexValue.ShouldEqualTo(varDataGrid.GetCellBy(1, "Default").GetText());
+        }
+
+        [TestMethod("B8-22_5_HexString1DArray")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexStringArray, "5", 'f', typeof(object), DisplayName = "Verify Default can be set in \"HexString[]\" variable with EditType \"EditBox\"")]
+        //B8-22_5_HexString1DArray
+        public void TIEditor_SetDefaultInTempVariable_VerifyHexString1DArrayWithEditBox(VariableDataType varDataType, string arrSize1, char value, object dummy)
+        {
+            string CallName = "B8-22_5_HexString1DArray";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int size = int.Parse(arrSize1);
+            string DefaultSingleHexValue = new string(value, 4);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(1, "Default").GetText(), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-22_5_HexString2DArray")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexString2DArray, "5", "5", 'f', typeof(object), DisplayName = "Verify Default can be set in \"HexString[,]\" variable with EditType \"EditBox\"")]
+        //B8-22_5_HexString2DArray
+        public void TIEditor_SetDefaultInTempVariable_VerifyHexString2DArrayWithEditBox(VariableDataType varDataType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-22_5_HexString2DArray";
+            IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            string DefaultSingleHexValue = new string(value, 4);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(1, "Default").GetText(), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-23")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-23
+        public void TIEditor_SetShowNameInGlobalVariable_CheckShowNameIsSet()
+        {
+            string ShowName = "B8-23";
+            CreateNewVariable1(VariableTabType.Global, ShowName);
+        }
+
+        [TestMethod("B8-24")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(1, typeof(object), DisplayName = "Verify CallName is set properly (single variable)")]
+        [DataRow(2, typeof(object), DisplayName = "Verify CallName is set properly (two variables)")]
+        //B8-24
+        public void TIEditor_SetCallNameInGlobalVariable(int varCount, object dummy)
+        {
+            for (int rowNo = 1; rowNo <= varCount; rowNo++)
+            {
+                string CallName = $"B8-24_{rowNo}";
+                CreateNewVariable1(VariableTabType.Global, "", CallName);
+            }
+        }
+
+        [TestMethod("B8-24")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-24
+        public void TIEditor_SetCallNameInGlobalVariable_CheckCallNameIsRepeated()
+        {
+            PP5DataGrid pp5DataGrid = null;
+            for (int rowNo = 1; rowNo <= 2; rowNo++)
+            {
+                string CallName = "B8-24";
+                pp5DataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName);
+            }
+
+            string errorTooltipMsg = "CallName repeat";
+            errorTooltipMsg.ShouldEqualTo(pp5DataGrid.PerformGetElement($"/ByCell@GlbGrid[{pp5DataGrid.LastRowNo - 1},@Call Name]").GetToolTipMessage());
+            errorTooltipMsg.ShouldEqualTo(pp5DataGrid.PerformGetElement($"/ByCell@GlbGrid[{pp5DataGrid.LastRowNo},@Call Name]").GetToolTipMessage());
+        }
+
+        [TestMethod("B8-25_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, typeof(object), DisplayName = "Verify DataType is \"Float\"")]
+        [DataRow(VariableDataType.Integer, typeof(object), DisplayName = "Verify DataType is \"Integer\"")]
+        [DataRow(VariableDataType.FloatPercentage, typeof(object), DisplayName = "Verify DataType is \"FloatPercentage\"")]
+        [DataRow(VariableDataType.Short, typeof(object), DisplayName = "Verify DataType is \"Short\"")]
+        [DataRow(VariableDataType.String, typeof(object), DisplayName = "Verify DataType is \"String\"")]
+        [DataRow(VariableDataType.Byte, typeof(object), DisplayName = "Verify DataType is \"Byte\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, typeof(object), DisplayName = "Verify DataType is \"HexString\"")]
+        [DataRow(VariableDataType.LineInVector, typeof(object), DisplayName = "Verify DataType is \"LineInVector\"")]
+        [DataRow(VariableDataType.LoadVector, typeof(object), DisplayName = "Verify DataType is \"LoadVector\"")]
+        [DataRow(VariableDataType.SpecVector, typeof(object), DisplayName = "Verify DataType is \"SpecVector\"")]
+        [DataRow(VariableDataType.ExtMeasVector, typeof(object), DisplayName = "Verify DataType is \"ExtMeasVector\"")]
+        [DataRow(VariableDataType.ACLoadVector, typeof(object), DisplayName = "Verify DataType is \"ACLoadVector\"")]
+        [DataRow(VariableDataType.ACSpecVector, typeof(object), DisplayName = "Verify DataType is \"ACSpecVector\"")]
+        [DataRow(VariableDataType.ConstantVector, typeof(object), DisplayName = "Verify DataType is \"ConstantVector\"")]
+        [DataRow(VariableDataType.Double, typeof(object), DisplayName = "Verify DataType is \"Double\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, typeof(object), DisplayName = "Verify DataType is \"Long\"")]
+        //B8-25_1
+        public void TIEditor_SetDataTypeInGlobalVariable_VerifyRegularDataTypes(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-25_1";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            varDataType.GetDescription().ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-25_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, "10", typeof(object), DisplayName = "Verify DataType is \"FloatArray\"")]
+        [DataRow(VariableDataType.IntegerArray, "10", typeof(object), DisplayName = "Verify DataType is \"IntegerArray\"")]
+        [DataRow(VariableDataType.DoubleArray, "10", typeof(object), DisplayName = "Verify DataType is \"DoubleArray\"")]
+        [DataRow(VariableDataType.StringArray, "10", typeof(object), DisplayName = "Verify DataType is \"StringArray\"")]
+        [DataRow(VariableDataType.ByteArray, "10", typeof(object), DisplayName = "Verify DataType is \"ByteArray\"")]
+        [DataRow(VariableDataType.LongArray, "10", typeof(object), DisplayName = "Verify DataType is \"LongArray\"")]
+        [DataRow(VariableDataType.HexStringArray, "10", typeof(object), DisplayName = "Verify DataType is \"HexStringArray\"")]
+        //B8-25_2
+        public void TIEditor_SetDataTypeInGlobalVariable_VerifyRank1Array(VariableDataType varDataType, string arrSize1, object dummy)
+        {
+            string CallName = "B8-25_2";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, arrSize1);
+
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            string dataTypeShowName = string.Format("{0}[{1}]", varDataType.GetDescription().Replace("[]", ""), arrSize1);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-25_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "10", "10", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-25_3
+        public void TIEditor_SetDataTypeInGlobalVariable_VerifyRank2Array(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-25_3";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, arrSize1, arrSize2);
+
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            string dataTypeShowName = string.Format("{0}[{1},{2}]", varDataType.GetDescription().Replace("[,]", ""), arrSize1, arrSize2);
+            dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Data Type").GetText());
+        }
+
+        [TestMethod("B8-26")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, typeof(object), DisplayName = "Verify EditType is \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.ComboBox, typeof(object), DisplayName = "Verify EditType is \"ComboBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.External_Signal, typeof(object), DisplayName = "Verify EditType is \"External_Signal\"")]
+        //B8-26
+        public void TIEditor_SetEditTypeInGlobalVariable(VariableDataType varDataType, VariableEditType varEditType, object dummy)
+        {
+            string CallName = "B8-26";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varEditType.ToString().ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Edit Type").GetText());
+        }
+
+        [TestMethod("B8-27")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Integer\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Short, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Short\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Byte\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        //[DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        //[DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.HexString, VariableEditType.EditBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"HexString\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LineInVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"LineInVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.LoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"LoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.SpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"SpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ExtMeasVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ExtMeasVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACLoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ACLoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACSpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ACSpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ConstantVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Minimum can not be set in \"ConstantVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Double\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Minimum can be set in \"Long\" variable with EditType \"EditBox\"")]
+        //B8-27
+        public void TIEditor_SetMinimumInGlobalVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, bool canSetMinimum, object dummy)
+        {
+            string CallName = "B8-27";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").LeftClick();
+            Cursor expectedCursor = canSetMinimum ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            Cursor currentCursor = DllHelper.GetCursor();
+            expectedCursor.ShouldEqualTo(currentCursor);
+
+            string minValue = "0";
+            if (canSetMinimum)
+            {
+                varDataGrid.GetSelectedCellBy(varDataGrid.LastRowNo, "Min.").SendText(minValue);
+                minValue.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").GetText());
+            }
+        }
+
+        [TestMethod("B8-27_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Integer[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Double[L]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, '0', VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        //B8-27_1
+        public void TIEditor_SetMinimumInGlobalVariable_VerifyArrayDataTypes(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-27_1";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int UUTMaxSize = 640;
+            UUTMaxSize.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-27_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.ByteArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.HexStringArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"HexString[]\" variable with EditType \"EditBox\"")]
+        //B8-27_2
+        public void TIEditor_SetMinimumInGlobalVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, char value, object dummy)
+        {
+            string CallName = "B8-27_2";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int size = int.Parse(arrSize1);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-27_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Float[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Integer[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.Byte2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Byte[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.String2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"String[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.HexString2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"HexString[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Minimum can be set in \"Long[,]\" variable with EditType \"EditBox\"")]
+        //B8-27_3
+        public void TIEditor_SetMinimumInGlobalVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-27_3";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Min.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-28")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Integer\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Short, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Short\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Byte\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatArrayOfSize640\"")]
+        //[DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"IntegerArrayOfSize640\"")]
+        //[DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"FloatPercentageArrayOfSize640\"")]
+        [DataRow(VariableDataType.LineInVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"LineInVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.LoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"LoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.SpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"SpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ExtMeasVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ExtMeasVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACLoadVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ACLoadVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ACSpecVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ACSpecVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.ConstantVector, VariableEditType.ComboBox, false, typeof(object), DisplayName = "Verify Maximum can not be set in \"ConstantVector\" variable with EditType \"ComboBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Double\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"DoubleArrayOfUUTMaxSize\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        [DataRow(VariableDataType.Long, VariableEditType.EditBox, true, typeof(object), DisplayName = "Verify Maximum can be set in \"Long\" variable with EditType \"EditBox\"")]
+        //B8-28
+        public void TIEditor_SetMaximumInGlobalVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, bool canSetMaximum, object dummy)
+        {
+            string CallName = "B8-28";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").LeftClick();
+            Cursor expectedCursor = canSetMaximum ? Cursor.IBeam : Cursor.Arrow;                           // Check the cursor is still in IBeam type (cell is editable)
+            Cursor currentCursor = DllHelper.GetCursor();
+            expectedCursor.ShouldEqualTo(currentCursor);
+
+            string maxValue = "0";
+            if (canSetMaximum)
+            {
+                varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").SendText(maxValue);
+                maxValue.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").GetText());
+            }
+        }
+
+        [TestMethod("B8-28_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Float[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Integer[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Double[L]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArrayOfUUTMaxSize, '0', VariableEditType.EditBox, typeof(object), DisplayName = "Verify DataType is \"StringArrayOfUUTMaxSize\"")]
+        //B8-28_1
+        public void TIEditor_SetMaximumInGlobalVariable_VerifyArrayDataTypes(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-28_1";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int UUTMaxSize = 640;
+            UUTMaxSize.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-28_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.StringArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.ByteArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, VariableEditType.EditBox, "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //B8-28_2
+        public void TIEditor_SetMaximumInGlobalVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, char value, object dummy)
+        {
+            string CallName = "B8-28_2";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            
+            int size = int.Parse(arrSize1);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-28_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Float[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Integer[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.Byte2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Byte[,]\" variable with EditType \"EditBox\"")]
+        //[DataRow(VariableDataType.String2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"String[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Maximum can be set in \"Long[,]\" variable with EditType \"EditBox\"")]
+        //B8-28_3
+        public void TIEditor_SetMaximumInGlobalVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-28_3";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            size.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-28_4")]
+        [DataRow(VariableDataType.HexString, VariableEditType.EditBox, "1", "1", '5', typeof(object), DisplayName = "Verify Maximum can not be set in \"HexString\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.HexStringArray, VariableEditType.EditBox, "5", "1", '5', typeof(object), DisplayName = "Verify Maximum can be set in \"HexString[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.HexString2DArray, VariableEditType.EditBox, "5", "5", '5', typeof(object), DisplayName = "Verify Maximum can be set in \"HexString[,]\" variable with EditType \"EditBox\"")]
+        //B8-28_4
+        public void TIEditor_SetMaximumInGlobalVariable_VerifHexStringDataType(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-28_4";
+            PP5DataGrid varDataGrid;
+            if (varDataType == VariableDataType.HexString)
+                varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            else if (varDataType == VariableDataType.HexStringArray)
+                varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
+            else
+                varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //if (varDataType == VariableDataType.HexStringArray)
+            //{
+            //    PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //    PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+            //}
+            //else if (varDataType == VariableDataType.HexString2DArray)
+            //{
+            //    PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //    PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //    PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+            //}
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").LeftClick();
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").SendText(value.ToString());
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Max.").GetText().ShouldEqualTo(value.ToString());
+
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            string DefaultSingleValue = new string('0', int.Parse(value.ToString()) * 2);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText(), DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-29")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Integer\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Short, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Short\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Byte\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Double\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set in \"Long\" variable with EditType \"EditBox\"")]
+        //B8-29
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, object dummy)
+        {
+            string CallName = "B8-29";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            string defaultValue = "0";
+            varDataGrid.GetSelectedCellBy(varDataGrid.LastRowNo, "Default").SendText(defaultValue);
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText());
+        }
+
+        [TestMethod("B8-29_1_String")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-29_1_String
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyStringDataTypeWithExtSignal()
+        {
+            string CallName = "B8-29_1_String";
+            VariableDataType varDataType = VariableDataType.String;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //VariableDataType varDataType = VariableDataType.String;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            string defaultValue = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText();
+            defaultValue.ShouldContain("PhoenixonDSP");
+            defaultValue.ShouldContain("DSPSensingOFF");
+            defaultValue.ShouldContain("(0xFF)");
+            defaultValue.ShouldContain("DSPSensingOFF_Signal");
+        }
+
+        [TestMethod("B8-29_1_String1DArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-29_1_String1DArray
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyString1DArrayDataTypeWithExtSignal()
+        {
+            string CallName = "B8-29_1_String1DArray";
+            int arrSize1 = 5;
+            VariableDataType varDataType = VariableDataType.StringArray;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1.ToString());
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //VariableDataType varDataType = VariableDataType.StringArray;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            string defaultValue = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText();
+            string DefaultSingleValue = @"PhoenixonDSP\.DSPSensingOFF:\(0xFF\)\.DSPSensingOFF_Signal";
+            arrSize1.ShouldEqualTo(Regex.Matches(defaultValue, DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-29_2_String2DArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-29_2_String2DArray
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyString2DArrayDataTypeWithExtSignal()
+        {
+            string CallName = "B8-29_2_String2DArray";
+            string arrSize1 = "2";
+            string arrSize2 = "2";
+            VariableDataType varDataType = VariableDataType.String2DArray;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //VariableDataType varDataType = VariableDataType.String2DArray;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            string defaultValue = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText();
+            string DefaultSingleValue = @"PhoenixonDSP\.DSPSensingOFF:\(0xFF\)\.DSPSensingOFF_Signal";
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            size.ShouldEqualTo(Regex.Matches(defaultValue, DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-29_2_StringUUTArray")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-29_2_StringUUTArray
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyStringUUTArrayDataTypeWithExtSignal()
+        {
+            string CallName = "B8-29_2_StringUUTArray";
+            VariableDataType varDataType = VariableDataType.StringArrayOfUUTMaxSize;
+            VariableEditType varEditType = VariableEditType.External_Signal;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //VariableDataType varDataType = VariableDataType.StringArrayOfUUTMaxSize;
+            //VariableEditType varEditType = VariableEditType.External_Signal;
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformGetElement("/ById[tvCluster]")
+                        .AddTreeViewItem("PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal");
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            string defaultValue = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText();
+            string DefaultSingleValue = @"PhoenixonDSP\.DSPSensingOFF:\(0xFF\)\.DSPSensingOFF_Signal";
+            int UUTSize = 640;
+            UUTSize.ShouldEqualTo(Regex.Matches(defaultValue, DefaultSingleValue).Count);
+        }
+
+        [TestMethod("B8-29_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.LineInVector, typeof(object), DisplayName = "Verify Default can be set in \"LineInVector\" variable with EditType \"ComboBox\"")]
+        //[DataRow(VariableDataType.LoadVector, typeof(object), DisplayName = "Verify Default can be set in \"LoadVector\" variable with EditType \"ComboBox\"")]
+        //[DataRow(VariableDataType.SpecVector, typeof(object), DisplayName = "Verify Default can be set in \"SpecVector\" variable with EditType \"ComboBox\"")]
+        //[DataRow(VariableDataType.ExtMeasVector, typeof(object), DisplayName = "Verify Default can be set in \"ExtMeasVector\" variable with EditType \"ComboBox\"")]
+        //[DataRow(VariableDataType.ACLoadVector, typeof(object), DisplayName = "Verify Default can be set in \"ACLoadVector\" variable with EditType \"ComboBox\"")]
+        //[DataRow(VariableDataType.ACSpecVector, typeof(object), DisplayName = "Verify Default can be set in \"ACSpecVector\" variable with EditType \"ComboBox\"")]
+        //[DataRow(VariableDataType.ConstantVector, typeof(object), DisplayName = "Verify Default can be set in \"ConstantVector\" variable with EditType \"ComboBox\"")]
+        //B8-29_2
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyVectorDataTypes(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-29_2";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, VariableEditType.ComboBox);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(VariableEditType.ComboBox.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+
+            List<string> expectedValues = new List<string>();
+            string[] defaultValues;
+            PP5DataGrid VectorDataGrid = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement("/ById[VectorGrid]"));
+            VectorDataGrid.ScrollToSpecificColumn("Default");
+            //while (!VectorDataGrid.GetCellBy(1, "Default").IsWithinScreen)
+            //{
+            //    MoveToElementAndRightClick(VectorDataGrid, MoveToElementOffsetStartingPoint.InnerBottomRight);
+            //    PP5IDEWindow.PerformClick("/ByClass[ContextMenu]/ById[PageRight]/ByName[Page Right]", ClickType.LeftClick);
+            //}
+            for (int i = 1; i <= VectorDataGrid.GetRowCount(); i++)
+                expectedValues.Add(VectorDataGrid.GetCellBy(i, "Default").GetText());
+            PP5IDEWindow.PerformClick("/ByName[Vector Editor,Ok]", ClickType.LeftClick);
+            defaultValues = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText().Split('@');
+
+            expectedValues.Count.ShouldEqualTo(defaultValues.Length);
+            for (int i = 0; i < expectedValues.Count; i++)
+            {
+                expectedValues[i].ShouldEqualTo(defaultValues[i]);
+            }
+        }
+
+        [TestMethod("B8-29_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Float[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Integer[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"Double[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, '0', typeof(object), DisplayName = "Verify Default can be set in \"String[L]\" variable with EditType \"EditBox\"")]
+        //B8-29_3
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyUUTSizeArrayDataTypes(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-29_3";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int UUTSize = 640;
+            UUTSize.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText().Count(c => c.Equals(value)));
+        }
+
+        [TestMethod("B8-29_4")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.ByteArray, VariableEditType.EditBox, "10", "00", typeof(object), DisplayName = "Verify Default can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //B8-29_4
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string value, object dummy)
+        {
+            string CallName = "B8-29_4";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value);
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            foreach (string defVal in varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText().Split(','))
+                value.ShouldEqualTo(defVal);
+        }
+
+        [TestMethod("B8-29_5")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Default can be set in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Default can be set in \"Float[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Integer2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Default can be set in \"Integer[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Byte2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Default can be set in \"Byte[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.String2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Default can be set in \"String[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Long2DArray, VariableEditType.EditBox, "10", "10", '0', typeof(object), DisplayName = "Verify Default can be set in \"Long[,]\" variable with EditType \"EditBox\"")]
+        //B8-29_5
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-29_5";
+            IElement varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(1, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, value.ToString());
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            varDataGrid.GetCellBy(1, "Default").GetText().Count(c => c.Equals(value)).ShouldEqualTo(size);
+        }
+
+        [TestMethod("B8-29_6_HexString")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexString, VariableEditType.EditBox, 'f', typeof(object), DisplayName = "Verify Default can not be set in \"HexString\" variable with EditType \"EditBox\"")]
+        //B8-29_6_HexString
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyHexStringDataTypeWithEditBox(VariableDataType varDataType, VariableEditType varEditType, char value, object dummy)
+        {
+            string CallName = "B8-29_6_HexString";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformInput("/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformInput("/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            //int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            string DefaultSingleHexValue = new string(value, 4);
+            DefaultSingleHexValue.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText());
+        }
+
+        [TestMethod("B8-29_6_HexString1DArray")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexStringArray, VariableEditType.EditBox, "5", 'f', typeof(object), DisplayName = "Verify Default can be set in \"HexString[]\" variable with EditType \"EditBox\"")]
+        //B8-29_6_HexString1DArray
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyHexString1DArrayWithEditBox(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, char value, object dummy)
+        {
+            string CallName = "B8-29_6_HexString1DArray";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            //int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            int size = int.Parse(arrSize1);
+            string DefaultSingleHexValue = new string(value, 4);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText(), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-29_6_HexString2DArray")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.HexString2DArray, VariableEditType.EditBox, "5", "5", 'f', typeof(object), DisplayName = "Verify Default can be set in \"HexString[,]\" variable with EditType \"EditBox\"")]
+        //B8-29_6_HexString2DArray
+        public void TIEditor_SetDefaultInGlobalVariable_VerifyHexString2DArrayWithEditBox(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, char value, object dummy)
+        {
+            string CallName = "B8-29_6_HexString2DArray";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").LeftClick();
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor]/ByClass[GroupBox]/ById[svInner,popEdit,PART_Editor]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[0]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformInput("/ByName[HexString Editor]/ByClass[ListBox]/ListItem[1]/Edit[0]", InputType.SendContent, new string(value, 2));
+            PP5IDEWindow.PerformClick("/ByName[HexString Editor,Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Ok]", ClickType.LeftClick);
+
+            int size = int.Parse(arrSize1) * int.Parse(arrSize2);
+            string DefaultSingleHexValue = new string(value, 4);
+            size.ShouldEqualTo(Regex.Matches(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText(), DefaultSingleHexValue).Count);
+        }
+
+        [TestMethod("B8-30")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Float, VariableEditType.EditBox, ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Float\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentage, VariableEditType.EditBox, ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"FloatPercentage\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Double, VariableEditType.EditBox, ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Double\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, VariableEditType.EditBox, ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Default can be set from \".0~.6\" in \"Float(%)[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, VariableEditType.EditBox, ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Default can be set from \".0~.6\" in \"Double[L]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, VariableEditType.EditBox, ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Default can be set from \".0~.6\" in \"Float[L]\" variable with EditType \"EditBox\"")]
+        //B8-30
+        public void TIEditor_SetFormatInGlobalVariable_VerifyRegularDataTypes(VariableDataType varDataType, VariableEditType varEditType, string formatStr, object dummy)
+        {
+            string CallName = "B8-30";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            foreach (string fm in formatStr.Split(','))
+            {
+                varDataGrid.GetSelectedCellBy(varDataGrid.LastRowNo, "Format").SendText(fm);
+                fm.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Format").GetText());
+            }
+        }
+
+        [TestMethod("B8-30_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Double[]\" variable with EditType \"EditBox\"")]
+        //B8-30_1
+        public void TIEditor_SetFormatInGlobalVariable_VerifyRank1Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string formatStr, object dummy)
+        {
+            string CallName = "B8-30_1";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            foreach (string fm in formatStr.Split(','))
+            {
+                varDataGrid.GetSelectedCellBy(varDataGrid.LastRowNo, "Format").SendText(fm);
+                fm.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Format").GetText());
+            }
+        }
+
+        [TestMethod("B8-30_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, VariableEditType.EditBox, "2", "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Double[,]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.Float2DArray, VariableEditType.EditBox, "2", "2", ".0,.1,.2,.3,.4,.5,.6", typeof(object), DisplayName = "Verify Format can be set from \".0~.6\" in \"Float[,]\" variable with EditType \"EditBox\"")]
+        //B8-30_2
+        public void TIEditor_SetFormatInGlobalVariable_VerifyRank2Array(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string arrSize2, string formatStr, object dummy)
+        {
+            string CallName = "B8-30_2";
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type").SendSingleKeys(varDataType.GetDescription());
+            //Press(Keys.Enter);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, arrSize1);
+            //PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, arrSize2);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //varDataGrid.GetCellBy(1, "Edit Type").SendSingleKeys(varEditType.ToString());
+            //Press(Keys.Enter);
+
+            foreach (string fm in formatStr.Split(','))
+            {
+                varDataGrid.GetSelectedCellBy(varDataGrid.LastRowNo, "Format").SendText(fm);
+                fm.ShouldEqualTo(varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Format").GetText());
+            }
+        }
+
+        [TestMethod("B8-31")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Short, Int16.MaxValue, "int16Max", typeof(object), DisplayName = "Verify enum value can be set with \"int16Max\" of datatype \"Short\"")]
+        [DataRow(VariableDataType.Short, Int16.MinValue, "int16Min", typeof(object), DisplayName = "Verify enum value can be set with \"int16Min\" of datatype \"Short\"")]
+        [DataRow(VariableDataType.Integer, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Verify enum value can be set with \"int32Max\" of datatype \"Integer\"")]
+        [DataRow(VariableDataType.Integer, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Verify enum value can be set with \"int32Min\" of datatype \"Integer\"")]
+        [DataRow(VariableDataType.Long, Int64.MaxValue, "int64Max", typeof(object), DisplayName = "Verify enum value can be set with \"int64Max\" of datatype \"Long\"")]
+        [DataRow(VariableDataType.Long, Int64.MinValue, "int64Min", typeof(object), DisplayName = "Verify enum value can be set with \"int64Min\" of datatype \"Long\"")]
+
+        [DataRow(VariableDataType.Float, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMax\" of datatype \"Float\"")]                            // Actual float.MaxValue is 3.40282347E+38f
+        [DataRow(VariableDataType.Float, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMin\" of datatype\"Float\"")]                            // Actual float.MinValue is -3.40282347E+38f
+        [DataRow(VariableDataType.FloatPercentage, "3.40282356779E+38", "Float(%)Max", typeof(object), DisplayName = "Verify enum value can be set with \"Float(%)Max\" of datatype \"FloatPercentage\"")]  // Actual float.MaxValue is 3.40282347E+38f
+        [DataRow(VariableDataType.FloatPercentage, "-3.40282356779E+38", "Float(%)Min", typeof(object), DisplayName = "Verify enum value can be set with \"Float(%)Min\" of datatype \"FloatPercentage\"")] // Actual float.MinValue is -3.40282347E+38f
+        [DataRow(VariableDataType.Double, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMax\" of datatype \"Double\"")]                // Actual double.MaxValue is 1.7976931348623157E+308
+        [DataRow(VariableDataType.Double, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMin\" of datatype \"Double\"")]               // Actual double.MinValue is -1.7976931348623157E+308
+
+        [DataRow(VariableDataType.Byte, "ff", "ByteMax", typeof(object), DisplayName = "Verify enum value can be set with \"ByteMax\" of datatype \"Byte\"")]
+        [DataRow(VariableDataType.Byte, "00", "ByteMin", typeof(object), DisplayName = "Verify enum value can be set with \"ByteMin\" of datatype \"Byte\"")]
+
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Verify enum value can be set with \"int32Max\" of datatype \"Integer[L]\"")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Verify enum value can be set with \"int32Min\" of datatype \"Integer[L]\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMax\" of datatype \"Float[L]\"")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMin\" of datatype \"Float[L]\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMax\" of datatype \"Float(%)[L]\"")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Verify enum value can be set with \"FloatMin\" of datatype \"Float(%)[L]\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMax\" of datatype \"Double[L]\"")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Verify enum value can be set with \"DoubleMin\" of datatype \"Double[L]\"")]
+        //B8-31
+        public void TIEditor_SetEnumItemInGlobalVariable_VerifyRegularDataTypesWithValidValue(VariableDataType varDataType, object enumValue, string enumName, object dummy)
+        {
+            string CallName = "B8-31";
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type")
+            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            ////Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type")
+            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            ////Press(Keys.Enter);
+
+            AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue.ToString());
+
+            string enumStringActual = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Enum Item").GetText();
+            string enumStringExpected = string.Concat(enumName, "=", enumValue);
+            enumStringExpected.ShouldEqualTo(enumStringActual);
+        }
+
+        [TestMethod("B8-31_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.String, 'a', 1024, "StringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"StringWithMaxLength(1024)\" of datatype \"String\"")]
+        [DataRow(VariableDataType.HexString, 'f', 2048, "HexStringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"HexStringWithMaxLength(2048)\" of datatype \"HexString\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, 'a', 1024, "StringWithMaxLength", typeof(object), DisplayName = "Verify enum value can be set with \"StringWithMaxLength(1024)\" of datatype \"String[L]\"")]
+        //B8-31_1
+        public void TIEditor_SetEnumItemInGlobalVariable_VerifyStringDataTypesWithValidValue(VariableDataType varDataType, char enumValueChar, int length, string enumName, object dummy)
+        {
+            string CallName = "B8-31_1";
+            string enumValue = new string(enumValueChar, length);
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type")
+            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            ////Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type")
+            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            ////Press(Keys.Enter);
+
+            AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
+
+            string enumStringActual = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Enum Item").GetText();
+            string enumStringExpected = string.Concat(enumName, "=", enumValue);
+            enumStringExpected.ShouldEqualTo(enumStringActual);
+        }
+
+        [TestMethod("B8-32")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-32
+        public void TIEditor_SetEnumItemInGlobalVariable_CheckValueIsInvalidWithSameEnumName()
+        {
+            string CallName = "B8-32";
+            string enumValue = "0";
+            string enumName = "a";
+            VariableDataType varDataType = VariableDataType.String;
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            //VariableTabNavi(VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+
+            //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
+            //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
+            //Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Data Type")
+            //           .ComboBoxSelectByName(VariableDataType.String.GetDescription());
+            ////Press(Keys.Enter);
+
+            //varDataGrid.GetCellBy(1, "Edit Type")
+            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            ////Press(Keys.Enter);
+            
+            bool isAdded = true;
+            for (int i = 0; i < 2; i++)
+            {
+                isAdded &= AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
+            }
+
+            if (!isAdded)
+            {
+                string errorMsg = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Creater]/Edit[0]").GetToolTipMessage();
+                string errorMsgExpected = "EnumItemName is duplicated";
+                errorMsg.ShouldNotBeNull();
+                errorMsgExpected.ShouldEqualTo(errorMsg);
+                PP5IDEWindow.PerformGetElement("/ByName[Enum Item Creater,Ok]").Enabled.ShouldBeFalse();
+            }
+
+            // Close the enum item creator/editor window
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Creater,Cancel]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Editor,Cancel]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-33")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-33
+        public void TIEditor_EditGlobalVariableUsedByOtherTI_CheckVariableNotEditable()
+        {
+            string tiname = "B8-33";
+            string CallNameGlb = "B8-33_Glb";
+            string CallNameRes = "B8-33_Res";
+            string minValue = "0";
+            string glbVarIsUsedWarningMsg = "This variable is already used by another TI.";
+            VariableDataType varDataType = VariableDataType.Integer;
+            VariableEditType varEditType = VariableEditType.EditBox;
+            TIFilePath = GetTIFilePath(tiname, runType: TestItemRunType.UUT);
+
+            PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallNameGlb, varDataType, varEditType);
+            //varDataGrid.GetCellByName(4/*Call Name.*/, CallNameGlb).SendText(minValue);
+            varDataGrid.GetSelectedCellBy(varDataGrid.LastRowNo, "Min.").SendText(minValue);
+
+            varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallNameRes, varDataType);
+            varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallNameGlb);
+            SaveAsNewTI(tiname);
+
+            PerformOpenNewTI();
+            VariableTabNavi(VariableTabType.Global);
+            PP5DataGrid varDataGridGlb = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{DataTableAutoIDType.GlbGrid}]"));
+            varDataGridGlb.GetCellBy(varDataGridGlb.LastRowNo, 1/*Lock Symbol*/).LeftClick();
+            PP5IDEWindow.PerformGetElement("/ByName[Global]/ByClass[TextBox]").GetText().ShouldEqualTo(glbVarIsUsedWarningMsg);
+
+            string tinameActual = PP5IDEWindow.PerformGetElement($"/ByName[Global]/ByClass[TabControl]/DataGrid[0]/ByCell[1,1]").GetText();
+            tiname.ShouldEqualTo(tinameActual);
+            PP5IDEWindow.PerformClick("/ByName[Global,Ok]", ClickType.LeftClick);
+
+            PerformCloseTI();
+            MenuSelect("Functions", "TI Editor");
+            WaitUntil(() => GetPP5Window() != null);
+            LoadOldTI(tiname);
+
+            VariableTabNavi(VariableTabType.Global);
+            varDataGridGlb = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{DataTableAutoIDType.GlbGrid}]"));
+            varDataGridGlb.GetCellBy(varDataGridGlb.LastRowNo, 1/*Lock Symbol*/).LeftClick();
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Save);
+
+            PP5IDEWindow.PerformClick("/Window[Compiler Error]/ById[btnOK]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/Window[Error]/ById[btnYes]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-42")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-42
+        public void TIEditor_VariableTableSelectLastRow_CheckToolBarButtonsIsDisabled()
+        {
+            // Create new condition variable
+            VariableTabNavi(VariableTabType.Condition);
+            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{DataTableAutoIDType.CndGrid}]"));
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo + 1, "No").LeftClick();
+
+            bool ExpectedBtnState = false;
+            for (TIToolBarButton btnState = TIToolBarButton.Cut; btnState <= TIToolBarButton.Delete; btnState++)
+                ExpectedBtnState.ShouldEqualTo(PP5IDEWindow.ToolBarGetSelectionState((int)btnState));
+        }
+
+        [TestMethod("B8-52_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableTabType.Condition, typeof(object))]
+        //[DataRow(VariableTabType.Result)]
+        //[DataRow(VariableTabType.Temp)]
+        //[DataRow(VariableTabType.Global)]
+        //B8-52_1
+        public void TIEditor_RepeatAddingVariableToGlbOrCndTable_CheckMaximumLimitIs1000(VariableTabType variableType, object dummy)
+        {
+            CreateNewVariable1(variableType, "", "B8-52_1");
+            //Press(Keys.Up);
+            //int variableLimit = 1000;
+            for (int i = 1; i <= 10; i++)
+            {
+                SelectAll();
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
+            }
+
+            string expectedWarningMsg = "Variable count must less than or equal to 1000.";
+            expectedWarningMsg.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByName[Exceed Limit]/ById[txtBlockMsg]").GetText());
+            PP5IDEWindow.PerformClick("/ByName[Exceed Limit,OK]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-52_2")]
+        [TestCategory("變數編輯(B8)")]
+        //[DataRow(VariableTabType.Condition)]
+        [DataRow(VariableTabType.Result, typeof(object))]
+        [DataRow(VariableTabType.Temp, typeof(object))]
+        //[DataRow(VariableTabType.Global)]
+        //B8-52_2
+        public void TIEditor_RepeatAddingVariableToResOrTmpTable_CheckMaximumLimitIs1000(VariableTabType variableType, object dummy)
+        {
+            CreateNewVariable2(variableType, "", "B8-52_2");
+            //Press(Keys.Up);
+            //int variableLimit = 1000;
+            for (int i = 1; i <= 10; i++)
+            {
+                SelectAll();
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
+            }
+
+            string expectedWarningMsg = "Variable count must less than or equal to 1000.";
+            expectedWarningMsg.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByName[Exceed Limit]/ById[txtBlockMsg]").GetText());
+            PP5IDEWindow.PerformClick("/ByName[Exceed Limit,OK]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-57")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableTabType.Condition, typeof(object))]
+        //[DataRow(VariableTabType.Result, typeof(object))]
+        //[DataRow(VariableTabType.Temp, typeof(object))]
+        [DataRow(VariableTabType.Global, typeof(object))]
+        //B8-57
+        public void TIEditor_UseTabToSwitchTableSelectedCell_CanSetValueInTheCell(VariableTabType variableType, object dummy)
+        {
+            //VariableTabNavi(variableType);
+            //PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement(variableType.GetDescription()));
+            //varDataGrid.GetCellBy(varDataGrid.LastRowNo + 1, "No").LeftClick();
+
+            //Press(Keys.Tab);
+            //varDataGrid.RefreshSelectedCell();
+            //varDataGrid.SelectedCellInfo.SelectedCell.DoubleClick();
+            //Press(Keys.Up);
+            ////varDataGrid.SelectedCellInfo.SelectedCell.SendText(variableType + "_sn");
+            //SendSingleKeys(variableType + "_sn");
+
+            //Press(Keys.Tab);
+            ////varDataGrid.RefreshSelectedCell();
+            ////varDataGrid.SelectedCellInfo.SelectedCell.SendText(variableType + "_cn");
+            //SendSingleKeys(variableType + "_cn");
+
+            //Press(Keys.Tab);
+            //SendSingleKeys(VariableDataType.Float.GetDescription());
+            //Press(Keys.Enter);
+
+            string showName = variableType + "_sn";
+            string callName = variableType + "_cn";
+            VariableDataType dataType = VariableDataType.String2DArray;
+            VariableEditType editType = VariableEditType.EditBox;
+            InitializeVariableDataGrid(variableType, showName, callName, dataType, editType, "10", "10");
+        }
+
+        [TestMethod("B8-60")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableTabType.Condition, VariableEditType.EditBox, VariableEditType.ComboBox, 0, typeof(object), DisplayName = "Change to EditBox from ComboBox")]
+        [DataRow(VariableTabType.Global, VariableEditType.EditBox, VariableEditType.ComboBox, 0, typeof(object), DisplayName = "Change to EditBox from ComboBox")]
+        //B8-60
+        public void TIEditor_VariableChangeEditType_OtherFieldsShouldBeCleared(VariableTabType variableType, VariableEditType fromEditType, VariableEditType toEditType, object value, object dummy)
+        {
+            object format = new VariableDecimalPlaces[] { VariableDecimalPlaces.One };
+            string showName = variableType + "_sn";
+            string callName = variableType + "_cn";
+            VariableDataType dataType = VariableDataType.Double;
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(variableType, showName, callName, dataType, fromEditType);
+
+            VariableInfo variableInfo = new VariableInfo(variableType, callName, dataType, fromEditType);
+            AddValueToDataGrid(varDataGrid, variableInfo, VariableColumnType.Min, value);
+            AddValueToDataGrid(varDataGrid, variableInfo, VariableColumnType.Max, value);
+            AddValueToDataGrid(varDataGrid, variableInfo, VariableColumnType.Default, value);
+            AddValueToDataGrid(varDataGrid, variableInfo, VariableColumnType.Format, format);
+
+            //VariableSelectionMoveBackward(varDataGrid, variableType, dataType, toEditType, 4);
+            varDataGrid.PerformGetElement($"/ByCell[1, {(int)VariableColumnType.EditType}]")
+                       .ComboBoxSelectByName(toEditType.GetDescription());
+
+            for (int colNo = (int)VariableColumnType.Min; colNo <= (int)VariableColumnType.Format; colNo++)
+                varDataGrid.PerformGetElement($"/ByCell[1, {colNo}]").GetText().ShouldBeNull();
+
+            // clean up global variable
+            if (variableType == VariableTabType.Global)
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
+        }
+
+        [TestMethod("B8-61")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableTabType.Condition, VariableEditType.ComboBox, VariableEditType.EditBox, 0, typeof(object), DisplayName = "Change to ComboBox from EditBox")]
+        [DataRow(VariableTabType.Global, VariableEditType.ComboBox, VariableEditType.EditBox, 0, typeof(object), DisplayName = "Change to ComboBox from EditBox")]
+        //B8-61
+        public void TIEditor_VariableChangeEditType_EnumItemFieldShouldBeCleared(VariableTabType variableType, VariableEditType fromEditType, VariableEditType toEditType, object value, object dummy)
+        {
+            object format = new VariableDecimalPlaces[] { VariableDecimalPlaces.One };
+            string showName = variableType + "_sn";
+            string callName = variableType + "_cn";
+            VariableDataType dataType = VariableDataType.Double;
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(variableType, showName, callName, dataType, fromEditType);
+            VariableSelectionMoveForward(varDataGrid, variableType, dataType, fromEditType, 5);
+
+            string enumName = "1";
+            string enumValue = "1";
+            AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
+
+            //VariableSelectionMoveBackward(varDataGrid, variableType, dataType, toEditType, 4);
+            varDataGrid.PerformGetElement($"/ByCell[1, {(int)VariableColumnType.EditType}]")
+                       .ComboBoxSelectByName(toEditType.GetDescription());
+
+            varDataGrid.PerformGetElement($"/ByCell[1, {(int)VariableColumnType.EnumItem}]").GetText().ShouldBeNull();
+
+            // clean up global variable
+            if (variableType == VariableTabType.Global)
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
+        }
+
+        [TestMethod("B8-62")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-62
+        public void TIEditor_SetDefaultWithSpecificValueInConditionVariable_CheckValueIsCorrect()
+        {
+            string CallName = "B8-62";
+            string defaultValue = "100.1";
+            VariableDataType varDataType = VariableDataType.FloatPercentage;
+            VariableEditType varEditType = VariableEditType.EditBox;
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, defaultValue);
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellValue(1, "Default"));
+        }
+
+        [TestMethod("B8-63")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-63
+        public void TIEditor_SetDefaultWithSpecificValueInGlobalVariable_CheckValueIsCorrect()
+        {
+            string CallName = "B8-63";
+            string defaultValue = "100.1";
+            VariableDataType varDataType = VariableDataType.FloatPercentage;
+            VariableEditType varEditType = VariableEditType.EditBox;
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Global, "", CallName, varDataType, varEditType, defaultValue);
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellValue(1, "Default"));
+
+            // clean up global variable
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
+        }
+
+        [TestMethod("B8-64")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-64
+        public void TIEditor_Set10GlobalVariables_CheckTICanLoadInGlobalVariables()
+        {
+            string CallName = "B8-64";
+            string tiname = "B8-64";
+            int count = 10;
+            VariableDataType varDataType = VariableDataType.FloatPercentage;
+            VariableEditType varEditType = VariableEditType.EditBox;
+
+            string[] CallNamesExpected = new string[10];
+            for (int i = 0; i < count; i++)
+            {
+                CallNamesExpected[i] = string.Format("{0}_{1}", CallName, i.ToString());
+                CreateNewVariable1(VariableTabType.Global, "", CallNamesExpected[i], varDataType, varEditType);
+            }
+
+            SaveAsNewTI(tiname);
+
+            PerformOpenNewTI();
+            VariableTabNavi(VariableTabType.Global);
+            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement(DataTableAutoIDType.GlbGrid));
+
+            varDataGrid.ScrollToBottom();
+
+            List<string> CallNamesActual = new List<string>();
+
+            while (CallNamesActual.Count <= 10)
+            {
+                CallNamesActual.AddRange(varDataGrid.GetSingleColumnValues(4/*Call Name*/).Where(v => v.Contains(CallName)));
+                varDataGrid.ScrollToSpecificVerticalPosition(rowNo: varDataGrid.TotalRowCount - 2 * varDataGrid.DisplayedRowCount + 1);
+            }
+
+            //// clean up global variable
+            //PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
+            if (CallNamesActual.Count > 10)
+                CallNamesActual = CallNamesActual.Distinct().ToList();
+
+            CallNamesExpected.ShouldEqualTo(CallNamesActual.ToArray());
+        }
+
+        [TestMethod("B8-65")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-65
+        public void TIEditor_SetEditTypeComboboxInConditionVariable_CheckCanSet()
+        {
+            string CallName = "B8-65";
+            VariableDataType varDataType = VariableDataType.HexString;
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+            varEditType.ToString().ShouldEqualTo(varDataGrid.GetCellValue(1, "Edit Type"));
+        }
+
+        [TestMethod("B8-66")]
+        [TestCategory("變數編輯(B8)")]
+        //B8-66
+        public void TIEditor_SetEditTypeComboboxInGlobalVariable_CheckCanSet()
+        {
+            string CallName = "B8-66";
+            VariableDataType varDataType = VariableDataType.HexString;
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Global, "", CallName, varDataType, varEditType);
+            varEditType.ToString().ShouldEqualTo(varDataGrid.GetCellValue(1, "Edit Type"));
+
+            // clean up global variable
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
+        }
+
+        [TestMethod("B8-67")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-67
+        public void TIEditor_SetDataTypeInConditionVariable_CheckInvalidRank(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-67";
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", CallName, varDataType, arrSize1, arrSize2);
+
+            if (((PP5Element)PP5IDEWindow).ErrorMessages.Count > 0)
+            {
+                string toolTipErrMsg = "Array size must less than or equal to 100000";
+                Hashtable errMsgs = ((PP5Element)PP5IDEWindow).ErrorMessages;
+                errMsgs.ContainsValue(toolTipErrMsg).ShouldBeTrue();
+                errMsgs.Keys.Count.ShouldEqualTo(2);
+                PP5IDEWindow.PerformGetElement("/Window[0]/Button[Ok]").Enabled.ShouldBeFalse();
+            }
+
+            // Close the 2d array setting window with correct values
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-68")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-68
+        public void TIEditor_SetDataTypeInResultVariable_CheckInvalidRank(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-68";
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
+
+            if (((PP5Element)PP5IDEWindow).ErrorMessages.Count > 0)
+            {
+                string toolTipErrMsg = "Array size must less than or equal to 100000";
+                Hashtable errMsgs = ((PP5Element)PP5IDEWindow).ErrorMessages;
+                errMsgs.ContainsValue(toolTipErrMsg).ShouldBeTrue();
+                errMsgs.Keys.Count.ShouldEqualTo(2);
+                PP5IDEWindow.PerformGetElement("/Window[0]/Button[Ok]").Enabled.ShouldBeFalse();
+            }
+
+            // Close the 2d array setting window with correct values
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-69")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-69
+        public void TIEditor_SetDataTypeInTempVariable_CheckInvalidRank(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-69";
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
+
+            if (((PP5Element)PP5IDEWindow).ErrorMessages.Count > 0)
+            {
+                string toolTipErrMsg = "Array size must less than or equal to 100000";
+                Hashtable errMsgs = ((PP5Element)PP5IDEWindow).ErrorMessages;
+                errMsgs.ContainsValue(toolTipErrMsg).ShouldBeTrue();
+                errMsgs.Keys.Count.ShouldEqualTo(2);
+                PP5IDEWindow.PerformGetElement("/Window[0]/Button[Ok]").Enabled.ShouldBeFalse();
+            }
+
+            // Close the 2d array setting window with correct values
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-70")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        [DataRow(VariableDataType.Float2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Float2DArray\"")]
+        [DataRow(VariableDataType.Integer2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Integer2DArray\"")]
+        [DataRow(VariableDataType.Byte2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Byte2DArray\"")]
+        [DataRow(VariableDataType.String2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"String2DArray\"")]
+        [DataRow(VariableDataType.HexString2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"HexString2DArray\"")]
+        [DataRow(VariableDataType.Long2DArray, "100", "1001", typeof(object), DisplayName = "Verify DataType is \"Long2DArray\"")]
+        //B8-70
+        public void TIEditor_SetDataTypeInGlobalVariable_CheckInvalidRank(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-70";
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Global, "", CallName, varDataType, arrSize1, arrSize2);
+
+            if (((PP5Element)PP5IDEWindow).ErrorMessages.Count > 0)
+            {
+                string toolTipErrMsg = "Array size must less than or equal to 100000";
+                Hashtable errMsgs = ((PP5Element)PP5IDEWindow).ErrorMessages;
+                errMsgs.ContainsValue(toolTipErrMsg).ShouldBeTrue();
+                errMsgs.Keys.Count.ShouldEqualTo(2);
+                PP5IDEWindow.PerformGetElement("/Window[0]/Button[Ok]").Enabled.ShouldBeFalse();
+            }
+
+            // Close the 2d array setting window with correct values
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformInput("/Window[0]/Edit[1]", InputType.SendContent, 100);
+            PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B8-71_1")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double, typeof(object), DisplayName = "Verify DataType is \"DoubleArray\"")]
+        //B8-71_1
+        public void TIEditor_EditTypeIsEmptyAndDataTypeDoubleInConditionVariable_VerifyOtherFieldsNotEditable(VariableDataType varDataType, object dummy)
+        {
+            string CallName = "B8-71_1";
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", CallName, varDataType);
+
+            // Close the 2d array setting window with correct values
+            bool canEdit = false;
+            for (int colNo = (int)VariableColumnType.Min; colNo <= (int)VariableColumnType.Default; colNo++)
+            {
+                varDataGrid.PerformGetElement($"/ByCell[1, {colNo}]").LeftClick();
+                if (DllHelper.GetCursor() == Cursor.IBeam)
+                    canEdit = true;
+            }
+
+            canEdit.ShouldBeFalse();
+        }
+
+        [TestMethod("B8-71_2")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.DoubleArray, "1", typeof(object), DisplayName = "Verify DataType is \"DoubleArray\"")]
+        //B8-71_2
+        public void TIEditor_EditTypeIsEmptyAndDataType1dArrInConditionVariable_VerifyOtherFieldsNotEditable(VariableDataType varDataType, string arrSize1, object dummy)
+        {
+            string CallName = "B8-71_2";
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", CallName, varDataType, arrSize1);
+
+            // Close the 2d array setting window with correct values
+            bool canEdit = false;
+            for (int colNo = (int)VariableColumnType.Min; colNo <= (int)VariableColumnType.Default; colNo++)
+            {
+                varDataGrid.PerformGetElement($"/ByCell[1, {colNo}]").LeftClick();
+                if (PP5IDEWindow.HasWindow(0))
+                {
+                    canEdit = true;
+                    PP5IDEWindow.CloseWindow(0);
+                }
+            }
+
+            canEdit.ShouldBeFalse();
+        }
+
+        [TestMethod("B8-71_3")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.Double2DArray, "1", "1", typeof(object), DisplayName = "Verify DataType is \"Double2DArray\"")]
+        //B8-71_3
+        public void TIEditor_EditTypeIsEmptyAndDataType2dArrInConditionVariable_VerifyOtherFieldsNotEditable(VariableDataType varDataType, string arrSize1, string arrSize2, object dummy)
+        {
+            string CallName = "B8-71_3";
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", CallName, varDataType, arrSize1, arrSize2);
+
+            // Close the 2d array setting window with correct values
+            bool canEdit = false;
+            for (int colNo = (int)VariableColumnType.Min; colNo <= (int)VariableColumnType.Default; colNo++)
+            {
+                varDataGrid.PerformGetElement($"/ByCell[1, {colNo}]").LeftClick();
+                if (PP5IDEWindow.HasWindow(0))
+                {
+                    canEdit = true;
+                    PP5IDEWindow.CloseWindow(0);
+                }
+            }
+
+            canEdit.ShouldBeFalse();
+        }
+
+        [TestMethod("B8-73")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.String, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set with \",\" in \"String\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.EditBox, typeof(object), DisplayName = "Verify Default can be set with \",\" in \"StringArray\" variable with EditType \"EditBox\"")]
+        //B8-73
+        public void TIEditor_SetDefaultInConditionVariable_CheckValueCommaCanBeSet(VariableDataType varDataType, VariableEditType varEditType, object dummy)
+        {
+            string CallName = "B8-73";
+            string defaultValue = ",";
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, defaultValue);
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellValue(1, "Default"));
+        }
+
+        [TestMethod("B8-74")]
+        [TestCategory("變數編輯(B8)")]
+        [DataRow(VariableDataType.StringArrayOfUUTMaxSize, VariableEditType.ComboBox, typeof(object), DisplayName = "Verify Default can be set with \",\" in \"StringArray\" variable with EditType \"ComboBox\"")]
+        //B8-74
+        public void TIEditor_SetDefaultInConditionVariableWithStringArray_CheckValueCanBeSet(VariableDataType varDataType, VariableEditType varEditType, object dummy)
+        {
+            string CallName = "B8-74";
+            string defaultValue = "B8-74";
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, defaultValue);
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellValue(1, "Default"));
+        }
+
+        [TestMethod("B9-1")]
+        [TestCategory("進入驗證模式(B9)")]
+        //B9-1
+        public void TIEditor_PressExecutionControlBtn_CanEnterExecutionControlWindow()
+        {
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Execution);
+            WaitUntil(() => PP5IDEWindow.ModuleName == WindowType.Execution.GetDescription());
+            WindowType.Execution.GetDescription().ShouldEqualTo(PP5IDEWindow.ModuleName);
+            PP5IDEWindow.PerformGetElement("/ById[MessageRichTxtBox]").GetText().ShouldNotBeNull();
+        }
+
+        [TestMethod("B9-2")]
+        [TestCategory("進入驗證模式(B9)")]
+        //B9-2
+        public void TIEditor_EditTiThenPressExecutionControlBtn_CanEnterExecutionControlWindow(VariableDataType varDataType, VariableEditType varEditType)
+        {
+            InitializeVariableDataGrid(VariableTabType.Condition, "", "B9-2", varDataType, varEditType);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Execution);
+            WaitUntil(() => PP5IDEWindow.ModuleName == WindowType.Execution.GetDescription());
+            WindowType.Execution.GetDescription().ShouldEqualTo(PP5IDEWindow.ModuleName);
+            PP5IDEWindow.PerformGetElement("/ById[MessageRichTxtBox]").GetText().ShouldBeNull();
+        }
+
+        [TestMethod("B9-3")]
+        [TestCategory("進入驗證模式(B9)")]
+        //B9-3
+        public void TIEditor_ChangeHWConigPressExecutionControlBtn_CanReinitializeExecutionControl(VariableDataType varDataType, VariableEditType varEditType)
+        {
+            InitializeVariableDataGrid(VariableTabType.Condition, "", "B9-3", varDataType, varEditType);
+            MenuSelect("Functions", "Hardware Configuration");
+            WaitUntil(() => PP5IDEWindow.ModuleName == WindowType.HardwareConfig.GetDescription());
+            MenuSelect("File", "Open...");
+            string currHWConfigName = PP5IDEWindow.PerformGetElement("/ById[fullPaneToolbox]").GetText();
+
+            PP5IDEWindow.ToolBarSelect((int)HWConfToolBarButton.SaveAs);
+            PP5IDEWindow.PerformInput("/ByName[Open File]/ById[txtFileName]", InputType.SendContent, currHWConfigName + "_new");
+            PP5IDEWindow.PerformClick("/ByName[Open File,Ok]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)HWConfToolBarButton.SetAsSysDefault);
+
+            MenuSelect("Windows", "TI Editor");
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Execution);
+            WaitUntil(() => PP5IDEWindow.ModuleName == WindowType.Execution.GetDescription());
+            WindowType.Execution.GetDescription().ShouldEqualTo(PP5IDEWindow.ModuleName);
+            PP5IDEWindow.PerformGetElement("/ById[MessageRichTxtBox]").GetText().ShouldNotBeNull();
+        }
+
+        [TestMethod("B9-4")]
+        [TestCategory("進入驗證模式(B9)")]
+        //B9-4
+        public void TIEditor_OpenTiNotLoadedThenPressExecutionControlBtn_CheckExecutionControlBtnDisabled()
+        {
+            PerformCloseTI();
+            MenuSelect("Functions", "TI Editor");
+            PP5IDEWindow.PerformClick("/ByName[Enter Point, Cancel]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarGetSelectionState((int)TIToolBarButton.Execution).ShouldBeFalse();
+        }
+
+        [TestMethod("B9-5")]
+        [TestCategory("進入驗證模式(B9)")]
+        //B9-5
+        public void TIEditor_SwitchToExecutionControlWindowAndBackToTIWindow_CheckTIBtnDisabled()
+        {
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Execution);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.TIEditor);
+            PP5IDEWindow.ToolBarGetSelectionState((int)TIToolBarButton.TIEditor).ShouldBeTrue();
+        }
+
+        [TestMethod("B10-1")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        [DataRow(0, "TIContext", "TCParamEdit", "ParamType", "ConstType", "Variable", "TCSrchBx", "TCDev", "TCSys")]    // 0: horizontal
+        [DataRow(1, "TCParamDesc", "TCSys")]                                                                            // 1: vertical
+        //B10-1
+        public void TIEditor_ChangeTIWindowSize_CheckUIIsNormalAndScrollbarWillShow(int horizontalOrVertical, params string[] panelIds)
+        {
+            MoveToElementOffsetStartingPoint startExpandingPoint = MoveToElementOffsetStartingPoint.BottomRight;
+            int dragOffsetX = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - PP5IDEWindow.Width;
+            int dragOffsetY = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - PP5IDEWindow.Height;
+            Dictionary<string, bool> canScrollDict = new Dictionary<string, bool>();
+
+            ((PP5Element)PP5IDEWindow).MoveToElement(MoveToElementOffsetStartingPoint.InnerCenterTop);
+            PP5IDEWindow.DoubleClick();
+
+            ((PP5Element)PP5IDEWindow).MoveToElement(MoveToElementOffsetStartingPoint.InnerCenterTop);
+            ((PP5Element)PP5IDEWindow).DragAndDropToOffset(MoveToElementOffsetStartingPoint.InnerCenterTop, 0, 0, PP5IDEWindow.PointAtTopLeft.X, PP5IDEWindow.PointAtTopLeft.Y);
+
+            // Check all text label and scrollbar state
+            canScrollDict = TIWindowGetAllScrollBarEnabledStates(horizontalOrVertical);
+
+            // Expand the window to maximum size
+            ((PP5Element)PP5IDEWindow).DragAndDropToOffset(startExpandingPoint, 0, 0, dragOffsetX, dragOffsetY);
+
+            // Recheck all text label and scrollbar state again
+            canScrollDict = TIWindowGetAllScrollBarEnabledStates(horizontalOrVertical);
+
+            //string[] panelIds = new string[] { "TIContext", "TCParamEdit", "ParamType", "ConstType", "Variable", "TCSrchBx", "TCDev", "TCSys" };
+            foreach (string panelId in panelIds)
+                canScrollDict[panelId].ShouldBeFalse();
+        }
+
+        [TestMethod("B10-2")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        [DataRow(0)]    // 0: horizontal
+        [DataRow(1)]    // 1: vertical
+        //B10-2
+        public void TIEditor_DragSplitterInTIWindow_CheckPanelRetainsMinWidthOrHeight(int horizontalOrVertical)
+        {
+            List<DragAndDropInfo> dragAndDropInfos = new List<DragAndDropInfo>();
+            List<IElement> panels = new List<IElement>();
+
+            var TIContextPanel = PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TIContextPanel]");
+            var TCParamPanel = PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TCParameterPanel]");
+            var VariablePanel = PP5IDEWindow.PerformGetElement("/ByName[dockItem1,dockItem2]/ById[VariablePanel]");
+            var TCListPanel = PP5IDEWindow.PerformGetElement("/ById[dockManager]/ByName[dockItem4]/ById[TCListPanel]");
+            panels.AddRange(new IElement[] { TIContextPanel, TCParamPanel, VariablePanel, TCListPanel });
+
+            if (horizontalOrVertical == 0)          // record horizontal splitter draging actions
+            {
+                dragAndDropInfos.Add(new DragAndDropInfo(MoveToElementOffsetStartingPoint.CenterLeft, (TIContextPanel.PointAtRightCenter.X + TCParamPanel.PointAtLeftCenter.X) / 2, TIContextPanel.PointAtRightCenter.Y,
+                                                                                                      -TIContextPanel.Width, 0));
+                dragAndDropInfos.Add(new DragAndDropInfo(MoveToElementOffsetStartingPoint.CenterLeft, (TIContextPanel.PointAtRightCenter.X + TCParamPanel.PointAtLeftCenter.X) / 2, TIContextPanel.PointAtRightCenter.Y,
+                                                                                                      TCParamPanel.Width, 0));
+
+                dragAndDropInfos.Add(new DragAndDropInfo(MoveToElementOffsetStartingPoint.CenterLeft, (TCParamPanel.PointAtRightCenter.X + TCListPanel.PointAtLeftCenter.X) / 2, TCListPanel.PointAtLeftCenter.Y,
+                                                                                                      -TCParamPanel.Width, 0));
+                dragAndDropInfos.Add(new DragAndDropInfo(MoveToElementOffsetStartingPoint.CenterLeft, (TCParamPanel.PointAtRightCenter.X + TCListPanel.PointAtLeftCenter.X) / 2, TCListPanel.PointAtLeftCenter.Y,
+                                                                                                      TCListPanel.Width, 0));
+            }
+            else if (horizontalOrVertical == 1)     // record vertical splitter draging actions
+            {
+                dragAndDropInfos.Add(new DragAndDropInfo(MoveToElementOffsetStartingPoint.CenterTop, VariablePanel.PointAtTopCenter.X, (TIContextPanel.PointAtBottomCenter.Y + VariablePanel.PointAtTopCenter.Y) / 2,
+                                                                                                     0, -TIContextPanel.Height));
+                dragAndDropInfos.Add(new DragAndDropInfo(MoveToElementOffsetStartingPoint.CenterTop, VariablePanel.PointAtTopCenter.X, (TIContextPanel.PointAtBottomCenter.Y + VariablePanel.PointAtTopCenter.Y) / 2,
+                                                                                                     0, VariablePanel.Height));
+            }
+
+
+            // Expand the window to maximum size
+            foreach (var dadInfo in dragAndDropInfos)
+            {
+                int minPanelWidthExpected = 24; int minPanelHeightExpected = 30;        // minimum panel Height and Width
+                int minPanelWidthActaul = 0, minPanelHeightActaul = 0;
+                ((PP5Element)PP5IDEWindow.PerformGetElement("/ByClass[MainControl]/ById[dockManager]/ByName[dockItem4]"))
+                                         .DragAndDropToOffset(dadInfo.startingPointType, dadInfo.srcOffsetX, dadInfo.srcOffsetY, dadInfo.destOffsetX, dadInfo.destOffsetY);
+                if (horizontalOrVertical == 0)
+                    minPanelWidthActaul = panels.Min(p => p.Width);
+                else if (horizontalOrVertical == 1)
+                    minPanelHeightActaul = panels.Min(p => p.Height);
+
+                minPanelWidthExpected.ShouldEqualTo(minPanelWidthActaul);
+                minPanelHeightExpected.ShouldEqualTo(minPanelHeightActaul);
+                RestoreDefaultDocking(WindowType.TIEditor);
+                //MenuSelect("Edit", "Default Dock");
+                //PP5IDEWindow.PerformClick("/ByName[TI Editor,Yes]", ClickType.LeftClick);
+            }
+        }
+
+        [TestMethod("B10-3")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-3
+        public void TIEditor_AddTIDescriptionAndDragSplitter_CheckDescTextAreaFullyDisplayed()
+        {
+            string desc = new string('a', 128);
+            TestItemTabNavi(TestItemTabType.TIDescription);
+            PP5IDEWindow.PerformInput("/ById[TIDescriptionView,TIDescriptionScrollViewer,TBDescription]", InputType.SendContent, desc);
+
+            var TIContextPanel = PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TIContextPanel]");
+            var TCParamPanel = PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TCParameterPanel]");
+            DragAndDropInfo dragAndDropInfo = new DragAndDropInfo(MoveToElementOffsetStartingPoint.CenterLeft, (TIContextPanel.PointAtRightCenter.X + TCParamPanel.PointAtLeftCenter.X) / 2, TIContextPanel.PointAtRightCenter.Y,
+                                                                                               10, 0);
+
+            while (!TIContextPanel.PerformGetElement("/ById[TIDescriptionScrollViewer]").CanScrollHorizontally)
+            {
+                ((PP5Element)TIContextPanel).DragAndDropToOffset(dragAndDropInfo);
+                desc.ShouldEqualTo(TIContextPanel.PerformGetElement("/ById[TIDescriptionView,TIDescriptionScrollViewer,TBDescription]").GetText());
+            }
+        }
+
+        [TestMethod("B10-4")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        [DataRow("極光1.jpg")]
+        [DataRow("雪中山莊&amp;湖景.jpg")]
+        //B10-4
+        public void TIEditor_AddTIDescriptionImage_CheckImageIsDisplayed(string imgName)
+        {
+            TestItemTabNavi(TestItemTabType.TIDescription);
+            PP5IDEWindow.PerformClick("/ById[TIDescriptionView,TIDescriptionScrollViewer,AddBtn]", ClickType.LeftClick);
+
+            PP5DataGrid tvFileExplorer = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement("/ByClass[DUIViewWndClassName]/ById[ProperTreeHost]/ByName[樹狀檢視]"));
+            tvFileExplorer.ScrollToBottom();
+
+            PP5IDEWindow.PerformClick("/ByName[桌面,本機,圖片]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ById[listview]/ByName[項目檢視,{imgName}]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Select a picture,開啟(O)]", ClickType.LeftClick);
+
+            byte[] imageArray = System.IO.File.ReadAllBytes($@"C:\Users\adam.chen\Pictures\{imgName}");
+            string base64ImageLocalFile = Convert.ToBase64String(imageArray);
+
+            IElement imgDisplayed = PP5IDEWindow.PerformGetElement("/ById[TIDescriptionView,TIDescriptionScrollViewer]/ByClass[Image]");
+            string base64ImgDisplayed = imgDisplayed.GetElementImageFromScreenshot().AsBase64EncodedString;
+            base64ImageLocalFile.ShouldEqualTo(base64ImgDisplayed);
+        }
+
+        [TestMethod("B10-5")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        [DataRow("極光1.jpg, 雪中山莊&amp;湖景.jpg")]
+        //B10-5
+        public void TIEditor_AddTIDescriptionImages_CheckImagesAreDisplayed(string imgNames)
+        {
+            string[] imgNameArr = imgNames.Split(',');
+            string[] base64ImgsDisplayed = new string[imgNameArr.Length];
+            string[] base64ImgsLocalFile = new string[imgNameArr.Length];
+            TestItemTabNavi(TestItemTabType.TIDescription);
+            
+            for (int i = 0; i < imgNameArr.Length; i++)
+            {
+                PP5IDEWindow.PerformClick("/ById[TIDescriptionView,TIDescriptionScrollViewer,AddBtn]", ClickType.LeftClick);
+                PP5DataGrid tvFileExplorer = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement("/ByClass[DUIViewWndClassName]/ById[ProperTreeHost]/ByName[樹狀檢視]"));
+                tvFileExplorer.ScrollToBottom();
+
+                PP5IDEWindow.PerformClick("/ByName[桌面,本機,圖片]", ClickType.LeftClick);
+                PP5IDEWindow.PerformClick($"/ById[listview]/ByName[項目檢視,{imgNameArr[i]}]", ClickType.LeftClick);
+                PP5IDEWindow.PerformClick("/ByName[Select a picture,開啟(O)]", ClickType.LeftClick);
+
+                IElement imgDisplayed = PP5IDEWindow.PerformGetElement("/ById[TIDescriptionView,TIDescriptionScrollViewer]/ByClass[Image]");
+                base64ImgsDisplayed[i] = imgDisplayed.GetElementImageFromScreenshot().AsBase64EncodedString;
+
+                byte[] imageArray = System.IO.File.ReadAllBytes($@"C:\Users\adam.chen\Pictures\{imgNameArr}");
+                base64ImgsLocalFile[i] = Convert.ToBase64String(imageArray);
+            }
+
+            base64ImgsLocalFile.ShouldEqualTo(base64ImgsDisplayed);
+        }
+
+        [TestMethod("B10-6")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-6
+        public void TIEditor_ChangeLanguage_CheckInfoCorrect()
+        {
+            MenuSelect("Language", "簡体中文");
+            MenuSelect("Language", "繁體中文");
+            MenuSelect("Language", "English");
+        }
+
+        [TestMethod("B10-7")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        [DataRow(TestItemTabType.TIDescription, false)]
+        [DataRow(TestItemTabType.TIContext, true)]
+        //B10-7
+        public void TIEditor_SwitchingBetweenTIContextAndDesc(TestItemTabType tabType, bool IsWithinScreen)
+        {
+            TestItemTabNavi(tabType);
+            IsWithinScreen.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]").IsWithinScreen);
+        }
+
+        [TestMethod("B10-8")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        [DataRow(TIPanelType.TIContextPanel)]
+        [DataRow(TIPanelType.TCParamPanel)]
+        [DataRow(TIPanelType.VariablePanel)]
+        [DataRow(TIPanelType.TCListPanel)]
+        //B10-8
+        public void TIEditor_MovePanelOutAndDockBack_CheckPositionSameAfterReDocked(TIPanelType panelType)
+        {
+            var panel = PP5IDEWindow.PerformClick($"/ById[{TIPanelType.TIContextPanel}]", ClickType.LeftClick);
+            Point panelPosDocked = panel.PointAtCenter;
+            DragAndDropInfo dragAndDropInfo = new DragAndDropInfo(MoveToElementOffsetStartingPoint.InnerCenterTop, 0, 0, 100, 100);
+            ((PP5Element)panel).DragAndDropToOffset(dragAndDropInfo);
+
+            panel.PerformClick("/", MoveToElementOffsetStartingPoint.InnerCenterTop, ClickType.RightClick);
+            PP5IDEWindow.PerformClick("/ByClass[Popup,ItemContextMenu]/ByName[Dock]", ClickType.LeftClick);
+
+            panelPosDocked.ShouldEqualTo(panel.PointAtCenter);
+        }
+
+        [TestMethod("B10-9")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-9
+        public void TIEditor_PerformDifferentAction_CheckProgressBarIsRunning()
+        {
+            string[] menuitemActions = new string[] { "Edit => New", "Edit => Loaded", "Edit => Save", "Utility => Compile" };
+            MenuSelect(menuitemActions[0].Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));       // Open new ti
+            OpenNewTI();
+
+            MenuSelect(menuitemActions[1].Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));       // Load old ti: "demo1"
+            LoadOldTI("demo1");
+
+            SaveAsNewTI("demo2");                                                                                       // Save a new ti named: "demo2"
+
+            MenuSelect(menuitemActions[2].Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));       // Save the ti
+
+            MenuSelect(menuitemActions[3].Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));       // Compile the ti
+            PP5IDEWindow.PerformClick("/ByName[Compile,OK]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B10-10")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-10
+        public void TIEditor_PerformDifferentAction_CheckWindowTitleIsChanged(string menuitemAction)
+        {
+            string TIWindowTitle;
+            string[] menuitemActions = new string[] { "Edit => New", "Edit => Loaded", "Edit => Save", "Utility => Compile" };
+            MenuSelect(menuitemActions[0].Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));       // Open new ti
+            OpenNewTI();
+
+            TIName = "UnClassified";
+            TIWindowTitle = string.Format("User-TI-UnClassified-{0}", TIName);
+            TIWindowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ById[TIContextPanel]/ByClass[PGGridAeraView]/ById[TitleTxtBlk]").GetText());
+
+
+            TIName = "demo1";
+            MenuSelect(menuitemActions[1].Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));       // Load old ti: "demo1"
+            LoadOldTI(TIName);
+            TIWindowTitle = PowerPro5Config.IDE_TIEditorWindowName;
+            TIWindowTitle.ShouldEqualTo(PP5IDEWindow.GetText());
+            
+            TIWindowTitle = string.Format("User-TI-UnClassified-{0}", TIName);
+            TIWindowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ById[TIContextPanel]/ByClass[PGGridAeraView]/ById[TitleTxtBlk]").GetText());
+            
+            
+            TIName = "demo2";
+            SaveAsNewTI(TIName);                                                                                       // Save a new ti named: "demo2"
+
+            TIWindowTitle = string.Format("User-TI-UnClassified-{0}", TIName);
+            TIWindowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ById[TIContextPanel]/ByClass[PGGridAeraView]/ById[TitleTxtBlk]").GetText());
+
+
+            MenuSelect(menuitemActions[2].Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));       // Save the ti
+            TIWindowTitle = string.Format("User-TI-UnClassified-{0}", TIName);
+            TIWindowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ById[TIContextPanel]/ByClass[PGGridAeraView]/ById[TitleTxtBlk]").GetText());
+        }
+
+        [TestMethod("B10-11")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        [DataRow(TIPanelType.TIContextPanel)]
+        [DataRow(TIPanelType.TCParamPanel)]
+        [DataRow(TIPanelType.VariablePanel)]
+        [DataRow(TIPanelType.TCListPanel)]
+        //B10-11
+        public void TIEditor_AutoHideAllDockPanels_AutoHideIsFunctioning(TIPanelType panelType)
+        {
+            PP5IDEWindow.PerformClick($"/ByName[dockItem2,dockItem3]/ById[{panelType},PART_PinButton]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement($"ByClass[AutoHideGroup]/ById[{panelType}]").ShouldNotBeNull();
+        }
+
+        [TestMethod("B10-12")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-12
+        public void TIEditor_LoadOldTI_CheckContentIsCorrect()
+        {
+            TIName = "B10-12";
+            string[] cellValuesExpected = new string[] { "", "B10-12_Cond", VariableDataType.Float.GetDescription(), VariableEditType.EditBox.GetDescription() };
+            InitializeVariableDataGrid(VariableTabType.Condition, cellValuesExpected[0], cellValuesExpected[1], TypeExtension.GetEnumByDescription<VariableDataType>(cellValuesExpected[2]), TypeExtension.GetEnumByDescription<VariableEditType>(cellValuesExpected[3]));
+            AddCommandBy(TestCmdGroupType.String, 1);
+            SaveAsNewTI(TIName);
+            PerformLoadOldTI(TIName);
+
+            string cmdName = GetCommandBy(TestCmdGroupType.String, 1).GetText();
+            string[] cellValuesActual = new string[4];
+            PP5IDEWindow.PerformClick($"/ByCell@{VariableTabType.Condition}[1, @No]", ClickType.LeftClick);
+            for (int i = 0; i < 4; i++)
+                cellValuesActual[i] = PP5IDEWindow.PerformGetElement($"/ByCell@{VariableTabType.Condition}[{i+1}]").GetText();
+
+            cmdName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText());
+            cellValuesExpected.ShouldEqualTo(cellValuesActual);
+        }
+
+        [TestMethod("B10-13")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-13
+        public void TIEditor_ChangeTIContextDataColumnWidth_CanAdjustWidth()
+        {
+            string[] colNames = new string[] { "IsSkip", "Label", "GroupName", "CommandName", "DisplayedParameters", "Description" };
+
+            TestItemTabNavi(TestItemTabType.TIContext);
+            var TIContextPanel = PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TIContextPanel]");
+
+            PP5Element thumb;
+            foreach (string colName in colNames)
+            {
+                thumb = (PP5Element)TIContextPanel.PerformGetElement($"/ById[HeaderPanel]/ByName[{colName}]/ByClass[Thumb]");
+                thumb.DragAndDropToOffset(MoveToElementOffsetStartingPoint.Center, 0, 0, -50, 0);
+                thumb.DragAndDropToOffset(MoveToElementOffsetStartingPoint.Center, 0, 0, 500, 0);
+            }
+        }
+
+        [TestMethod("B10-14")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-14
+        public void TIEditor_ChangeVariableDataColumnWidth_CanAdjustWidth()
+        {
+            string[] colNames = new string[] { "ShowName", "CallName", "DisplayedType", "Minimum", "Maximum", "Default", "Format", "DisplayedEnum" };
+
+            VariableTabNavi(VariableTabType.Condition);
+            var VariablePanel = PP5IDEWindow.PerformGetElement("/ByName[dockItem1,dockItem2]/ById[VariablePanel]");
+
+            PP5Element thumb;
+            foreach (string colName in colNames)
+            {
+                thumb = (PP5Element)VariablePanel.PerformGetElement($"/ById[HeaderPanel]/ByName[{colName}]/ByClass[Thumb]");
+                thumb.DragAndDropToOffset(MoveToElementOffsetStartingPoint.Center, 0, 0, -50, 0);
+                thumb.DragAndDropToOffset(MoveToElementOffsetStartingPoint.Center, 0, 0, 500, 0);
+            }
+        }
+
+        [TestMethod("B10-15")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-15
+        public void TIEditor_UndoThenCheckIsUndoed()
+        {
+            AddCommandBy(TestCmdGroupType.String, 1);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
+
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Undo);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldBeNull();
+        }
+
+        [TestMethod("B10-16")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-16
+        public void TIEditor_UndoAndRedoThenCheckIsRedoed()
+        {
+            AddCommandBy(TestCmdGroupType.String, 1);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
+
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Undo);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Redo);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
+        }
+
+        [TestMethod("B10-17")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-17
+        public void TIEditor_OpenMultipleTI_CheckUINormallyDisplayed()
+        {
+            PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TIContextPanel]").ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TCParameterPanel]").ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement("/ByName[dockItem1,dockItem2]/ById[VariablePanel]").ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement("/ById[dockManager]/ByName[dockItem4]/ById[TCListPanel]").ShouldNotBeNull();
+
+            PerformOpenNewTI(closeCurrTI: false);
+
+            PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TIContextPanel]").ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement("/ByName[dockItem2,dockItem3]/ById[TCParameterPanel]").ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement("/ByName[dockItem1,dockItem2]/ById[VariablePanel]").ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement("/ById[dockManager]/ByName[dockItem4]/ById[TCListPanel]").ShouldNotBeNull();
+        }
+
+        [TestMethod("B10-18")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-18
+        public void TIEditor_LoadOldTI_CheckProgressBarIsRunning()
+        {
+            TIName = "B10-18";
+            SaveAsNewTI(TIName);
+
+            taskManager.StartNewTask($"PerformLoadOldTI: {TIName}", PerformLoadOldTI, TIName);
+            //PerformLoadOldTI(TIName);
+            
+            while (PP5IDEWindow.PerformGetElement("/ProgressBar[0]") != null)
+                ((PP5Element)PP5IDEWindow.PerformGetElement("/ProgressBar[0]")).RangeValue.Value.ShouldBeInRange(0, 100);
+        }
+
+        [TestMethod("B10-19")]
+        [TestCategory("畫面顯示狀態(B10)")]
+        //B10-19
+        public void TIEditor_FloatThePanelThenReopenTI_CheckInitializeWindowsNotCoveredByTheFloatPanel()
+        {
+            var panel = PP5IDEWindow.PerformGetElement($"/ById[{TIPanelType.TIContextPanel}]");
+            string panelTitle = panel.GetText();
+
+            panel.PerformClick("/", MoveToElementOffsetStartingPoint.InnerCenterTop, ClickType.RightClick);
+            PP5IDEWindow.PerformClick("/ByClass[Popup,ItemContextMenu]/ByName[Float]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformGetElement("/Window[-1]").GetText().ShouldNotEqualTo(panelTitle);
+            PP5IDEWindow.PerformClick("/Window[-1]/ByName[Cancel]", ClickType.LeftClick);
+
+            RestoreDefaultDocking(WindowType.TIEditor);
+            //MenuSelect("Edit", "Default Dock");
+            //PP5IDEWindow.PerformClick("/ByName[TI Editor,Yes]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B11-1")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("language => 簡体中文", "工具 => 选项", "选项")]
+        [DataRow("语言 => 繁體中文", "工具 => 選項", "選項")]
+        [DataRow("語言 => English", "Utility => Option", "Option")]
+        //B11-1
+        public void TIEditor_OpenOptionWindowInMenuItem_CheckTitleIsSame(string languagePath, string menuItemPath, string optionWindowTitle)
+        {
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+            MenuSelect(menuItemPath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+            PP5IDEWindow.PerformGetElement("/Window[-1]").GetText().ShouldNotEqualTo(optionWindowTitle);
+        }
+
+        [TestMethod("B11-2")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(0)]
+        [DataRow(10)]
+        //B11-2
+        public void TIEditor_OpenOptionWindowAndSetLoadNum_CheckRowCountEqualsLoadNum(int rowCount)
+        {
+            string languagePath = "language => English";
+            string menuItemPath = "Utility => Option";
+            string optionWindowTitle = "Option";
+
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));                 // Switch language
+            MenuSelect(menuItemPath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));                 // Open Option Widnow
+            PP5IDEWindow.PerformInput($"/ByName[{optionWindowTitle}]/ByClass[TextBox]", InputType.SendContent, rowCount);   // Fill-in total load number
+
+            PP5IDEWindow.PerformGetElement($"/ByName[{optionWindowTitle}]/ById[dataPresenter]").GetRowCount();              // Check load number same as row count
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        [TestMethod("B11-3")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-3
+        public void TIEditor_OpenOptionWindowAndTickReverse_CheckReverseIsChecked()
+        {
+            string menuItemPath = "Utility => Option";
+            string optionWindowTitle = "Option";
+            string rowCount = "1";
+
+            MenuSelect(menuItemPath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));                 // Open Option Widnow
+            PP5IDEWindow.PerformInput($"/ByName[{optionWindowTitle}]/ByClass[TextBox]", InputType.SendContent, rowCount);
+
+            var OptionDg = PP5IDEWindow.PerformGetElement($"/ByName[{optionWindowTitle}]/ById[dataPresenter]");             // Tick Reverse checkbox
+            OptionDg.GetCellBy(1, "Reverse").TickCheckBox();
+            OptionDg.GetCellBy(1, "Reverse").isElementChecked().ShouldBeTrue();
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        [TestMethod("B11-4")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-4
+        public void TIEditor_OpenOptionWindowAndSetValues_CheckSettingIsStoredAfterWindowReopened()
+        {
+            string menuItemPath = "Utility => Option";
+            string optionWindowTitle = "Option";
+            string rowCount = "2";
+
+            MenuSelect(menuItemPath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));                 // Open Option Widnow
+            PP5IDEWindow.PerformInput($"/ByName[{optionWindowTitle}]/ByClass[TextBox]", InputType.SendContent, rowCount);   // Add 2 rows by setting load number = 2
+
+            var OptionDg = PP5IDEWindow.PerformGetElement($"/ByName[{optionWindowTitle}]/ById[dataPresenter]");             // Tick 1st row's Reverse checkbox
+            OptionDg.GetCellBy(1, "Reverse").TickCheckBox();
+            PP5IDEWindow.PerformClick($"/ByName[{optionWindowTitle}, Ok]", ClickType.LeftClick);
+
+            MenuSelect(menuItemPath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));                 // Reopen the option window
+            rowCount.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByName[{optionWindowTitle}]/ByClass[TextBox]").GetText());
+            OptionDg = PP5IDEWindow.PerformGetElement($"/ByName[{optionWindowTitle}]/ById[dataPresenter]");
+            OptionDg.GetCellBy(1, "Reverse").isElementChecked().ShouldBeTrue();
+            OptionDg.GetRowCount();
+
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        [TestMethod("B11-5")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("language => 簡体中文", "测试命令", "参数数值", "表达式编辑器")]
+        [DataRow("语言 => 繁體中文", "測試命令", "參數數值", "表達式編輯器")]
+        [DataRow("語言 => English", "Test Command", "Parameter Value", "Expression Editor")]
+        //B11-5
+        public void TIEditor_OpenVariableWindowWithParameterTypeExpression_CheckTitleIsSame(string languagePath, string TestCmdMulLing, string ParamValMulLing, string windowTitle)
+        {
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));     // Switch language
+            TestItemTabNavi(TestItemTabType.TIContext);                                                         // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "If");                                           // Add command: "System, Flow Control", "If"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdMulLing}]", ClickType.LeftClick);             // LeftClick on command
+            
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@{ParamValMulLing}]", ClickType.LeftClick);     // Open Window "Expression Editor"
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                  // Check window title is correct
+        }
+
+        [TestMethod("B11-6")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.Float, "Float_B11-6")]
+        [DataRow(VariableDataType.String, "String_B11-6")]
+        [DataRow(VariableDataType.HexString, "HexString_B11-6")]
+        [DataRow(VariableDataType.Byte, "Byte_B11-6")]
+        //B11-6
+        public void TIEditor_EditVariableWindowWithParameterTypeExpression_CheckCanSelectTheCorrectParamType(VariableDataType dataType, string callName)
+        {
+            string TestCmdColName = "Test Command";
+            string ParamValColName = "Parameter Value";
+            string windowTitle = "Expression Editor";
+
+            InitializeVariableDataGrid(VariableTabType.Condition, "", callName, dataType, VariableEditType.EditBox);    // Create a condition variable with given dataType and callName
+            TestItemTabNavi(TestItemTabType.TIContext);                                                                 // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "If");                                                   // Add command: "System, Flow Control", "If"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);                     // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Expression Editor"
+
+            IElement expressionWindow = PP5IDEWindow.PerformGetElement($"/Window[{windowTitle}]");
+            expressionWindow.PerformClick("/ById[TB_Value,UI_textbox]", ClickType.LeftClick);
+
+            SendSingleKeys("\"");
+            SendSingleKeys(callName);
+            expressionWindow.PerformGetElement("/ById[UI_combobox]")
+                            .ComboBoxSelectByIndex(0);
+
+            if (dataType == VariableDataType.Float)
+                PP5IDEWindow.PerformClick($"/ByName[Expression Editor,Numeric]", ClickType.LeftClick);
+            else
+                PP5IDEWindow.PerformClick($"/ByName[Expression Editor,{dataType.ToString()}]", ClickType.LeftClick);
+        }
+
+        [TestMethod("B11-7")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-7
+        public void TIEditor_EditVariableWindowWithParameterTypeExpression_CheckSettingIsStoredAfterWindowReopened()
+        {
+            string TestCmdColName = "Test Command";
+            string ParamValColName = "Parameter Value";
+            string windowTitle = "Expression Editor";
+            VariableDataType dataType = VariableDataType.Float;
+            string callName = "Float_B11-6";
+
+            TestItemTabNavi(TestItemTabType.TIContext);                                                         // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "If");                                           // Add command: "System, Flow Control", "If"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);             // LeftClick on command
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@{ParamValColName}]", ClickType.LeftClick);     // Open Window "Expression Editor"
+
+            IElement expressionWindow = PP5IDEWindow.PerformGetElement($"/Window[{windowTitle}]");
+            if (dataType == VariableDataType.Float)
+                expressionWindow.PerformClick($"/ByName[Numeric]", ClickType.LeftClick);
+            else
+                expressionWindow.PerformClick($"/ByName[{dataType.ToString()}]", ClickType.LeftClick);
+
+            expressionWindow.PerformClick("/ById[TB_Value,UI_textbox]", ClickType.LeftClick);
+
+            SendSingleKeys("\"");
+            SendSingleKeys(callName);
+            expressionWindow.PerformGetElement("/ById[UI_combobox]")
+                            .ComboBoxSelectByIndex(0);
+            SendSingleKeys("=0");
+
+            expressionWindow.PerformClick("/ByName[Check]", ClickType.LeftClick);
+            expressionWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@{ParamValColName}]", ClickType.LeftClick);     // Open Window "Expression Editor"
+
+            string expStrExpected = string.Format("\"{0}\" = 0", callName);
+            expStrExpected.ShouldEqualTo(expressionWindow.PerformGetElement("/ById[TB_Value,UI_textbox]").GetText());
+        }
+
+        [TestMethod("B11-8")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("language => 簡体中文", "测试命令", "参数数值", "条件", "结果", "临时", "全域", "常数")]
+        [DataRow("语言 => 繁體中文", "測試命令", "參數數值", "條件", "結果", "臨時", "全域", "常數")]
+        [DataRow("語言 => English", "Test Command", "Parameter Value", "Condition", "Result", "Temporary", "Global", "Constant")]
+        //B11-8
+        public void TIEditor_EditVariableWindowWithParameterTypeFuncPar_CheckDataTypeLabelsAreSame(string languagePath, string TestCmdMulLing, string ParamValMulLing, params string[] dataTypeLabelsMulLang)
+        {
+            string windowTitle = "Func Parameter Editor";
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));         // Switch language
+            TestItemTabNavi(TestItemTabType.TIContext);                                                             // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Call_Dll");                                         // Add command: "System, Flow Control", "Call_Dll"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdMulLing}]", ClickType.LeftClick);                 // LeftClick on command
+
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@{ParamValMulLing}]", InputType.SendContent, 1);    // 4th parameter input "1"
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValMulLing}]", ClickType.LeftClick);         // Open Window "Func Parameter Editor"
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                      // Check window title is correct
+
+            var FuncParameterEditor = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            string[] dataTypeLabelIds = new string[] { "CndRdoBtn", "RstRdoBtn", "TmpRdoBtn", "GlbRdoBtn", "CntRdoBtn" };
+            for (int i = 0; i < dataTypeLabelIds.Length; i++)
+                dataTypeLabelsMulLang[i].ShouldEqualTo(FuncParameterEditor.PerformGetElement($"/ById[{dataTypeLabelIds[i]}]").GetText());
+        }
+
+        [TestMethod("B11-9")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-9
+        public void TIEditor_EditVariableWindowWithParameterTypeFuncPar_CheckCanSelectTheCorrectParamType()
+        {
+            VariableDataType dataType = VariableDataType.Float;
+            string callName = "Float_B11-9";
+            string TestCmdColName = "Test Command";
+            string ParamValColName = "Parameter Value";
+            string windowTitle = "Func Parameter Editor";
+            
+            InitializeVariableDataGrid(VariableTabType.Condition, "", callName, dataType, VariableEditType.EditBox);    // Create a condition variable with given dataType and callName
+            TestItemTabNavi(TestItemTabType.TIContext);                                                                 // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Call_Dll");                                             // Add command: "System, Flow Control", "Call_Dll"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);                     // LeftClick on command
+
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@{ParamValColName}]", InputType.SendContent, 1);        // 4th parameter input "1"
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                          // Check window title is correct
+
+            var funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+            funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
+                            .ComboBoxSelectByName(callName);
+
+            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+        }
+
+        [TestMethod("B11-10")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-10
+        public void TIEditor_EditVariableWindowWithParameterTypeFuncPar_CheckSettingIsStoredAfterWindowReopened()
+        {
+            VariableDataType dataType = VariableDataType.Float;
+            string callName = "Float_B11-10";
+            string TestCmdColName = "Test Command";
+            string ParamValColName = "Parameter Value";
+            string windowTitle = "Func Parameter Editor";
+
+            InitializeVariableDataGrid(VariableTabType.Condition, "", callName, dataType, VariableEditType.EditBox);    // Create a condition variable with given dataType and callName
+            TestItemTabNavi(TestItemTabType.TIContext);                                                                 // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Call_Dll");                                             // Add command: "System, Flow Control", "Call_Dll"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);                     // LeftClick on command
+
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@{ParamValColName}]", InputType.SendContent, 1);        // 4th parameter input "1"
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                          // Check window title is correct
+
+            var funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+            funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
+                            .ComboBoxSelectByName(callName);
+
+            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
+            funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+
+            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+            funcParEdtWindow.PerformGetElement("/ByName[Condition]").isElementChecked().ShouldBeTrue();
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        [TestMethod("B11-11")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("language => 簡体中文", "测试命令", "参数数值", "测试项目参数编辑器")]
+        [DataRow("语言 => 繁體中文", "測試命令", "參數數值", "測試項目參數編輯器")]
+        [DataRow("語言 => English", "Test Command", "Parameter Value", "Test Item Var Editor")]
+        //B11-11
+        public void TIEditor_EditVariableWindowWithParameterTypeTiCondition_CheckDataTypeLabelsAreSame(string languagePath, string TestCmdMulLing, string ParamValMulLing, string windowTitle)
+        {
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));         // Switch language
+            TestItemTabNavi(TestItemTabType.TIContext);                                                             // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.Sub_TI, 1);                                                               // Add 1st command of "Sub TI"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdMulLing}]", ClickType.LeftClick);                 // LeftClick on command
+
+            PP5IDEWindow.PerformClick($"/ByCell@MappingGrid[5,@{ParamValMulLing}]", ClickType.LeftClick);         // Open Window "Test Item Var Editor"
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                      // Check window title is correct
+        }
+
+        [TestMethod("B11-12")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-12
+        public void TIEditor_EditVariableWindowWithParameterTypeTiCondition_CheckCanSelectTheCorrectParamType()
+        {
+            VariableDataType dataType = VariableDataType.Float;
+            string callName = "Float_B11-12";
+            string TestCmdColName = "Test Command";
+            string ParamValColName = "Parameter Value";
+            string windowTitle = "Func Parameter Editor";
+
+            InitializeVariableDataGrid(VariableTabType.Condition, "", callName, dataType, VariableEditType.EditBox);    // Create a condition variable with given dataType and callName
+            TestItemTabNavi(TestItemTabType.TIContext);                                                                 // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Call_Dll");                                             // Add command: "System, Flow Control", "Call_Dll"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);                     // LeftClick on command
+
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@{ParamValColName}]", InputType.SendContent, 1);        // 4th parameter input "1"
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                          // Check window title is correct
+
+            var funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+            funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
+                            .ComboBoxSelectByName(callName);
+
+            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+        }
+
+        [TestMethod("B11-13")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-13
+        public void TIEditor_EditVariableWindowWithParameterTypeTiCondition_CheckSettingIsStoredAfterWindowReopened()
+        {
+            VariableDataType dataType = VariableDataType.Float;
+            string callName = "Float_B11-13";
+            string TestCmdColName = "Test Command";
+            string ParamValColName = "Parameter Value";
+            string windowTitle = "Func Parameter Editor";
+
+            InitializeVariableDataGrid(VariableTabType.Condition, "", callName, dataType, VariableEditType.EditBox);    // Create a condition variable with given dataType and callName
+            TestItemTabNavi(TestItemTabType.TIContext);                                                                 // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Call_Dll");                                             // Add command: "System, Flow Control", "Call_Dll"
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);                     // LeftClick on command
+
+            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@{ParamValColName}]", InputType.SendContent, 1);        // 4th parameter input "1"
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                          // Check window title is correct
+
+            var funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+            funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
+                            .ComboBoxSelectByName(callName);
+
+            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
+            funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+
+            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+            funcParEdtWindow.PerformGetElement("/ByName[Condition]").isElementChecked().ShouldBeTrue();
+            PP5IDEWindow.CloseWindow(0);
+        }
 
         /// <summary>
         /// TestCase: J1-2
@@ -20146,7 +24834,7 @@ namespace PP5AutoUITests
             {
                 // Add first command in group "AC Source"
                 //AddCommandBy("AC Source", 1, TestCommandSourceType.Device);
-                AddCommandBy("AC Source", 1);
+                AddCommandBy(TestCmdGroupType.AC_Source, 1);
 
                 // LeftClick on the command
                 Console.WriteLine("LeftClick on the command");
@@ -20154,8 +24842,8 @@ namespace PP5AutoUITests
 
                 // Delete the command by clicking on the buttons (not from menu)
                 Console.WriteLine("Delete the command");
-                var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                                .GetElements(By.ClassName("RadioButton"));
+                var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                                                .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
                 functionBtns[12].LeftClick();
             }
         }
@@ -20174,7 +24862,7 @@ namespace PP5AutoUITests
 
             // Add first command in group "AC Source"
             //AddCommandBy("AC Source", 1, TestCommandSourceType.Device);
-            AddCommandBy("AC Source", 1);
+            AddCommandBy(TestCmdGroupType.AC_Source, 1);
 
             // LeftClick on the command
             Console.WriteLine("LeftClick on the command");
@@ -20203,8 +24891,8 @@ namespace PP5AutoUITests
                 CreateNewVariable1(VariableTabType.Condition, "J1-4", "J1-4");
 
                 // Delete by clicking on the buttons (from toolbar)
-                var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                                .GetElements(By.ClassName("RadioButton"));
+                var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                                                .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
                 functionBtns[12].LeftClick();
             }
         }
@@ -20259,7 +24947,7 @@ namespace PP5AutoUITests
         {
             for (int i = 0; i < repeatCount; i++)
             {
-                CreateNewVariable1(VariableTabType.Condition, CallName: "varCN" + i.ToString());
+                CreateNewVariable1(VariableTabType.Condition, "varCN" + i.ToString(), "varCN" + i.ToString());
             }
         }
 
@@ -20294,7 +24982,7 @@ namespace PP5AutoUITests
         [DataRow(20000)] //J2-5
         public void MainPanel_TIEditor_CreateMassiveCommands(int repeatCount)
         {
-            AddCommandBy("AC Source", 1, addCount: repeatCount);
+            AddCommandBy(TestCmdGroupType.AC_Source, 1, addCount: repeatCount);
         }
 
         /// <summary>
@@ -20311,7 +24999,7 @@ namespace PP5AutoUITests
 
             // Add first command in group "AC Source"
             //AddCommandBy("AC Source", 1, TestCommandSourceType.Device);
-            AddCommandBy("AC Source", 1);
+            AddCommandBy(TestCmdGroupType.AC_Source, 1);
 
             // LeftClick on the command
             Console.WriteLine("LeftClick on the command");
@@ -20992,13 +25680,5 @@ namespace PP5AutoUITests
         //{
         //    Assert.Fail();
         //}
-
-        private string GetTIFilePath(string TIName, TestItemSourceType sourceType = TestItemSourceType.UserDefined, TestItemType itemType = TestItemType.TI, TestItemRunType runType = TestItemRunType.UUT)
-        {
-            if (itemType == TestItemType.TI)
-                return Path.Combine(PowerPro5Config.ReleaseFolder, "TestItem", sourceType.ToString(), "TI", runType.GetDescription().Replace(" ", ""), TIName + ".tix");
-            else
-                return Path.Combine(PowerPro5Config.ReleaseFolder, "TestItem", sourceType.ToString(), itemType.ToString(), TIName + ".tix");
-        }
     }
 }

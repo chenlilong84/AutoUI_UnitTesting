@@ -11,7 +11,7 @@ using OpenQA.Selenium.Appium.Windows;
 
 namespace PP5AutoUITests.Session
 {
-    public class MainPanelDriver : DriverBase, IDriver
+    public class MainPanelDriver : DriverBase, ISessionDriver
     {
         public MainPanelDriver()
         {
@@ -20,19 +20,19 @@ namespace PP5AutoUITests.Session
             sessionType = SessionType.MainPanel;
             //targetAppPath = @"C:\Users\adam.chen\Desktop\Debug\bin\Chroma.MainPanel.exe";
             //targetAppWorkingDir = @"C:\Users\adam.chen\Desktop\Debug\bin\";
-            WaitForAppLaunch = 35;
+            WaitForAppLaunch = 10;
             base.targetAppPath = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\Chroma.MainPanel.exe";
             base.targetAppWorkingDir = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\";
         }
 
-        public WindowsDriver<WindowsElement> CreateNewDriver()
+        public PP5Driver CreateNewDriver()
         {
             OpenQA.Selenium.Appium.AppiumOptions appCapabilities = new OpenQA.Selenium.Appium.AppiumOptions();
             appCapabilities.AddAdditionalCapability("app", targetAppPath);
             appCapabilities.AddAdditionalCapability("appWorkingDir", targetAppWorkingDir);
             appCapabilities.AddAdditionalCapability("deviceName", DeviceName);
             appCapabilities.AddAdditionalCapability("ms:waitForAppLaunch", WaitForAppLaunch);
-            currentDriver = new WindowsDriver<WindowsElement>(new Uri(WindowsApplicationDriverUrl), appCapabilities);
+            currentDriver = new PP5Driver(new Uri(WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(180), sessionType);
 
             Assert.IsNotNull(currentDriver);
 
@@ -41,7 +41,7 @@ namespace PP5AutoUITests.Session
             return currentDriver;
         }
 
-        public override WindowsDriver<WindowsElement> CreateDriver()
+        public override PP5Driver CreateDriver()
         {
             processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(targetAppPath));
             if (processes.Length == 0)

@@ -5,6 +5,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium.Windows;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Support;
+using OpenQA.Selenium.Support.UI;
+
 namespace PP5AutoUITests
 {
     public static class AutoUIActionExtension
@@ -298,6 +301,7 @@ namespace PP5AutoUITests
 
             Logger.LogMessage($"LeftClick on {onElement.TagName} \"{showName}\"");
             new Actions(Executor.GetInstance().GetCurrentDriver()).Click(onElement).Perform();
+            
         }
         public static void LeftClickWithDelay(this IWebElement onElement, int delayMilliSecond)
         {
@@ -349,6 +353,19 @@ namespace PP5AutoUITests
             new Actions(Executor.GetInstance().GetCurrentDriver()).MoveToElement(toElement, offsetX, offsetY, offsetOrigin).Perform();
         }
 
+        public static void MoveToElementAndClick(this IWebElement toElement, int offsetX, int offsetY, MoveToElementOffsetOrigin offsetOrigin)
+        {
+            new Actions(Executor.GetInstance().GetCurrentDriver()).MoveToElement(toElement, offsetX, offsetY, offsetOrigin)
+                                                                  .Click().Perform();
+        }
+
+        public static void MoveToElementAndDoubleClickWithDelay(this IWebElement toElement, int offsetX, int offsetY, MoveToElementOffsetOrigin offsetOrigin, int delayMilliSecond)
+        {
+            toElement.MoveToElementAndClick(offsetX, offsetY, offsetOrigin);
+            Thread.Sleep(delayMilliSecond);
+            toElement.MoveToElementAndClick(offsetX, offsetY, offsetOrigin);
+        }
+
         public static void SendSingleKeys(this IWebElement element, string keysToSend)
         {
             new Actions(Executor.GetInstance().GetCurrentDriver()).SendKeys(element, keysToSend).Perform();
@@ -358,16 +375,42 @@ namespace PP5AutoUITests
         {
             Actions actions = new Actions(Executor.GetInstance().GetCurrentDriver());
 
-            foreach (string keysToSend in multikeysToSend)
+            //bool HasFunctionalKey = multikeysToSend.Any(key => KeysConverter.GetInstance().HasKey(key));
+            bool HasModifierKey = multikeysToSend.Any(key => KeysConverter.GetInstance().IsModifierKey(key));
+            int ModifierKeyCount = multikeysToSend.Count(key => KeysConverter.GetInstance().IsModifierKey(key));
+
+            if (HasModifierKey)
             {
-                actions.SendKeys(element, keysToSend);
-                Logger.LogMessage($"KeyboardInput \"{keysToSend}\" in {element.TagName} \"{element.GetAttribute("AutomationId")}\"");
+                //int nStep = ModifierKeyCount * 2 + (multikeysToSend.Count() - ModifierKeyCount);
+                for (int i = 0; i < ModifierKeyCount; i++)
+                {
+                    actions.KeyDown(element, multikeysToSend[i]);
+                    Logger.LogMessage($"KeyboardInput \"{multikeysToSend[i]}\" in {element.TagName} \"{element.GetAttribute("AutomationId")}\"");
+                }
+                for (int i = ModifierKeyCount; i < multikeysToSend.Count(); i++)
+                {
+                    actions.SendKeys(element, multikeysToSend[i]);
+                    Logger.LogMessage($"KeyboardInput \"{multikeysToSend[i]}\" in {element.TagName} \"{element.GetAttribute("AutomationId")}\"");
+                }
+                for (int i = ModifierKeyCount - 1; i >= 0; i--)
+                {
+                    actions.KeyUp(element, multikeysToSend[i]);
+                    Logger.LogMessage($"KeyboardInput \"{multikeysToSend[i]}\" in {element.TagName} \"{element.GetAttribute("AutomationId")}\"");
+                }
             }
-            
+            else
+            {
+                foreach (string keysToSend in multikeysToSend)
+                {
+                    actions.SendKeys(element, keysToSend);
+                    Logger.LogMessage($"KeyboardInput \"{keysToSend}\" in {element.TagName} \"{element.GetAttribute("AutomationId")}\"");
+                }
+            }
+
             actions.Perform();
         }
 
-        public static void SendContent(this IWebElement element, string keysToSend)
+        public static void SendText(this IWebElement element, string keysToSend)
         {
             element.Clear();
             if (!keysToSend.IsNullOrEmpty())

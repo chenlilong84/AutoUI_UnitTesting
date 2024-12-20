@@ -22,11 +22,11 @@ namespace PP5AutoUITests
         {
             string testString = "testCopyAndPaste";
 
-            IWebElement testCmdSearchTextBox = CurrentDriver.GetElement(By.ClassName("CmdTreeView"))
-                                                            .GetElement(MobileBy.AccessibilityId("searchText"));
+            IWebElement testCmdSearchTextBox = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("CmdTreeView"))
+                                                            .GetWebElementFromWebElement(MobileBy.AccessibilityId("searchText"));
 
-            IWebElement testCmdEditSearchTextBox = CurrentDriver.GetElement(By.ClassName("SettingAeraView"))
-                                                                .GetElement(MobileBy.AccessibilityId("searchText"));
+            IWebElement testCmdEditSearchTextBox = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("SettingAeraView"))
+                                                                .GetWebElementFromWebElement(MobileBy.AccessibilityId("searchText"));
 
             // Clean up text in both search box
             testCmdSearchTextBox.ClearContent();
@@ -47,11 +47,11 @@ namespace PP5AutoUITests
         {
             string testString = "testCutAndPaste";
 
-            IWebElement testCmdSearchTextBox = CurrentDriver.GetElement(By.ClassName("CmdTreeView"))
-                                                            .GetElement(MobileBy.AccessibilityId("searchText"));
+            IWebElement testCmdSearchTextBox = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("CmdTreeView"))
+                                                            .GetWebElementFromWebElement(MobileBy.AccessibilityId("searchText"));
 
-            IWebElement testCmdEditSearchTextBox = CurrentDriver.GetElement(By.ClassName("SettingAeraView"))
-                                                                .GetElement(MobileBy.AccessibilityId("searchText"));
+            IWebElement testCmdEditSearchTextBox = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("SettingAeraView"))
+                                                                .GetWebElementFromWebElement(MobileBy.AccessibilityId("searchText"));
 
             // Clean up text in both search box
             testCmdSearchTextBox.ClearContent();
@@ -76,10 +76,10 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS", first command in Group: "Arithmetic"
             string CommandName = "ABS";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
             // Check command name the same
             CommandName.ShouldEqualTo(GetCellValue("PGGrid", 1, "Test Command"));
@@ -94,10 +94,10 @@ namespace PP5AutoUITests
 
             // Input Command name: "XOR", last command in Group: "Arithmetic"
             string CommandName = "XOR";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandBy(GroupName, CommandName);
+            AddCommandBy(cgt, CommandName);
 
             // Check command name the same
             CommandName.ShouldEqualTo(GetCellValue("PGGrid", 1, "Test Command"));
@@ -113,10 +113,10 @@ namespace PP5AutoUITests
 
             // Input Command name: "ABS", first command in Group: "Arithmetic"
             int CommandNumber = 1;
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandBy(GroupName, CommandNumber);
+            AddCommandBy(cgt, CommandNumber);
 
             // Check command name the same
             commandName.ShouldEqualTo(GetCellValue("PGGrid", 1, "Test Command"));
@@ -132,10 +132,10 @@ namespace PP5AutoUITests
 
             // Input Command name: "XOR", last command in Group: "Arithmetic"
             int CommandNumber = 25;
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandBy(GroupName, CommandNumber);
+            AddCommandBy(cgt, CommandNumber);
 
             // Check command name the same
             commandName.ShouldEqualTo(GetCellValue("PGGrid", 1, "Test Command"));
@@ -151,10 +151,10 @@ namespace PP5AutoUITests
             // Input Command name: "GetTDL_Information", first command in Group: "Data Logger"
             // Where group is not visible in command list
             int CommandNumber = 1;
-            string GroupName = "Data Logger";
+            TestCmdGroupType cgt = TestCmdGroupType.Data_Logger;
 
             // Add the command
-            AddCommandBy(GroupName, CommandNumber);
+            AddCommandBy(cgt, CommandNumber);
 
             // Check command name the same
             "GetTDL_Information".ShouldEqualTo(GetCellValue("PGGrid", 1, "Test Command"));
@@ -167,11 +167,11 @@ namespace PP5AutoUITests
             //// Arrange
             // Input Command name that is not in Group: "Arithmetic"
             string CommandName = "XXXXXXXXXX";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             //// Act + Assert
             // Add the command, check exception message
-            Exception exp = Assert.ThrowsException<CommandNameNotExistedException>(() => AddCommandBy(GroupName, CommandName));
+            Exception exp = Assert.ThrowsException<CommandNameNotExistedException>(() => AddCommandBy(cgt, CommandName));
             CommandName.ShouldEqualTo(exp.Message);
         }
 
@@ -182,11 +182,11 @@ namespace PP5AutoUITests
             //// Arrange
             // Input Command number that is not in Group: "Arithmetic"
             int CommandNumber = 50;
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             //// Act + Assert
             // Add the command, check exception message
-            Exception exp = Assert.ThrowsException<CommandNumberOutOfRangeException>(() => AddCommandBy(GroupName, CommandNumber));
+            Exception exp = Assert.ThrowsException<CommandNumberOutOfRangeException>(() => AddCommandBy(cgt, CommandNumber));
             CommandNumber.ToString().ShouldEqualTo(exp.Message);
         }
 
@@ -198,11 +198,11 @@ namespace PP5AutoUITests
             // Input Command name that is not in Group: "Arithmetic"
             string WrongCommandName1 = "FFFFFFFFFF";
             string WrongCommandName2 = "GGGGGGGGGG";
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             //// Act + Assert
             // Add the commands, check exception message
-            CommandNameNotExistedException exp = Assert.ThrowsException<CommandNameNotExistedException>(() => AddCommandsBy(GroupName, WrongCommandName1, WrongCommandName2, "MOD"));
+            CommandNameNotExistedException exp = Assert.ThrowsException<CommandNameNotExistedException>(() => AddCommandsBy(cgt, WrongCommandName1, WrongCommandName2, "MOD"));
             WrongCommandName1.ShouldEqualTo(exp.CommandName);
         }
 
@@ -212,12 +212,12 @@ namespace PP5AutoUITests
         {
             //// Arrange
             // The group name
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             //// Act + Assert
             // Add the commands with No: 0, 1, 10
             // Command number: 0 is not in Group: "Arithmetic"
-            CommandNumberOutOfRangeException exp = Assert.ThrowsException<CommandNumberOutOfRangeException>(() => AddCommandsBy(GroupName, 0, 1, 10));
+            CommandNumberOutOfRangeException exp = Assert.ThrowsException<CommandNumberOutOfRangeException>(() => AddCommandsBy(cgt, 0, 1, 10));
 
             // check exception message
             0.ShouldEqualTo(exp.CommandNumber);
@@ -229,46 +229,46 @@ namespace PP5AutoUITests
         {
             //// Arrange
             // The group name
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             //// Act + Assert
             // Add the commands with No: 1, 10, 50
             // Command number: 50 is not in Group: "Arithmetic"
-            CommandNumberOutOfRangeException exp = Assert.ThrowsException<CommandNumberOutOfRangeException>(() => AddCommandsBy(GroupName, 1, 10, 50));
+            CommandNumberOutOfRangeException exp = Assert.ThrowsException<CommandNumberOutOfRangeException>(() => AddCommandsBy(cgt, 1, 10, 50));
 
             // check exception message
             50.ShouldEqualTo(exp.CommandNumber);
         }
 
-        [TestMethod]
-        [TestCategory("ByCommandName")]
-        public void TestAddCommand_GroupNameNotInList_ShouldReturnGroupNameNotExistedException()
-        {
-            //// Arrange
-            // The group name not existed
-            string GroupName = "xxxxxxxxxx";
-            string CommandName = "ABS";
+        //[TestMethod]
+        //[TestCategory("ByCommandName")]
+        //public void TestAddCommand_GroupNameNotInList_ShouldReturnGroupNameNotExistedException()
+        //{
+        //    //// Arrange
+        //    // The group name not existed
+        //    string GroupName = "xxxxxxxxxx";
+        //    string CommandName = "ABS";
 
-            //// Act + Assert
-            // Add the command, check exception message
-            GroupNameNotExistedException exp = Assert.ThrowsException<GroupNameNotExistedException>(() => AddCommandBy(GroupName, CommandName));
-            GroupName.ShouldEqualTo(exp.GroupName);
-        }
+        //    //// Act + Assert
+        //    // Add the command, check exception message
+        //    GroupNameNotExistedException exp = Assert.ThrowsException<GroupNameNotExistedException>(() => AddCommandBy(GroupName, CommandName));
+        //    GroupName.ShouldEqualTo(exp.GroupName);
+        //}
 
-        [TestMethod]
-        [TestCategory("ByCommandNumber")]
-        public void TestAddCommand2_GroupNameNotInList_ShouldReturnGroupNameNotExistedException()
-        {
-            //// Arrange
-            // The group name not existed
-            string GroupName = "xxxxxxxxxx";
-            int CommandNumber = 26;
+        //[TestMethod]
+        //[TestCategory("ByCommandNumber")]
+        //public void TestAddCommand2_GroupNameNotInList_ShouldReturnGroupNameNotExistedException()
+        //{
+        //    //// Arrange
+        //    // The group name not existed
+        //    string GroupName = "xxxxxxxxxx";
+        //    int CommandNumber = 26;
 
-            //// Act + Assert
-            // Add the command, check exception message
-            GroupNameNotExistedException exp = Assert.ThrowsException<GroupNameNotExistedException>(() => AddCommandBy(GroupName, CommandNumber));
-            GroupName.ShouldEqualTo(exp.GroupName);
-        }
+        //    //// Act + Assert
+        //    // Add the command, check exception message
+        //    GroupNameNotExistedException exp = Assert.ThrowsException<GroupNameNotExistedException>(() => AddCommandBy(GroupName, CommandNumber));
+        //    GroupName.ShouldEqualTo(exp.GroupName);
+        //}
 
         [TestMethod]
         [TestCategory("ByCommandName")]
@@ -278,11 +278,11 @@ namespace PP5AutoUITests
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Command Group
-            string GroupName = "AC Source";
-            
+            TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
+
             // Add the command with command names: "ABS", "MOD", "XOR"
             // { "AC Source",  new[] { "ReadAC_Current", "ReadAC_Frequency" } },
-            AddCommandsBy(GroupName, "ReadAC_Current", "ReadAC_Frequency", "SetACDev_CPPHParameter2");
+            AddCommandsBy(cgt, "ReadAC_Current", "ReadAC_Frequency", "SetACDev_CPPHParameter2");
 
             // Check commands are correctly added
             CollectionAssert.AreEqual(new List<string> { "ReadAC_Current", "ReadAC_Frequency", "SetACDev_CPPHParameter2" }, GetSingleColumnValues(DataTableAutoIDType.PGGrid, 5/*Test Command*/));
@@ -296,10 +296,10 @@ namespace PP5AutoUITests
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Command Group
-            string GroupName = "Arithmetic";
+            TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the commands with indexces: 1, 10, 25 (ABS, LOG, XOR)
-            AddCommandsBy(GroupName, 1, 10, 25);
+            AddCommandsBy(cgt, 1, 10, 25);
 
             // Check commands are correctly added
             CollectionAssert.AreEqual(new List<string>{ "ABS", "LOG", "XOR" }, GetSingleColumnValues(DataTableAutoIDType.PGGrid, 5/*Test Command*/));

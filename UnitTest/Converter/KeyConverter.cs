@@ -420,5 +420,13 @@ namespace PP5AutoUITests
             }
             return "Unknown Keystroke";
         }
+
+        public bool HasKey(string keystroke) => GetDescription(keystroke) != "Unknown Keystroke";
+
+        public bool IsModifierKey(string keystroke)
+        {
+            string[] ModifierKeys = new string[] { Keys.Shift, Keys.Control, Keys.Alt, Keys.Meta, Keys.Command, Keys.LeftAlt, Keys.LeftControl, Keys.LeftShift };
+            return ModifierKeys.Contains(keystroke);
+        }
     }
 }

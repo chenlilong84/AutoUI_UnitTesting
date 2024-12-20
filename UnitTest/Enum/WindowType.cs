@@ -11,20 +11,20 @@ namespace PP5AutoUITests
     /// </summary>
     public enum WindowType : int
     {
-        //None = 0,
+        ///// <summary>
+        ///// No Module is opened
+        ///// </summary>
+        [System.ComponentModel.Description("None")]
+        None = 0,
         ///// <summary>
         ///// Main Panel Login Window
         ///// </summary>
         //LoginWindow,
-        ///// <summary>
-        ///// Main Panel Menu Window
-        ///// </summary>
-        //MainPanelMenu,
         /// <summary>
         /// Test Item Editor Window
         /// </summary>
         [System.ComponentModel.Description("TI Editor")]
-        TIEditor = 0,
+        TIEditor,
         /// <summary>
         /// Test Program Editor Window
         /// </summary>
@@ -60,5 +60,9 @@ namespace PP5AutoUITests
         /// </summary>
         [System.ComponentModel.Description("Report")]
         Report,
+        /// <summary>
+        /// Main Panel Menu Window
+        /// </summary>
+        MainPanelMenu,
     }
 }

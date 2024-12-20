@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using OpenQA.Selenium.Appium;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium.Windows;
 
-namespace OpenQA.Selenium.Support.PageObjects
+namespace PP5AutoUITests.SeleniumSupport
 {
     //
     // 摘要:
@@ -33,8 +35,8 @@ namespace OpenQA.Selenium.Support.PageObjects
             }
 
             this.elementIdentifier = elementIdentifier;
-            automationIdFinder = MobileBy.AccessibilityId(this.elementIdentifier);
-            nameFinder = By.Name(this.elementIdentifier);
+            automationIdFinder = PP5By.Id(this.elementIdentifier);
+            nameFinder = PP5By.Name(this.elementIdentifier);
         }
 
         //
@@ -47,16 +49,25 @@ namespace OpenQA.Selenium.Support.PageObjects
         //
         // 傳回:
         //     The element that matches
-        public override IWebElement FindElement(ISearchContext context)
+        public new IElement FindElement(ISearchContext context)
         {
             try
             {
-                return automationIdFinder.FindElement(context);
+                return ((WindowsElement)automationIdFinder.FindElement(context)).ConvertToElement();
             }
-            catch (NoSuchElementException)
+            catch (WebDriverException)
             {
-                return nameFinder.FindElement(context);
+                return ((WindowsElement)nameFinder.FindElement(context)).ConvertToElement();
             }
+            //catch (NoSuchElementException)
+            //{
+            //    return nameFinder.FindElement(context);
+            //}
+
+            //if (automationIdFinder.FindElement(context) != null)
+            //    return automationIdFinder.FindElement(context);
+            //else
+            //    return nameFinder.FindElement(context);
         }
 
         //
@@ -69,11 +80,11 @@ namespace OpenQA.Selenium.Support.PageObjects
         //
         // 傳回:
         //     A readonly collection of elements that match.
-        public override ReadOnlyCollection<IWebElement> FindElements(ISearchContext context)
+        public new ReadOnlyCollection<IElement> FindElements(ISearchContext context)
         {
-            List<IWebElement> list = new List<IWebElement>();
-            list.AddRange(automationIdFinder.FindElements(context));
-            list.AddRange(nameFinder.FindElements(context));
+            List<IElement> list = new List<IElement>();
+            list.AddRange(automationIdFinder.FindElements(context).Cast<WindowsElement>().ToList().AsReadOnly().ConvertToElements());
+            list.AddRange(nameFinder.FindElements(context).Cast<WindowsElement>().ToList().AsReadOnly().ConvertToElements());
             return list.AsReadOnly();
         }
 

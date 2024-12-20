@@ -7,7 +7,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Appium.Windows;
+using OpenQA.Selenium.Remote;
 
 namespace PP5AutoUITests
 {
@@ -18,7 +20,7 @@ namespace PP5AutoUITests
 
         public SessionType sessionType { get; set; }
 
-        public WindowsDriver<WindowsElement> currentDriver;
+        public PP5Driver currentDriver;
 
         public Process[] processes;
 
@@ -33,7 +35,7 @@ namespace PP5AutoUITests
         //public abstract void CreateNewDriver();
         //protected abstract void AttachExistingDriver();
 
-        public WindowsDriver<WindowsElement> AttachExistingDriver()
+        public PP5Driver AttachExistingDriver()
         {
             processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(targetAppPath));
             foreach (Process clsProcess in processes)
@@ -65,24 +67,31 @@ namespace PP5AutoUITests
                         if (hWnd.ToInt32() == 0)
                         {
                             //使用FindWindow获取窗口句柄
-                            hWnd = DllHelper.FindWindow(null, WindowName);
+                            hWnd = NativeMethods.FindWindow(null, WindowName);
 
                             int id = -1;
 
                             // 用GetWindowThreadProcessId函数来验证句柄属否属于该进程
-                            DllHelper.GetWindowThreadProcessId(hWnd, out id);
+                            NativeMethods.GetWindowThreadProcessId(hWnd, out id);
                             if (id != clsProcess.Id)
                                 continue;
                         }
 
                         // hWnd 為之前運行的 main Panel 程序之 handle，attach 到 appium session
                         PowerPro5Config.PP5WindowHandleHex = string.Format("0x{0:X8}", hWnd.ToInt64());
-                        PowerPro5Config.PP5WindowSessionType = sessionType.ToString();
+                        //PowerPro5Config.PP5WindowSessionType = sessionType.ToString();
                         //PowerPro5Config.PP5WindowHandleHex = hWnd.ToString("X");
                         OpenQA.Selenium.Appium.AppiumOptions appCapabilities = new OpenQA.Selenium.Appium.AppiumOptions();
                         //appCapabilities.AddAdditionalCapability("app", targetAppPath);
                         //appCapabilities.AddAdditionalCapability("appWorkingDir", targetAppWorkingDir);
                         appCapabilities.AddAdditionalCapability("appTopLevelWindow", PowerPro5Config.PP5WindowHandleHex);
+                        
+                        // Set driver logging preference
+                        appCapabilities.SetLoggingPreference(LogType.Client, LogLevel.All);
+                        appCapabilities.SetLoggingPreference(LogType.Driver, LogLevel.All);
+                        appCapabilities.SetLoggingPreference(LogType.Profiler, LogLevel.All);
+                        appCapabilities.SetLoggingPreference(LogType.Server, LogLevel.All);
+
                         //appCapabilities.AddAdditionalCapability("ms:waitForAppLaunch", 1);
 
                         // 2024/01/30, Adam updated
@@ -94,7 +103,7 @@ namespace PP5AutoUITests
                         // Operation timed out. (0x80131505)。正在中止測試執行。
                         try
                         {
-                            currentDriver = new WindowsDriver<WindowsElement>(new Uri(PowerPro5Config.WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(30));
+                            currentDriver = new PP5Driver(new Uri(PowerPro5Config.WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(180), sessionType);
                         }
                         catch (OpenQA.Selenium.WebDriverException ex) 
                         {
@@ -102,9 +111,9 @@ namespace PP5AutoUITests
                         }
                         finally
                         {
-                            currentDriver = new WindowsDriver<WindowsElement>(new Uri(PowerPro5Config.WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(30));
+                            currentDriver = new PP5Driver(new Uri(PowerPro5Config.WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(180), sessionType);
                         }
-                        
+
                         // Set implicit timeout to 1.5 seconds to make element search to retry every 500 ms for at most three times
                         //currentDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1.5); // Adjust the timeout as needed
                         //return currentDriver;
@@ -114,7 +123,7 @@ namespace PP5AutoUITests
             return currentDriver;
         }
 
-        public abstract WindowsDriver<WindowsElement> CreateDriver();
+        public abstract PP5Driver CreateDriver();
         //public WindowsDriver<WindowsElement> CreateDriver()
         //{
         //    processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(targetAppPath));

@@ -77,12 +77,12 @@ namespace PP5AutoUITests
 
             // New Test Program window, LeftClick on Button "Ok"
             Console.WriteLine("LeftClick on Button \"Ok\"");
-            PP5IDEWindow.GetElement(timeOut: 5000, By.Name("New Test Program"),
-                                                     By.Name("Ok"))
+            PP5IDEWindow.GetElementWithRetry<IElement, IElement>(timeOut: 5000, By.Name("New Test Program"),
+                                                                                By.Name("Ok"))
                         .LeftClick();
 
             //Text[@Name =\"Test Program : UnClassified\"][@AutomationId=\"TitleTxtBlk\"]"
-            string TPNameInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TPNameInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
 
             // Check new TP is opened by verify the TP name info
             "UnClassified".ShouldEqualTo(TPNameInfo.Split(':')[1].Trim());
@@ -119,7 +119,7 @@ namespace PP5AutoUITests
             //Console.WriteLine("LeftClick on Button \"Ok\"");
             PP5IDEWindow.GetWindowElement("Save Test Program")
                         .GetEditElement("TPNameTxtBox")
-                        .SendContent(TPName);
+                        .SendText(TPName);
 
             PP5IDEWindow.GetWindowElement("Save Test Program")
                         .GetBtnElement("Ok")
@@ -136,7 +136,7 @@ namespace PP5AutoUITests
                         .LeftClick();
 
             //Text[@Name =\"Test Program : UnClassified\"][@AutomationId=\"TitleTxtBlk\"]"
-            string TPNameInfo = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
+            string TPNameInfo = PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId("TitleTxtBlk")).Text;
 
             // Check new TP is opened by verify the TP name info
             TPName.ShouldEqualTo(TPNameInfo.Split(':')[1].Trim());
@@ -178,7 +178,7 @@ namespace PP5AutoUITests
             //Console.WriteLine("LeftClick on Button \"Ok\"");
             PP5IDEWindow.GetWindowElement("Save Test Program")
                         .GetEditElement("TPNameTxtBox")
-                        .SendContent(TPName);
+                        .SendText(TPName);
 
             PP5IDEWindow.GetWindowElement("Save Test Program")
                         .GetBtnElement("Ok")
@@ -188,14 +188,14 @@ namespace PP5AutoUITests
             MenuSelect("Functions", "Management");
 
             // Click on TP/TI button
-            PP5IDEWindow.GetElement(By.ClassName("ToolBar"))
-                        .GetElements(By.ClassName("RadioButton"))[1].LeftClick();
+            PP5IDEWindow.GetWebElementFromWebElement(By.ClassName("ToolBar"))
+                        .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[1].LeftClick();
 
-            IWebElement ManagementTabControl = PP5IDEWindow.GetElement(MobileBy.AccessibilityId("mainTab"));
-            IWebElement TestProgramTabItem = ManagementTabControl.TabSelect(1, 0);
+            IElement ManagementTabControl = PP5IDEWindow.GetExtendedElement(PP5By.Id("mainTab"));
+            IElement TestProgramTabItem = ManagementTabControl.TabSelect(1, 0);
 
             // Search the TP with name
-            IWebElement testItemSearchBox = TestProgramTabItem.GetElement(MobileBy.AccessibilityId("searchText"));
+            IWebElement testItemSearchBox = TestProgramTabItem.GetWebElementFromWebElement(MobileBy.AccessibilityId("searchText"));
             testItemSearchBox.Clear();
             testItemSearchBox.SendComboKeys(TPName, Keys.Enter);
 
@@ -274,14 +274,14 @@ namespace PP5AutoUITests
                 AddTIBy("UnClassified", 1, TestItemSourceType.System);
 
                 TPExecuteAction(TPAction.SwitchToUUTTestPage);
-                GetPP5Window().GetElement(By.ClassName("PGUUTGridAeraView"))
-                              .GetFirstDataGridElement()
-                              .GetCellBy(1, 1)
-                              .LeftClick();
+                PP5IDEWindow.GetExtendedElement(PP5By.ClassName("PGUUTGridAeraView"))
+                            .GetFirstDataGridElement()
+                            .GetCellBy(1, 1)
+                            .LeftClick();
 
                 // Delete by clicking on the buttons (from toolbar)
-                var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                                .GetElements(By.ClassName("RadioButton"));
+                var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                                                .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
                 functionBtns[12].LeftClick();
             }
         }
@@ -298,10 +298,10 @@ namespace PP5AutoUITests
             AddTIBy("UnClassified", 1, TestItemSourceType.System);
 
             TPExecuteAction(TPAction.SwitchToUUTTestPage);
-            GetPP5Window().GetElement(By.ClassName("PGUUTGridAeraView"))
-                          .GetFirstDataGridElement()
-                          .GetCellBy(1, 1)
-                          .LeftClick();
+            PP5IDEWindow.GetExtendedElement(PP5By.ClassName("PGUUTGridAeraView"))
+                        .GetFirstDataGridElement()
+                        .GetCellBy(1, 1)
+                        .LeftClick();
 
             for (int i = 0; i < runCount; i++)
             {
@@ -321,20 +321,20 @@ namespace PP5AutoUITests
         public void TPEditor_InsertAndDeleteSameVectorVar_ForNTimes(int runCount)
         {
             TPExecuteAction(TPAction.SwitchToVectorVariablePage);
-            IWebElement vectorShownameCell = GetPP5Window().GetElement(By.ClassName("VectorAeraView"))
-                                                           .GetFirstDataGridElement()
-                                                           .GetCellBy(2, "Show Name");
+            IElement vectorShownameCell = PP5IDEWindow.GetExtendedElement(PP5By.ClassName("VectorAeraView"))
+                                                      .GetFirstDataGridElement()
+                                                      .GetCellBy(2, "Show Name");
             
             for (int i = 0; i < runCount; i++)
             {
                 vectorShownameCell.DoubleClick();
-                vectorShownameCell.SendContent("Line In Vector 2");
+                vectorShownameCell.SendText("Line In Vector 2");
 
                 Press(Keys.Enter);
 
                 // Delete by clicking on the buttons (from toolbar)
-                var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                                .GetElements(By.ClassName("RadioButton"));
+                var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                                                .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
                 functionBtns[12].LeftClick();
             }
         }
@@ -349,20 +349,20 @@ namespace PP5AutoUITests
         public void TPEditor_CopyAndPasteSameVectorVar_ForNTimes(int runCount)
         {
             TPExecuteAction(TPAction.SwitchToVectorVariablePage);
-            IWebElement vectorShownameCell = GetPP5Window().GetElement(By.ClassName("VectorAeraView"))
-                                                           .GetFirstDataGridElement()
-                                                           .GetCellBy(2, "Show Name");
+            IElement vectorShownameCell = PP5IDEWindow.GetExtendedElement(PP5By.ClassName("VectorAeraView"))
+                                                      .GetFirstDataGridElement()
+                                                      .GetCellBy(2, "Show Name");
 
             vectorShownameCell.DoubleClick();
-            vectorShownameCell.SendContent("Line In Vector 2");
+            vectorShownameCell.SendText("Line In Vector 2");
 
             Press(Keys.Enter);
 
             for (int i = 0; i < runCount; i++)
             {
                 // Copy and Paste the variable by clicking on the buttons (from toolbar)
-                var functionBtns = CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                                                .GetElements(By.ClassName("RadioButton"));
+                var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                                                .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
                 functionBtns[10].LeftClick();
                 functionBtns[11].LeftClick();
             }
@@ -379,13 +379,13 @@ namespace PP5AutoUITests
         public void TPEditor_Create10000VectorVariables(int vecCount)
         {
             TPExecuteAction(TPAction.SwitchToVectorVariablePage);
-            IWebElement vectorDGEle = GetPP5Window().GetElement(By.ClassName("VectorAeraView"))
-                                                    .GetFirstDataGridElement();
+            IElement vectorDGEle = PP5IDEWindow.GetExtendedElement(PP5By.ClassName("VectorAeraView"))
+                                               .GetFirstDataGridElement();
 
             for (int i = 1; i <= vecCount; i++)
             {
                 vectorDGEle.GetCellBy(i + 1, "Show Name").DoubleClick();
-                vectorDGEle.GetCellBy(i + 1, "Show Name").SendContent("Line In Vector " + (i + 1).ToString());
+                vectorDGEle.GetCellBy(i + 1, "Show Name").SendText("Line In Vector " + (i + 1).ToString());
                 Press(Keys.Enter);
             }
         }
@@ -418,10 +418,10 @@ namespace PP5AutoUITests
             AddTIBy("UnClassified", 1, TestItemSourceType.System);
 
             TPExecuteAction(TPAction.SwitchToUUTTestPage);
-            GetPP5Window().GetElement(By.ClassName("PGUUTGridAeraView"))
-                          .GetFirstDataGridElement()
-                          .GetCellBy(1, 1)
-                          .LeftClick();
+            PP5IDEWindow.GetExtendedElement(PP5By.ClassName("PGUUTGridAeraView"))
+                        .GetFirstDataGridElement()
+                        .GetCellBy(1, 1)
+                        .LeftClick();
 
             for (int i = 0; i < tiCount; i++)
             {

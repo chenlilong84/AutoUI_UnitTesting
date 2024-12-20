@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 // 指定為預設值: 
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyFileVersion("1.0.0.2")]
 
 [assembly: InternalsVisibleTo("Appium.Net")]
 [assembly: InternalsVisibleTo("WebDriver.Support")]

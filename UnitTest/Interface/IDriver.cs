@@ -1,14 +1,17 @@
-﻿using System.Diagnostics;
-using OpenQA.Selenium.Appium.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OpenQA.Selenium;
 
 namespace PP5AutoUITests
 {
-    public interface IDriver
+    public interface IDriver<T> where T : IElement
     {
-        WindowsDriver<WindowsElement> CreateDriver();
+        T FindElement(By by);
 
-        WindowsDriver<WindowsElement> AttachExistingDriver();
-
-        WindowsDriver<WindowsElement> CreateNewDriver();
+        ReadOnlyCollection<T> FindElements(By by);
     }
 }

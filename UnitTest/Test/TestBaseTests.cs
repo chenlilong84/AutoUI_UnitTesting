@@ -294,8 +294,7 @@ namespace PP5AutoUITests
             bool tiNotSaved = false;
 
             // Act
-            testBase.PerformOpenNewTI(
-                tiNotSaved);
+            testBase.PerformOpenNewTI();
 
             // Assert
             Assert.Fail();
@@ -913,23 +912,6 @@ namespace PP5AutoUITests
                 cmdNumber,
                 addCount,
                 out cmdToAdd);
-
-            // Assert
-            Assert.Fail();
-        }
-
-        [TestMethod]
-        public void AddCommands_StateUnderTest_ExpectedBehavior()
-        {
-            // Arrange
-            var testBase = new TestBase();
-            ReadOnlyCollection<IWebElement> cmdTreeItems = null;
-            int[] cmdNumbers = null;
-
-            // Act
-            testBase.AddCommands(
-                cmdTreeItems,
-                cmdNumbers);
 
             // Assert
             Assert.Fail();

@@ -39,6 +39,8 @@ namespace PP5AutoUITests
     {
         [System.ComponentModel.Description("System")]
         System = 0,
+        [System.ComponentModel.Description("System-Flow")]
+        SystemFlow,
         [System.ComponentModel.Description("User-Defined")]
         UserDefined,
     }

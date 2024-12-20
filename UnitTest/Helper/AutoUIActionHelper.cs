@@ -269,6 +269,118 @@ namespace PP5AutoUITests
         //}
 
         #endregion
+
+        internal static void GetOffsetFromElementCenter(this IElement target, MoveToElementOffsetStartingPoint startingPoint, ref int offsetX, ref int offsetY)
+        {
+            switch (startingPoint) 
+            {
+                // exact starting point
+                case MoveToElementOffsetStartingPoint.TopLeft:
+                    offsetX = -target.Width / 2;
+                    offsetY = -target.Height / 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.CenterTop:
+                    offsetX = 0;
+                    offsetY = -target.Height / 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.TopRight:
+                    offsetX = target.Width / 2;
+                    offsetY = -target.Height / 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.CenterLeft:
+                    offsetX = -target.Width / 2;
+                    offsetY = 0;
+                    break;
+                case MoveToElementOffsetStartingPoint.Center: 
+                    offsetX = 0;
+                    offsetY = 0;
+                    break;
+                case MoveToElementOffsetStartingPoint.CenterRight:
+                    offsetX = target.Width / 2;
+                    offsetY = 0;
+                    break;
+                case MoveToElementOffsetStartingPoint.BottomLeft:
+                    offsetX = -target.Width / 2;
+                    offsetY = target.Height / 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.CenterBottom:
+                    offsetX = 0;
+                    offsetY = target.Height / 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.BottomRight:
+                    offsetX = target.Width / 2;
+                    offsetY = target.Height / 2;
+                    break;
+                
+                // Inner starting point
+                case MoveToElementOffsetStartingPoint.InnerTopLeft:
+                    offsetX = -target.Width / 2 + 2;
+                    offsetY = -target.Height / 2 + 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.InnerCenterTop:
+                    offsetX = 0;
+                    offsetY = -target.Height / 2 + 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.InnerTopRight:
+                    offsetX = target.Width / 2 - 2;
+                    offsetY = -target.Height / 2 + 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.InnerCenterLeft:
+                    offsetX = -target.Width / 2 + 2;
+                    offsetY = 0;
+                    break;
+                case MoveToElementOffsetStartingPoint.InnerCenterRight:
+                    offsetX = target.Width / 2 - 2;
+                    offsetY = 0;
+                    break;
+                case MoveToElementOffsetStartingPoint.InnerBottomLeft:
+                    offsetX = -target.Width / 2 + 2;
+                    offsetY = target.Height / 2 - 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.InnerCenterBottom:
+                    offsetX = 0;
+                    offsetY = target.Height / 2 - 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.InnerBottomRight:
+                    offsetX = target.Width / 2 - 2;
+                    offsetY = target.Height / 2 - 2;
+                    break;
+
+                // Outer starting point
+                case MoveToElementOffsetStartingPoint.OuterTopLeft:
+                    offsetX = -target.Width / 2 - 2;
+                    offsetY = -target.Height / 2 - 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.OuterCenterTop:
+                    offsetX = 0;
+                    offsetY = -target.Height / 2 - 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.OuterTopRight:
+                    offsetX = target.Width / 2 + 2;
+                    offsetY = -target.Height / 2 - 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.OuterCenterLeft:
+                    offsetX = -target.Width / 2 - 2;
+                    offsetY = 0;
+                    break;
+                case MoveToElementOffsetStartingPoint.OuterCenterRight:
+                    offsetX = target.Width / 2 + 2;
+                    offsetY = 0;
+                    break;
+                case MoveToElementOffsetStartingPoint.OuterBottomLeft:
+                    offsetX = -target.Width / 2 - 2;
+                    offsetY = target.Height / 2 + 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.OuterCenterBottom:
+                    offsetX = 0;
+                    offsetY = target.Height / 2 + 2;
+                    break;
+                case MoveToElementOffsetStartingPoint.OuterBottomRight:
+                    offsetX = target.Width / 2 + 2;
+                    offsetY = target.Height / 2 + 2;
+                    break;
+            }
+        }
     }
 
     //public class SuperAction : Actions

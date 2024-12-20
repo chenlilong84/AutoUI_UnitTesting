@@ -16,6 +16,7 @@ namespace PP5AutoUITests
         internal const string ReleaseFolder = "C:/Program Files (x86)/Chroma/PowerPro5";
         internal const string ReleaseTIUserPreTestFolder = "C:/Program Files (x86)/Chroma/PowerPro5/TestItem/UserDefined/TI/PreTest";
         internal const string ReleaseDataFolder = "C:/Program Files (x86)/Chroma/PowerPro5/Data";
+        internal const string ReleaseBinFolder = "C:/Program Files (x86)/Chroma/PowerPro5/Bin";
         internal const string SystemCommandFileName = "SystemCommand.csx";
         internal const string WindowsApplicationDriverUrl = "http://127.0.0.1:4723/";
         //internal const string WindowsApplicationDriverUrl = "http://127.0.0.1:4723/wd/hub";

@@ -43,93 +43,94 @@ namespace PP5AutoUITests
         [DataRow(1)]
         public void Report_LoadTIorTP_ForNTimes(int runCount)
         {
-            IWebElement ReportEditorTabControl = CurrentDriver.GetElement(MobileBy.AccessibilityId("TITPTab"));
+            IElement ReportEditorTabControl = PP5IDEWindow.GetExtendedElement(PP5By.Id("TITPTab"));
 
             for (int i = 0; i < runCount; i++)
             {
                 // Click on report editor button
-                CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                             .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+                CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                             .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
 
                 // Adam, 20240704, Modified method use tabSelect
                 // Click on By TI tab > HTML Report
                 
-                IWebElement ByTIHTMLReportPage = ReportEditorTabControl.TabSelect(0, 0);
+                IElement ByTIHTMLReportPage = ReportEditorTabControl.TabSelect(0, 0);
 
                 // Click on By TI tab > HTML Report
-                //IWebElement ByTITabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("TITPTab"))
+                //IWebElement ByTITabItem = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("TITPTab"))
                 //                                       .GetElements(By.ClassName("TabItem"))[0];
 
                 //ByTITabItem.LeftClick();
 
-                //IWebElement HTMLReportTabItem = ByTITabItem.GetElement(By.ClassName("TabControl"))
+                //IWebElement HTMLReportTabItem = ByTITabItem.GetElementFromWebElement(By.ClassName("TabControl"))
                 //                                           .GetElements(By.ClassName("TabItem"))[0];
 
                 //HTMLReportTabItem.LeftClick();
 
 
 
-                //HTMLReportTabItem.GetElement(MobileBy.AccessibilityId("testItemCbx"))
+                //HTMLReportTabItem.GetElementFromWebElement(MobileBy.AccessibilityId("testItemCbx"))
                 //                 .SelectComboBoxItemByIndex(1);
 
-                ByTIHTMLReportPage.GetElement(MobileBy.AccessibilityId("testItemCbx"))
+                ByTIHTMLReportPage.GetWebElementFromWebElement(MobileBy.AccessibilityId("testItemCbx"))
                                   .LeftClick();
                 Press(Keys.Down);
 
                 // Adam, 20240704, Modified method use tabSelect
                 // Click on By TP tab > HTML Report
-                IWebElement ByTPTabControl = ReportEditorTabControl.TabSelect(1).GetFirstTabControlElement();
+                IElement ByTPTabControl = ReportEditorTabControl.TabSelect(1).GetFirstTabControlElement();
 
-                CurrentDriver.GetElement(By.Name("Select Test Program"))
-                    .GetElement(By.Name("Ok"))
+                CurrentDriver.GetExtendedElement(PP5By.Name("Select Test Program"))
+                    .GetWebElementFromWebElement(By.Name("Ok"))
                     .LeftClick();
 
-                IWebElement ByTPHTMLReportPage = ByTPTabControl.TabSelect(0);
+                IElement ByTPHTMLReportPage = ByTPTabControl.TabSelect(0);
 
                 //var chidren = ByTPHTMLReportPage.GetChildElements();
                 //var tbc = ByTPHTMLReportPage.GetFirstCustomElement()
                 //                            .GetFirstTabControlElement();
 
-                System.Threading.SpinWait.SpinUntil(() => !ByTPHTMLReportPage.GetElement(By.ClassName("ReportEditorControl")).GetFirstTabControlElement()
+                System.Threading.SpinWait.SpinUntil(() => !ByTPHTMLReportPage.GetExtendedElement(PP5By.ClassName("ReportEditorControl"))
+                                                                             .GetFirstTabControlElement()
                                                                              .TabSelect(1)
-                                                                             .GetElement(MobileBy.AccessibilityId("testItemCbxByTP"))
+                                                                             .GetExtendedElement(PP5By.Id("testItemCbxByTP"))
                                                                              .GetCellValue()
                                                                              .IsNullOrEmpty());
 
                 // Click on By TP tab > HTML Report
-                //IWebElement ByTPTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("TITPTab"))
+                //IWebElement ByTPTabItem = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("TITPTab"))
                 //                                       .GetElements(By.ClassName("TabItem"))[1];
 
                 //ByTPTabItem.LeftClick();
 
-                //ByTPTabItem = CurrentDriver.GetElement(MobileBy.AccessibilityId("TITPTab"))
+                //ByTPTabItem = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("TITPTab"))
                 //                            .GetElements(By.ClassName("TabItem"))[1];
 
-                //HTMLReportTabItem = ByTPTabItem.GetElement(By.ClassName("TabControl"))
+                //HTMLReportTabItem = ByTPTabItem.GetElementFromWebElement(By.ClassName("TabControl"))
                 //                               .GetElements(By.ClassName("TabItem"))[0];
 
                 //HTMLReportTabItem.LeftClick();
 
-                //var tabcontrol = HTMLReportTabItem.GetElement(MobileBy.AccessibilityId("reportEditorCtrlByTP"));
+                //var tabcontrol = HTMLReportTabItem.GetElementFromWebElement(MobileBy.AccessibilityId("reportEditorCtrlByTP"));
 
-                //var cmbTI = HTMLReportTabItem.GetElement(MobileBy.AccessibilityId("editMode"))
+                //var cmbTI = HTMLReportTabItem.GetElementFromWebElement(MobileBy.AccessibilityId("editMode"))
                 //                             .GetElements(By.ClassName("TabItem"))[1]
-                //                             .GetElement(MobileBy.AccessibilityId("testItemCbxByTP"));
+                //                             .GetElementFromWebElement(MobileBy.AccessibilityId("testItemCbxByTP"));
 
-                //System.Threading.SpinWait.SpinUntil(() => !HTMLReportTabItem.GetElement(MobileBy.AccessibilityId("testItemCbxByTP"))
+                //System.Threading.SpinWait.SpinUntil(() => !HTMLReportTabItem.GetElementFromWebElement(MobileBy.AccessibilityId("testItemCbxByTP"))
                 //                                                            .GetCellValue()
                 //                                                            .IsNullOrEmpty());
             }
 
             // Click on report editor button
-            CurrentDriver.GetElement(By.ClassName("ToolBar"))
-                         .GetElements(By.ClassName("RadioButton"))[0].LeftClick();
+            CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
+                         .GetWebElementsFromWebElement(By.ClassName("RadioButton"))[0].LeftClick();
 
             ReportEditorTabControl.TabSelect(0, 0);
 
             // Click on By TI tab > HTML Report
-            //IWebElement ByTITabItem1 = CurrentDriver.GetElement(MobileBy.AccessibilityId("TITPTab"))
+            //IWebElement ByTITabItem1 = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("TITPTab"))
             //                                        .GetElements(By.ClassName("TabItem"))[0];
 
             //ByTITabItem1.LeftClick();

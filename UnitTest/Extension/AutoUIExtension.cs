@@ -197,7 +197,7 @@ namespace PP5AutoUITests
             public static extern IntPtr GetWindowRect(IntPtr hWnd, ref Rect rect);
         }
 
-        public static Process StartProcess(string driverFileName, bool useShellExecute = true, int WaitForAppLaunch = 0)
+        public static Process StartProcess(string driverFileName, bool useShellExecute = true, int WaitForAppLaunch = 0, ProcessWindowStyle windowStyle = ProcessWindowStyle.Normal)
         {
             string processName = Path.GetFileNameWithoutExtension(driverFileName);
             Process[] processes = Process.GetProcessesByName(processName);
@@ -211,15 +211,15 @@ namespace PP5AutoUITests
 
             ProcessStartInfo psi = new ProcessStartInfo(driverFileName);
             psi.UseShellExecute = useShellExecute;
-            psi.Verb = "runas"; // run as administrator
-            psi.WindowStyle = ProcessWindowStyle.Minimized;     // window minimized
+            psi.Verb = "runas";                         // run as administrator
+            psi.WindowStyle = windowStyle;              // window open style
             psi.WorkingDirectory = Path.GetDirectoryName(driverFileName);
             Process process = Process.Start(psi);
             Thread.Sleep(WaitForAppLaunch);
             return process;
         }
 
-        public static IWebDriver SwitchToWindow(this WindowsDriver<WindowsElement> driver, out bool switchedSuccess)
+        public static PP5Driver SwitchToWindow(this PP5Driver driver, out bool switchedSuccess)
         {
             //session.Manage().Window.FullScreen();
             if (driver == null)
@@ -228,17 +228,18 @@ namespace PP5AutoUITests
                 return null;
             }
 
+            
             var winhandles = driver.WindowHandles;
             if (winhandles.Count == 0 || !winhandles.Contains(PowerPro5Config.PP5WindowHandleHex))
             {
                 switchedSuccess = false;
                 return null;
             }
-
-            IWebDriver currWindow = driver.SwitchTo().Window(winhandles[winhandles.IndexOf(PowerPro5Config.PP5WindowHandleHex)]);
+            
+            driver.SwitchTo().Window(winhandles[winhandles.IndexOf(PowerPro5Config.PP5WindowHandleHex)]);
             //IWebDriver currWindow = driver.SwitchTo().Window(driver.CurrentWindowHandle);
             switchedSuccess = true;
-            return currWindow;
+            return driver;
 
             /* Legacy window switching method
             //// Multiple windows detected, close upper window
@@ -284,7 +285,7 @@ namespace PP5AutoUITests
         //        return null;
         //    }
 
-        //    IWebDriver currentElement = driver.GetElement(By.);
+        //    IWebDriver currentElement = driver.GetElementFromWebElement(By.);
         //    switchedSuccess = true;
         //    return currentElement;
         //}
@@ -297,20 +298,20 @@ namespace PP5AutoUITests
                 return false;
             else
                 return currWindow.Title == windowTitle;
-            //WindowsElement window = Executor.GetInstance().GetCurrentDriver().GetElement(ByWindowInfo);
+            //WindowsElement window = Executor.GetInstance().GetCurrentDriver().GetElementFromWebElement(ByWindowInfo);
         }
 
         //public static bool CheckMessageBoxOpenedByName(this string messageBoxTitle)
         //{
         //    //Executor.GetInstance().SwitchTo(sessionType);
-        //    WindowsElement window = Executor.GetInstance().GetCurrentDriver().GetElement(By.Name(messageBoxTitle));
+        //    WindowsElement window = Executor.GetInstance().GetCurrentDriver().GetElementFromWebElement(By.Name(messageBoxTitle));
         //    return window != null;
         //}
 
         //public static bool CheckMessageBoxOpenedById(this string messageBoxID)
         //{
         //    //Executor.GetInstance().SwitchTo(sessionType);
-        //    WindowsElement window = Executor.GetInstance().GetCurrentDriver().GetElement(MobileBy.AccessibilityId(messageBoxID));
+        //    WindowsElement window = Executor.GetInstance().GetCurrentDriver().GetElementFromWebElement(MobileBy.AccessibilityId(messageBoxID));
         //    return window != null;
         //}
 

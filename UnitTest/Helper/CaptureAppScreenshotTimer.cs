@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
 namespace PP5AutoUITests
 {
@@ -53,7 +54,7 @@ namespace PP5AutoUITests
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
+            Logger.LogMessage("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
             //_action(_param1, _param2);
             //var task = new Task(_action(_param1, _param2));
             //bool res = await task.Start();
