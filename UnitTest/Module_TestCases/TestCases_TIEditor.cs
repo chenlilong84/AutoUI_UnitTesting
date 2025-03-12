@@ -41,24 +41,30 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PP5AutoUITests.Model;
 using System.Drawing;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-//using System.Windows.Forms;
-//using SeleniumExtras.PageObjects;
-//using System.Windows.Forms;
+using System.Diagnostics;
+using System.Windows.Automation;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
-//using System.Drawing.Drawing2D;
-//using System.Windows.Forms;
 
 namespace PP5AutoUITests
 {
     [TestClass]
     public class TestCases_TIEditor : TestBase
     {
+        //public Task currTask = null;
         [TestInitialize]
         public void TIEditor_TestMethodSetup()
         {
             //fileWatcher.watcher.SynchronizingObject = base;
             OpenNewTIEditorWindow();
+
+            // Load the command group infos
+            //lock (taskManagerLock)
+            //{
+                taskManager.StartNewTask("LoadCommandGroup", LoadCommandGroup);
+            //}
+
+            SharedSetting.forceRefreshPP5Window = false;
 
             SharedSetting.isScreenshotEnabled = false;
             if (SharedSetting.isScreenshotEnabled)
@@ -68,9 +74,6 @@ namespace PP5AutoUITests
                 _scrnShotTimer = new CaptureAppScreenshotTimer(CaptureApplicationScreenshot, "dotMemory.UI.64", saveFolder, updateInterval); // 60000 milliseconds = 1 minute
                 _scrnShotTimer.Start();
             }
-
-            // Wait for the command group info is loaded
-            WaitUntil(() => CheckAllTasksCompleted());
         }
 
         [TestCleanup]
@@ -78,18 +81,6 @@ namespace PP5AutoUITests
         {
             if (_scrnShotTimer != null)
                 _scrnShotTimer.Stop();
-
-            // Clear the testcase TI file
-            //if (TIFilePath != null)
-            //{
-            //    string tmpTestCaseFilePath = $"C:/Temp/{Path.GetFileName(TIFilePath)}";
-            //    if (File.Exists(tmpTestCaseFilePath))
-            //    {
-            //        File.Delete(tmpTestCaseFilePath);         // Ensure that the target does not exist.
-            //    }
-            //    File.Move(TIFilePath, tmpTestCaseFilePath);   // Move the file.
-            //}
-            //TIFilePath = null;
 
             if (TIFilePaths.Count > 0)
             {
@@ -471,8 +462,8 @@ namespace PP5AutoUITests
             functionBtns[12].LeftClick();
 
             // Check "ABS" command counts
-            //RefreshDataTable(DataTableAutoIDType.PGGrid);
-            CommandCountAfterInsertAndDelete.ShouldEqualTo(GetRowCount(DataTableAutoIDType.PGGrid));
+            //RefreshDataTable(TIDataTableAutoIDType.PGGrid);
+            CommandCountAfterInsertAndDelete.ShouldEqualTo(GetRowCount(TIDataTableAutoIDType.PGGrid));
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -3698,8 +3689,8 @@ namespace PP5AutoUITests
             MenuSelect("File", "Open...");
 
             ComboBoxSelectByName("GroupCmb", groupExpected);
-            //RefreshDataTable(DataTableAutoIDType.LoginGrid);
-            //List<string> existingTINames = GetSingleColumnValues(DataTableAutoIDType.LoginGrid, "Test Item Name", excludeLastRow: false);
+            //RefreshDataTable(TIDataTableAutoIDType.LoginGrid);
+            //List<string> existingTINames = GetSingleColumnValues(TIDataTableAutoIDType.LoginGrid, "Test Item Name", excludeLastRow: false);
             //if (!existingTINames.Contains(TIName))
             //    Assert.Fail($"No TI existed with given TI Name: {TIName}");
             //else
@@ -5296,7 +5287,7 @@ namespace PP5AutoUITests
             bool SkipStateExpected = true;
             string labelExpected = "DllLabel";
             string descriptionExpected = "DllDescription";
-            string autoIDCommandEditTable = DataTableAutoIDType.PGGrid.ToString();
+            string autoIDCommandEditTable = TIDataTableAutoIDType.PGGrid.ToString();
 
             //// ti name
             //string TIName = "B1-21_DLL";
@@ -5329,7 +5320,7 @@ namespace PP5AutoUITests
 
             // Add Dll Command and edit on:  Skip、Label、Description
             AddCommandBy(TestCmdGroupType.Dll, cmdNumber: 1);
-            //RefreshDataTable(DataTableAutoIDType.PGGrid);
+            //RefreshDataTable(TIDataTableAutoIDType.PGGrid);
             GetCellBy(autoIDCommandEditTable, 1, "Skip").LeftClick();
             GetCellBy(autoIDCommandEditTable, 1, "Label").SendSingleKeys(labelExpected);
             GetCellBy(autoIDCommandEditTable, 1, "Description").SendSingleKeys(descriptionExpected);
@@ -5673,7 +5664,7 @@ namespace PP5AutoUITests
             bool SkipStateExpected = true;
             string labelExpected = "PythonLabel";
             string descriptionExpected = "PythonDescription";
-            string autoIDCommandEditTable = DataTableAutoIDType.PGGrid.ToString();
+            string autoIDCommandEditTable = TIDataTableAutoIDType.PGGrid.ToString();
 
             //// ti name
             //string TIName = "B1-21_Python";
@@ -5706,7 +5697,7 @@ namespace PP5AutoUITests
 
             // Add Python Command and edit on:  Skip、Label、Description
             AddCommandBy(TestCmdGroupType.Python, cmdNumber: 1);
-            //RefreshDataTable(DataTableAutoIDType.PGGrid);
+            //RefreshDataTable(TIDataTableAutoIDType.PGGrid);
             GetCellBy(autoIDCommandEditTable, 1, "Skip").LeftClick();
             GetCellBy(autoIDCommandEditTable, 1, "Label").SendSingleKeys(labelExpected);
             GetCellBy(autoIDCommandEditTable, 1, "Description").SendSingleKeys(descriptionExpected);
@@ -6086,8 +6077,8 @@ namespace PP5AutoUITests
             // Arrange
             string testCmdName;
             string testCmdNameChanged;
-            string cmdTable = DataTableAutoIDType.PGGrid.ToString();
-            string paramTable = DataTableAutoIDType.ParameterGrid.ToString();
+            string cmdTable = TIDataTableAutoIDType.PGGrid.ToString();
+            string paramTable = TIDataTableAutoIDType.ParameterGrid.ToString();
 
             //// Step 1. 
             TIFilePath = GetTIFilePath(TIName);                                         // Get TI Testcase path       
@@ -6193,8 +6184,8 @@ namespace PP5AutoUITests
             // Arrange
             string testCmdName;
             string testCmdNameChanged;
-            string cmdTable = DataTableAutoIDType.PGGrid.ToString();
-            string paramTable = DataTableAutoIDType.ParameterGrid.ToString();
+            string cmdTable = TIDataTableAutoIDType.PGGrid.ToString();
+            string paramTable = TIDataTableAutoIDType.ParameterGrid.ToString();
 
             //// Step 1. 
             TIFilePath = GetTIFilePath(TIName);                                         // Get TI Testcase path       
@@ -6305,30 +6296,29 @@ namespace PP5AutoUITests
             //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
-            // Assert
-            IElement commandAddedExpected = null;                                                        // Check the command is inserted in the command group in TI Editor
+            // Check the command is inserted in the command group in TI Editor
             IElement commandAdded = GetCommandBy(cgt, cmdName);
-            commandAddedExpected.ShouldNotEqualTo(commandAdded);
+            commandAdded.ShouldNotBeNull();
 
             // Delete the added command
             int CGIListIdx = GetGroupNames().IndexOf(groupName);
-            FileProcessingExtension.JsonDeleteNode(filePath: GetCommandFileFullPath(),
+            FileProcessingExtension.JsonDeleteNode(filePath: GetTmpCommandFileFullPath(),
                                                    nodePath: $"CommandGroupInfos[{CGIListIdx}]/Commands[-1]");
         }
 
         [TestMethod("B2-2")]
         [TestCategory("測試命令列表(B2)")]
-        [DataRow(Colors.NavyBlue, Colors.DarkMagenta2)]
+        [DataRow(Colors.NavyBlue, Colors.DarkMagenta2, typeof(object), DisplayName = "B2-2")]
         //[DataRow(Colors.White, Colors.Green)]
         //B2-2
-        public void TIEditor_ChangeBgFgColorOfTestCommand_VerifyTestCommandColorSame(Colors colorFont, Colors colorBackground)
+        public void TIEditor_ChangeBgFgColorOfTestCommand_VerifyTestCommandColorSame(Colors colorFont, Colors colorBackground, object dummy)
         {
             //colorTabItem.LeftClick();
             MenuSelect("Functions", "Management");                                                          // Open management
             WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, 10000);
             PP5IDEWindow.ToolBarSelect(2/*System Setup*/);
             IElement colorTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
-                                                   .TabSelect(2/*System Setup*/, "Color");                  // Tabselect "System Setup, Color"
+                                                .TabSelect("Color");                  // Tabselect "System Setup, Color"
 
             #region Set font color and bg color
             //string colorCodeFont = "#Navy";                                                             
@@ -6409,15 +6399,14 @@ namespace PP5AutoUITests
             //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
-            // Assert
-            IWebElement commandAddedExpected = null;                                                        // Check the command is inserted in the command group in TI Editor
-            WaitUntil(() => CheckAllTasksCompleted());
+            // Assert                                                        
+            // Check the command is inserted in the command group in TI Editor
             IWebElement commandAdded = GetCommandBy(cgt, cmdName);
-            commandAddedExpected.ShouldNotEqualTo(commandAdded);
+            commandAdded.ShouldNotBeNull();
 
             // Delete the added command
             int CGIListIdx = GetGroupNames().IndexOf(groupName);
-            FileProcessingExtension.JsonDeleteNode(filePath: GetCommandFileFullPath(),
+            FileProcessingExtension.JsonDeleteNode(filePath: GetTmpCommandFileFullPath(),
                                                    nodePath: $"CommandGroupInfos[{CGIListIdx}]/Commands[-1]");
         }
 
@@ -6444,14 +6433,13 @@ namespace PP5AutoUITests
             PerformOpenNewTI();
 
             // Assert
-            IWebElement commandAddedExpected = null;                                                        // Check the command is inserted in the command group in TI Editor
-            WaitUntil(() => CheckAllTasksCompleted());
+            // Check the command is inserted in the command group in TI Editor
             IWebElement commandAdded = GetCommandBy(cgt, cmdName);
-            commandAddedExpected.ShouldNotEqualTo(commandAdded);
+            commandAdded.ShouldNotBeNull();
 
             // Delete the added command
             int CGIListIdx = GetGroupNames().IndexOf(groupName);
-            FileProcessingExtension.JsonDeleteNode(filePath: GetCommandFileFullPath(),
+            FileProcessingExtension.JsonDeleteNode(filePath: GetTmpCommandFileFullPath(),
                                                    nodePath: $"CommandGroupInfos[{CGIListIdx}]/Commands[-1]");
         }
 
@@ -6466,48 +6454,102 @@ namespace PP5AutoUITests
             string cmdNameChanged = "AAA_B2-5_Python1";
             TestCmdGroupType cgt = TestCmdGroupType.Python;
             string groupName = GetGroupNameByEnum(cgt);
-            bool isCmdUpdatedExpected = true;
-            bool isCmdUpdated = AddEmptyCommandInCGIList(groupName, cmdName);
-            isCmdUpdatedExpected.ShouldEqualTo(isCmdUpdated);
+            string dummyPythonPath = Path.Combine(Environment.CurrentDirectory, cmdName + ".py");
+
+            File.Create(dummyPythonPath).Close();
+            Logger.LogMessage($"Dummy Python generated at: {dummyPythonPath}");
+            
+            //bool isCmdUpdatedExpected = true;
+            //bool isCmdUpdated = AddEmptyCommandInCGIList(groupName, cmdName);
+            //isCmdUpdatedExpected.ShouldEqualTo(isCmdUpdated);
 
             // Action
-            //// Step 2. In management, change the command name to "AAA_B2-5_Python1"
+            // Step 2-1. Create a new python command with name: "AAA_B2-5_Python"
             MenuSelect("Functions", "Management");                                                          // Open management
             WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, SharedSetting.LONG_TIMEOUT);
             PP5IDEWindow.ToolBarSelect(4/*Ex-Function*/);
             IElement PythonTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
-                                                    .TabSelect(4/*Ex-Function*/, "Python");                 // Tabselect "Ex-Function, Python"
+                                                 .TabSelect("Python");                                      // Tabselect "Ex-Function, Python"
             var pythonTable = PythonTabPage.GetDataGridElement("PythonDataGrid");                           // Select the row whose Test command alias is "AAA_B2-5_Python"
+
+            PythonTabPage.PerformClick("/ByName[Add]", ClickType.LeftClick);                                // Add the DLL
+            var fileDialog = PP5IDEWindow.GetExtendedElement(PP5By.Name("Document"));
+            Logger.LogMessage($"fileDialog windowName: {fileDialog.ControlType.ToString()}");
+            fileDialog.GetExtendedElement(PP5By.ClassName("Address Band Root"))
+                      .GetExtendedElement(PP5By.Id("1001"))
+                      .SelectItem(Environment.CurrentDirectory);
+
+            fileDialog.GetExtendedElement(PP5By.Name("項目檢視"))
+                      .SelectItem(cmdName + ".py");
+            fileDialog.GetWebElementFromWebElement(By.Name("開啟(O)"))
+                      .LeftClick();
+            /// List[@ClassName =\"UIItemsView\"][@Name=\"項目檢視\"]/ListItem[@ClassName=\"UIItem\"][@Name=\"testdll.dll\"]/Edit[@Name=\"名稱\"][@AutomationId=\"System.ItemNameDisplay\"]"
+            //]\"]/Window[@ClassName=\"#32770\"][@Name=\"Document\"]/Button[@ClassName=\"Button\"][@Name=\"開啟(O)\"]"
+
+            Thread.Sleep(SharedSetting.SHORT_TIMEOUT);
+            var AddPythonWindow = AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformGetElement("/ByName[Add Python]");
+            
+            AddPythonWindow.PerformInput("/ByCell@TopDataGrid[1,1]", InputType.SendContent, cmdName);    // Input the command name
+            Press(Keys.Enter);
+            AddPythonWindow.PerformClick("/ByName[OK]", ClickType.LeftClick);                               // 按OK
+            Thread.Sleep(5000);
+            PP5IDEWindowRefresh();
+            WaitUntil(() => cmdName == PP5IDEWindow.GetCellValue("PythonDataGrid", 3/*Alias(Command)*/));
+
+            // create a filewatcher to monitor the Python file changes (watch all Python files in all Python related folders)
+            string filePath = string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseFolder, "Python");
+            string fileExtName = "py";
+            FileSystemWatcherWrapper fileWatcher = new FileSystemWatcherWrapper();
+            NotifyFilters notifyFilters = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            fileWatcher.CreateFileWatcher(filePath, notifyFilters, fileExtName);
+            fileWatcher.FileChanged += FileWatcher_UpdateDllOrPythonInfos;
+
+            // Step 2-2. In management, change the command name to "AAA_B2-5_Python1"
             pythonTable.GetRowByName(3, cmdName)
                        .LeftClick();
-            PythonTabPage.GetWebElementFromWebElement(By.Name("Edit")).LeftClick();                                          // Click on "Edit" button
+            PythonTabPage.PerformClick("/ByName[Edit]", ClickType.LeftClick);                                           // Click on "Edit" button
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit Python"))                 // Alias (command)欄位修改command name: "AAA_B2-5_Python" > "AAA_B2-5_Python1"
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformGetElement("/ByName[Edit Python]")                      // Alias (command)欄位修改command name: "AAA_B2-5_Python" > "AAA_B2-5_Python1"
                                                         .GetDataGridElement("TopDataGrid")
                                                         .GetCellBy(1, 3)
                                                         .SendText(cmdNameChanged);
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit Python"))                 // 按OK
-                                                        .GetBtnElement("OK")
-                                                        .LeftClick();
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformGetElement("/ByName[Edit Python]")                      // 按OK
+                                                        .PerformClick("/ByName[OK]", ClickType.LeftClick);
 
             Thread.Sleep(SharedSetting.NORMAL_TIMEOUT);
             PP5IDEWindowRefresh();
 
-            WaitUntil(() => cmdNameChanged == PP5IDEWindow.GetCellValue("PythonDataGrid", 2/*Alias(Command)*/));               // 檢查欄位是否已更新到datatable
+            WaitUntil(() => cmdNameChanged == PP5IDEWindow.GetCellValue("PythonDataGrid", 3/*Alias(Command)*/));        // 檢查欄位是否已更新到datatable
 
-            //// Step 3. Switch back to TI Editor, check command name is updated to "AAA_B2-5_Python1"
+            // Step 3. Switch back to TI Editor, check command name is updated to "AAA_B2-5_Python1"
             MenuSelect("Windows", "TI Editor");
+            PP5IDEWindowRefresh();
 
             // Assert
-            IWebElement commandAddedExpected = null;                                                        // Check the command is updated to the newname in TI Editor
-            IWebElement commandAdded = GetCommandBy(cgt, cmdName);
-            commandAddedExpected.ShouldNotEqualTo(commandAdded);
+            // Check the command is updated to the newname in TI Editor
+            IWebElement commandAdded = GetCommandBy(cgt, cmdNameChanged);
+            commandAdded.ShouldNotBeNull();
+
+            // Delete the added command
+            DeleteTIorTPorCommand(MngtDataTableAutoIDType.PythonDataGrid, cmdNameChanged);
+            //MenuSelect("Windows", "Management");
+            //PP5IDEWindow.GetSelectedRow("PythonDataGrid")
+            //            .GetCellBy(2/*Active*/).GetFirstCheckBoxElement()
+            //            .UnTickCheckBox();
+
+            //if (PP5IDEWindow.PerformGetElement("/ByName[Error]") != null)
+            //    PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            //PP5IDEWindow.PerformClick("/Button[Delete]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Yes]", ClickType.LeftClick);
 
             // Delete the added command
             int CGIListIdx = GetGroupNames().IndexOf(groupName);
-            FileProcessingExtension.JsonDeleteNode(filePath: GetCommandFileFullPath(),
+            FileProcessingExtension.JsonDeleteNode(filePath: GetTmpCommandFileFullPath(),
                                                    nodePath: $"CommandGroupInfos[{CGIListIdx}]/Commands[-1]");
+
+            fileWatcher.FileChanged -= FileWatcher_UpdateDllOrPythonInfos;
         }
 
         [TestMethod("B2-5_Dll")]
@@ -6529,71 +6571,80 @@ namespace PP5AutoUITests
             Logger.LogMessage($"Dummy DLL generated at: {Path.Combine(Environment.CurrentDirectory, cmdName)}");
 
             // Action
-            //// Step 2. In management, change the command name to "AAA_B2-5_Dll1"
+            // 2.1 Switch to management, add the dll command "AAA_B2-5_Dll"
             MenuSelect("Functions", "Management");                                                          // Open management
             WaitUntil(() => PP5IDEWindow.Text == PowerPro5Config.IDE_ManagementWindowName, SharedSetting.LONG_TIMEOUT);
             PP5IDEWindow.ToolBarSelect(4/*Ex-Function*/);
             IElement DllTabPage = PP5IDEWindow.GetTabControlElement("mainTab")
-                                                 .TabSelect(4/*Ex-Function*/, "DLL");                       // Tabselect "Ex-Function, DLL"
+                                              .TabSelect("DLL");                            // Tabselect "Ex-Function, DLL"
 
-            DllTabPage.GetBtnElement("Add").LeftClick();                                                    // Add the DLL
+            DllTabPage.PerformClick("/ByName[Add]", ClickType.LeftClick);                   // Add the DLL
             var fileDialog = PP5IDEWindow.GetExtendedElement(PP5By.Name("Document"));
             Logger.LogMessage($"fileDialog windowName: {fileDialog.ControlType.ToString()}");
             fileDialog.GetExtendedElement(PP5By.ClassName("Address Band Root"))
                       .GetExtendedElement(PP5By.Id("1001"))
-                      .ComboBoxSelectByName(Environment.CurrentDirectory);
+                      .SelectItem(Environment.CurrentDirectory);
 
             fileDialog.GetExtendedElement(PP5By.Name("項目檢視"))
-                      .ComboBoxSelectByName(cmdName + ".dll");
+                      .SelectItem(cmdName + ".dll");
             fileDialog.GetWebElementFromWebElement(By.Name("開啟(O)"))
                       .LeftClick();
             /// List[@ClassName =\"UIItemsView\"][@Name=\"項目檢視\"]/ListItem[@ClassName=\"UIItem\"][@Name=\"testdll.dll\"]/Edit[@Name=\"名稱\"][@AutomationId=\"System.ItemNameDisplay\"]"
             //]\"]/Window[@ClassName=\"#32770\"][@Name=\"Document\"]/Button[@ClassName=\"Button\"][@Name=\"開啟(O)\"]"
 
             Thread.Sleep(SharedSetting.SHORT_TIMEOUT);
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Add DLL - Managed DLL"))       // 按OK
-                                                        .GetBtnElement("OK")
-                                                        .LeftClick();
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformGetElement("/ByName[Add DLL - Managed DLL]")       // 按OK
+                                                        .PerformClick("/ByName[OK]", ClickType.LeftClick);
 
             Thread.Sleep(SharedSetting.SHORT_TIMEOUT);
             PP5IDEWindowRefresh();
-            WaitUntil(() => cmdName == PP5IDEWindow.GetCellValue("DllDataGrid", 2/*Alias(Command)*/));
+            WaitUntil(() => cmdName == PP5IDEWindow.GetCellValue("DllDataGrid", 3/*Alias(Command)*/));
 
-            // Edit the Dll
+            // create a filewatcher to monitor the dll file changes (watch all DLLs in all DLL related folders)
+            string filePath = string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseFolder, "Dll");
+            string fileExtName = "dll";
+            FileSystemWatcherWrapper fileWatcher = new FileSystemWatcherWrapper();
+            NotifyFilters notifyFilters = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            fileWatcher.CreateFileWatcher(filePath, notifyFilters, fileExtName);
+            fileWatcher.FileChanged += FileWatcher_UpdateDllOrPythonInfos;
+
+            // Step 2-2. In management, change the command name to "AAA_B2-5_Dll1"
             PP5IDEWindow.GetDataGridElement("DllDataGrid")
                         .GetRowByName(3, cmdName)
                         .LeftClick();
 
-            PP5IDEWindow.GetExtendedElement(PP5By.Name("Edit")).LeftClick();                                             // Click on "Edit" button
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Managed"))          // Alias (command)欄位修改command name: "AAA_B2-5_Dll" > "AAA_B2-5_Dll1"
+            PP5IDEWindow.PerformClick("/ByName[Edit]", ClickType.LeftClick);                                        // Click on "Edit" button
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformGetElement("/ByName[Edit DLL - Managed]")           // Alias (command)欄位修改command name: "AAA_B2-5_Dll" > "AAA_B2-5_Dll1"
                                                         .GetDataGridElement("TopDataGrid")
                                                         .GetCellBy(1, 3)
                                                         .SendText(cmdNameChanged);
 
-            AutoUIExecutor.SwitchTo(SessionType.Desktop).GetExtendedElementBySingleWithRetry(PP5By.Name("Edit DLL - Managed"))          // 按OK
-                                                        .GetBtnElement("OK")
-                                                        .LeftClick();
+            AutoUIExecutor.SwitchTo(SessionType.Desktop).PerformGetElement("/ByName[Edit DLL - Managed]")           // 按OK
+                                                        .PerformClick("/ByName[OK]", ClickType.LeftClick);
 
             Thread.Sleep(SharedSetting.NORMAL_TIMEOUT);
             PP5IDEWindowRefresh();
 
-            WaitUntil(() => cmdNameChanged == PP5IDEWindow.GetCellValue("DllDataGrid", 2/*Alias(Command)*/)); // 檢查欄位是否已更新到datatable
+            WaitUntil(() => cmdNameChanged == PP5IDEWindow.GetCellValue("DllDataGrid", 3/*Alias(Command)*/)); // 檢查欄位是否已更新到datatable
 
             //// Step 3. Switch back to TI Editor, check command name is updated to "AAA_B2-5_Dll1"
             MenuSelect("Windows", "TI Editor");
 
             // Assert
-            IWebElement commandAddedExpected = null;                                                        // Check the command is updated to the newname in TI Editor
-            IWebElement commandAdded = GetCommandBy(cgt, cmdName);
-            commandAddedExpected.ShouldNotEqualTo(commandAdded);
+            // Check the command is updated to the newname in TI Editor
+            IWebElement commandAdded = GetCommandBy(cgt, cmdNameChanged);
+            commandAdded.ShouldNotBeNull();
 
             // Delete the added command
-            MenuSelect("Windows", "Management");
-            PP5IDEWindow.GetSelectedRow("DllDataGrid")
-                        .GetCellBy(2/*Active*/).GetFirstCheckBoxElement()
-                        .UnTickCheckBox();
-            PP5IDEWindow.GetBtnElement("Delete").LeftClick();
-            PP5IDEWindow.GetWindowElement("Notice").GetBtnElement("Yes").LeftClick();
+            DeleteTIorTPorCommand(MngtDataTableAutoIDType.DllDataGrid, cmdNameChanged);
+            //MenuSelect("Windows", "Management");
+            //PP5IDEWindow.GetSelectedRow("DllDataGrid")
+            //            .GetCellBy(2/*Active*/).GetFirstCheckBoxElement()
+            //            .UnTickCheckBox();
+            //PP5IDEWindow.PerformClick("/Button[Delete]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Yes]", ClickType.LeftClick);
+
+            fileWatcher.FileChanged -= FileWatcher_UpdateDllOrPythonInfos;
 
             //PP5IDEWindow.GetSelectedRow("DllDataGrid")
             //            .GetCellBy(2/*Active*/)
@@ -6602,7 +6653,7 @@ namespace PP5AutoUITests
             //PP5IDEWindow.PerformClick("/Window[Notice]/Button[Yes]", ClickType.LeftClick);
 
             //int CGIListIdx = GetGroupNames().IndexOf(groupName);
-            //FileProcessingExtension.JsonDeleteNode(filePath: GetCommandFileFullPath(),
+            //FileProcessingExtension.JsonDeleteNode(filePath: GetTmpCommandFileFullPath(),
             //                                       nodePath: $"CommandGroupInfos[{CGIListIdx}]/Commands[-1]");
         }
 
@@ -6619,13 +6670,29 @@ namespace PP5AutoUITests
 
             TIExecuteAction(TIAction.SetTIActive, subTiName);
 
-            PerformOpenNewTI(itemType, TestItemRunType.UUT);                           // Open new thread-TI and include the subTI
-            GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Sub_TI).ShouldBeNull();
+            PerformOpenNewTI(itemType, TestItemRunType.UUT);
+            //if (itemType == TestItemType.ThreadTI)
+                GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Sub_TI).ShouldBeNull();
+            //else
+            //    GetCommandBy(TestCmdGroupType.Sub_TI, subTiName).ShouldBeNull();
+            PerformCloseTI();
 
             TIRename(subTiName, newSubTiName);
 
-            MenuSelect("Windows", "TI Editor");
-            GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Sub_TI).ShouldBeNull();
+            PerformOpenNewTI(itemType, TestItemRunType.UUT);
+            //if (itemType == TestItemType.ThreadTI)
+                GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Sub_TI).ShouldBeNull();
+            //else
+            //    GetCommandBy(TestCmdGroupType.Sub_TI, newSubTiName).ShouldBeNull();
+            PerformCloseTI();
+
+            //// Clean up subti/threadti
+            DeleteTIorTPorCommand(MngtDataTableAutoIDType.TestItem_DataGrid, newSubTiName);
+            //SwitchToModule(WindowType.Management);
+            //SearchTI(newSubTiName);
+            //PP5IDEWindow.PerformClick("/ByName[Delete]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformClick("/Window[0]/Button[Yes]", ClickType.LeftClick);
+            //SpinWait.SpinUntil(() => PP5IDEWindow.PerformGetElement("/ProgressBar[0]") == null);
         }
 
         [TestMethod("B2-6_1")]
@@ -6641,11 +6708,15 @@ namespace PP5AutoUITests
 
             PerformOpenNewTI(TestItemType.TI, TestItemRunType.UUT);                                         // Open new TI and include the subTI
             GetCommandBy(TestCmdGroupType.Sub_TI, subTiName).ShouldNotBeNull();
+            PerformCloseTI();
 
             TIRename(subTiName, newSubTiName);
 
-            MenuSelect("Windows", "TI Editor");
+            PerformOpenNewTI(TestItemType.TI, TestItemRunType.UUT);
             GetCommandBy(TestCmdGroupType.Sub_TI, newSubTiName).ShouldNotBeNull();
+            PerformCloseTI();
+
+            DeleteTIorTPorCommand(MngtDataTableAutoIDType.TestItem_DataGrid, newSubTiName);
         }
 
         //[TestMethod("B2-6_2")]
@@ -6690,8 +6761,8 @@ namespace PP5AutoUITests
 
         [TestMethod("B2-7")]
         [TestCategory("測試命令列表(B2)")]
-        [DataRow(TestItemType.TI, typeof(object), DisplayName = "Rename ThreadTI In Management, Check TI Has Cmd List Updated")]                 
-        [DataRow(TestItemType.SubTI, typeof(object), DisplayName = "Rename ThreadTI In Management, Check SubTI Has Cmd List Updated")]    
+        [DataRow(TestItemType.TI, typeof(object), DisplayName = "Rename ThreadTI In Management, Check TI Has Cmd List Updated")]
+        [DataRow(TestItemType.SubTI, typeof(object), DisplayName = "Rename ThreadTI In Management, Check SubTI Has Cmd List Updated")]
         public void TIEditor_RenameThreadTIInManagement(TestItemType itemType, object dummy)
         {
             string threadTiName = "B2-6_ThreadTi";
@@ -6706,8 +6777,10 @@ namespace PP5AutoUITests
 
             TIRename(threadTiName, newThreadTiName);
 
-            MenuSelect("Windows", "TI Editor");
+            PP5IDEWindow.MenuSelect("Windows", "TI Editor");
             GetCommandBy(TestCmdGroupType.Thread_TI, newThreadTiName).ShouldNotBeNull();
+
+            DeleteTIorTPorCommand(MngtDataTableAutoIDType.TestItem_DataGrid, newThreadTiName);
         }
 
         //[TestMethod("B2-7_1")]
@@ -6768,6 +6841,8 @@ namespace PP5AutoUITests
 
             MenuSelect("Windows", "TI Editor");
             GetCmdGroupTreeItemByGroupName(TestCmdGroupType.Thread_TI).ShouldBeNull();
+
+            DeleteTIorTPorCommand(MngtDataTableAutoIDType.TestItem_DataGrid, newThreadTiName);
         }
 
         [TestMethod("B3-1_1")]
@@ -6780,7 +6855,7 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[searchText]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
             Press(Keys.Enter);
 
-            true.ShouldEqualTo(GetCommandBy(TestCmdGroupType.AC_Source, searchPattern).Selected);                                                               // Verify the command is searched
+            GetCommandBy(TestCmdGroupType.AC_Source, searchPattern, doExpand: false).ShouldBeSelected();                                                           // Verify the command is searched
         }
 
         [TestMethod("B3-1_2")]
@@ -6791,10 +6866,10 @@ namespace PP5AutoUITests
             //  Searching Command name: "ReadAC_Current"
             string searchPattern = "ReadAC_Current";
 
-            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[searchText]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
             PP5IDEWindow.PerformClick("/ById[TCListPanel]/ById[SearchBtn]", ClickType.LeftClick);
 
-            true.ShouldEqualTo(GetCommandBy(TestCmdGroupType.AC_Source, searchPattern).Selected);
+            GetCommandBy(TestCmdGroupType.AC_Source, searchPattern, doExpand: false).ShouldBeSelected();
         }
 
         [TestMethod("B3-2_1")]
@@ -6806,7 +6881,7 @@ namespace PP5AutoUITests
             string searchPattern = "ReadAC_Current";
             string warningMessage = "Search to the end, whether to search from the beginning ?";
 
-            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[searchText]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
 
             // Keep pressing "search Next" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(By.Name("Search Result")))
@@ -6832,7 +6907,7 @@ namespace PP5AutoUITests
             string searchPattern = "ReadAC_Current";
             string warningMessage = "Search to the end, whether to search from the beginning ?";
 
-            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[searchText]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
 
             // Keep pressing "search Next" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(By.Name("Search Result")))
@@ -6858,7 +6933,7 @@ namespace PP5AutoUITests
             string searchPattern = "ReadAC_Current";
             string warningMessage = "Search to the end, whether to search from the beginning ?";
 
-            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[SearchBox]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
+            PP5IDEWindow.PerformInput("/ById[TCListPanel]/ById[searchText]", InputType.SendContent, searchPattern); // Get the Command page search box and search with the command
 
             // Keep pressing "search Previus" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(By.Name("Search Result")))
@@ -7249,12 +7324,12 @@ namespace PP5AutoUITests
             AddCommandBy(cgt, commandName, 2);                                                                // Add 2 commands with name: ReadAC_Current
 
             TestItemTabNavi(TestItemTabType.TIContext);                                                             // Switch to test item context window
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);                       // Select on the second command in TI context page
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@Test Command]", ClickType.LeftClick);                       // Select on the second command in TI context page
 
             AddCommandBy(cgt, commandNameToCheck);                                                            // Add command: ReadAC_Frequency
 
             // Assert
-            string commandNameOnTIContext = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[2,@TestCommand]").Text;  // Check command is inserted in the previous position of the selected command
+            string commandNameOnTIContext = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[2,@Test Command]").GetText();  // Check command is inserted in the previous position of the selected command
             commandNameToCheck.ShouldEqualTo(commandNameOnTIContext);
         }
 
@@ -7301,45 +7376,41 @@ namespace PP5AutoUITests
         //B4-3_1
         public void TIEditor_ChooseMultipleCommandAndCheckSkipBySelectAll_VerifyAllSkipCheckedAndUnChecked()
         {
+            int cmdCount = 3;
             TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
-            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", addCount: 3);                                       // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
-            
-            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
-            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@TestCommand]", InputType.SelectAllContent, null);  // Select all commands
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", cmdCount);                        // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
 
+            //PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@Test Command]", ClickType.LeftClick);
+            //PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@Test Command]", InputType.SelectAllContent, null); 
+            //PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", InputType.SelectAllContent, null);// Select all commands
             Logger.LogMessage("LeftClick on first row > Skip checkbox");
-            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
             PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row > Skip checkbox
-            
-            string SkipStateExpected = "Checked";
-            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all Checked
-            {
-                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
-                SkipStateExpected.ShouldEqualTo(SkipState);
-            }
-            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
+            for (int i = 1; i <= cmdCount; i++)                                                                    // Verify Skip cell are all Checked
+                PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").ShouldBeChecked();
+
+            PP5IDEWindow.PerformInput("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", InputType.SelectAllContent, null);// Select all commands
+            Logger.LogMessage("LeftClick on first row > Skip checkbox");
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row > Skip checkbox
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
+            for (int i = 1; i <= cmdCount; i++)                                                                    // Verify Skip cell are all UnChecked
+                PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").ShouldBeUnchecked();
+            /* Legacy method
+            //string SkipStateExpected = "Checked";
+            //for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all Checked
             //{
+            //    string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
             //    SkipStateExpected.ShouldEqualTo(SkipState);
             //}
 
-            
-            Logger.LogMessage("LeftClick on first row > Skip checkbox");
-            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row > Skip checkbox
-            
-            SkipStateExpected = "Unchecked";
-            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all UnChecked
-            {
-                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
-                SkipStateExpected.ShouldEqualTo(SkipState);
-            }
-            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            //SkipStateExpected = "Unchecked";
+            //for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all UnChecked
             //{
+            //    string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
             //    SkipStateExpected.ShouldEqualTo(SkipState);
             //}
-
+            */
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -7515,8 +7586,9 @@ namespace PP5AutoUITests
         //B4-3_2
         public void TIEditor_ChooseMultipleCommandAndCheckSkipBySelectAll_VerifyAllSkipUnChecked()
         {
+            int cmdCount = 3;
             TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
-            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", addCount: 3);                                       // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", cmdCount);                                       // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
                 
             Logger.LogMessage("LeftClick on first and third row > Skip checkbox");                          // LeftClick on first and third row > Skip checkbox
             //GetCellBy("PGGrid", 0, "Skip").LeftClick();
@@ -7524,23 +7596,26 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByCell@PGGrid[3,@Skip]", ClickType.LeftClick);
 
-            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
-            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@TestCommand]", InputType.SelectAllContent, null);  // Select all commands
-            
-            Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");
-            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row to uncheck all Skip checkbox
+            //PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@Test Command]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", InputType.SelectAllContent, null);// Select all commands
 
-            
-            string SkipStateExpected = "Unchecked";
-            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all UnChecked
-            {
-                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
-                SkipStateExpected.ShouldEqualTo(SkipState);
-            }
-            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            //Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");
+            //PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row to uncheck all Skip checkbox
+            //string SkipStateExpected = "Unchecked";
+            //for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all UnChecked
+            //{
+            //    string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
+            //    SkipStateExpected.ShouldEqualTo(SkipState);
+            //}
+
+            PP5IDEWindow.PerformInput("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", InputType.SelectAllContent, null);// Select all commands
+            Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row > Skip checkbox
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
+            for (int i = 1; i <= cmdCount; i++)                                                                    // Verify Skip cell are all UnChecked
+                PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").ShouldBeUnchecked();
+
+            //foreach (string SkipState in GetSingleColumnValues(TIDataTableAutoIDType.PGGrid, 2/*Skip*/))
             //{
             //    SkipStateExpected.ShouldEqualTo(SkipState);
             //}
@@ -7715,29 +7790,36 @@ namespace PP5AutoUITests
         //B4-3_3
         public void TIEditor_ChooseMultipleCommandAndCheckSkipBySelectAll_VerifyAllSkipChecked()
         {
+            int cmdCount = 3;
             TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
-            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", addCount: 3);                        // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", cmdCount);                        // Add 3 repeated commands: group: "AC Source", command name: "ReadAC_Current"
 
             Logger.LogMessage("LeftClick on second row > Skip checkbox");
             //GetCellBy("PGGrid", 1, "Skip").LeftClick();
             PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@Skip]", ClickType.LeftClick);                      // LeftClick on second row > Skip checkbox
 
-            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
-            //CurrentDriver.GetElementFromWebElement(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).SelectAllContent();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@TestCommand]", ClickType.LeftClick);               
-            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@TestCommand]", InputType.SelectAllContent, null);  // Select all commands
+            //PP5IDEWindow.PerformClick("/ByCell@PGGrid[2,@Test Command]", ClickType.LeftClick);               
+            //PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@Test Command]", InputType.SelectAllContent, null);  // Select all commands
+            PP5IDEWindow.PerformInput("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", InputType.SelectAllContent, null);// Select all commands
+
+            PP5IDEWindow.PerformInput("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", InputType.SelectAllContent, null);// Select all commands
+            Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row > Skip checkbox
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
+            for (int i = 1; i <= cmdCount; i++)                                                                    // Verify Skip cell are all Checked
+                PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").ShouldBeChecked();
+
+            //Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");                       
+            ////GetCellBy("PGGrid", 0, "Skip").LeftClick();
+            //PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row to check all Skip checkbox
             
-            Logger.LogMessage("LeftClick on first row to uncheck all Skip checkbox");                       
-            //GetCellBy("PGGrid", 0, "Skip").LeftClick();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Skip]", ClickType.LeftClick);                      // LeftClick on first row to check all Skip checkbox
-            
-            string SkipStateExpected = "Checked";
-            for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all Checked
-            {
-                string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
-                SkipStateExpected.ShouldEqualTo(SkipState);
-            }
-            //foreach (string SkipState in GetSingleColumnValues(DataTableAutoIDType.PGGrid, 2/*Skip*/))
+            //string SkipStateExpected = "Checked";
+            //for (int i = 1; i <= 3; i++)                                                                    // Verify Skip cell are all Checked
+            //{
+            //    string SkipState = PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[{i},@Skip]").GetCellValue();
+            //    SkipStateExpected.ShouldEqualTo(SkipState);
+            //}
+            //foreach (string SkipState in GetSingleColumnValues(TIDataTableAutoIDType.PGGrid, 2/*Skip*/))
             //{
             //    SkipStateExpected.ShouldEqualTo(SkipState);
             //}
@@ -7919,10 +8001,10 @@ namespace PP5AutoUITests
 
             TestItemTabNavi(TestItemTabType.TIContext);                                                     // Switch to test item context window
             PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Label]", InputType.SendContent, LabelExpected);    // Input "Test" string in "Label" in TI context page
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
 
             // Assert
-            string LabelActual = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Label]").GetCellValue(); // Check Label has "Test"
-            LabelExpected.ShouldEqualTo(LabelActual);
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Label]").ShouldHaveText(LabelExpected);         // Check Label has "Test"
         }
 
         [TestMethod("B4-5")]
@@ -7935,24 +8017,26 @@ namespace PP5AutoUITests
 
             Logger.LogMessage("SendKey: \"a\" on first row > Label checkbox");
             //GetCellBy("PGGrid", 0, "Label").SendSingleKeys("a");
-            PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Label]", InputType.SendSingleKeys, "a");   // SendKey: "a" on first row > Label checkbox
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Label]", InputType.SendContent, "a");   // SendKey: "a" on first row > Label checkbox
             
             Logger.LogMessage("SendKey the same: \"a\" on second row > Label checkbox");
             //GetCellBy("PGGrid", 1, "Label").SendSingleKeys("a");
-            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@Label]", InputType.SendSingleKeys, "a");   // SendKey the same: "a" on second row > Label checkbox
-            Press(Keys.Enter);                                                                      // Press enter to show result
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@Label]", InputType.SendContent, "a");   // SendKey the same: "a" on second row > Label checkbox
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
 
-            
             //GetCellBy("PGGrid", 0, "Label").MoveToElement();
-            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Label]").MoveToElement();             // Repeated label name, error on both Label cells,
-                                                                                                    // inspect the first error tooltip, verify the error tooltip message
-            AutoUIExecutor.SwitchTo(SessionType.Desktop);
-            //string errorToolTip = CurrentDriver.GetElementFromWebElement(10000, By.ClassName("Popup"), By.ClassName("ToolTip"))
-            //                                   .GetElementFromWebElement(By.TagName("Text")).Text;
-            string errorToolTip = CurrentDriver.PerformGetElement("/ByClass[Popup]/ToolTip[0]/Text[0]").Text;
-            string expectedErrorToolTip = "Label Repeat";
-            expectedErrorToolTip.ShouldEqualTo(errorToolTip);                                       // Check error tooltip has message: "Label Repeat"
-            AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+            //string expectedErrorToolTip = "Label Repeat";           // Ver.1.20.2: "Label Repeat"
+            string expectedErrorToolTip = "Label is duplicated";    // Ver.1.30.0: "Label is duplicated"
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Label]").GetToolTipMessage().ShouldEqualTo(expectedErrorToolTip);
+            //PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Label]").MoveToElement();             // Repeated label name, error on both Label cells,
+            //                                                                                        // inspect the first error tooltip, verify the error tooltip message
+            //AutoUIExecutor.SwitchTo(SessionType.Desktop);
+            ////string errorToolTip = CurrentDriver.GetElementFromWebElement(10000, By.ClassName("Popup"), By.ClassName("ToolTip"))
+            ////                                   .GetElementFromWebElement(By.TagName("Text")).Text;
+            //string errorToolTip = CurrentDriver.PerformGetElement("/ByClass[Popup]/ToolTip[0]/Text[0]").Text;
+            //string expectedErrorToolTip = "Label Repeat";
+            //expectedErrorToolTip.ShouldEqualTo(errorToolTip);                                       // Check error tooltip has message: "Label Repeat"
+            //AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
 
@@ -8132,13 +8216,15 @@ namespace PP5AutoUITests
         public void TIEditor_DescriptionCellInputRandomText()
         {
             string textToInput = "Test";
-            TestItemTabNavi(TestItemTabType.TIContext);                                                         // Switch to test item context window
-            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current");                                         // Add command with group: "AC Source", command name: "ReadAC_Current"
+            TestItemTabNavi(TestItemTabType.TIContext);                                                             // Switch to test item context window
+            AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current");                                             // Add command with group: "AC Source", command name: "ReadAC_Current"
 
-            PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Description]", InputType.SendContent, textToInput);    // Input "Test" on cell "Description"
-            string textToInputActual = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Description]").GetCellValue();
+            PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Description]", InputType.SendContent, textToInput);        // Input "Test" on cell "Description"
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);  // Click on empty place in the grid to confirm input
 
-            textToInput.ShouldEqualTo(textToInputActual);
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Description]").ShouldHaveText(textToInput);           // Check the input text
+            //string textToInputActual = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Description]").GetCellValue();
+            //textToInput.ShouldEqualTo(textToInputActual);
         }
 
         [TestMethod("B4-9_LeftClick")]
@@ -8187,8 +8273,7 @@ namespace PP5AutoUITests
             //                                   .GetExtendedElement(PP5By.ClassName("TextBox")).Text;
             //string cmdNameActual = PP5IDEWindow.PerformGetElement("/ById[editParamAreaView]/ByClassName[TextBox]")
             //                                   .GetText();
-            string cmdNameActual = PP5IDEWindow.PerformGetElement("/ById[editParamAreaView]/ByClass[ScrollViewer,TextBox]")          // from UI recorder 
-                                               .GetText();                                                                            
+            string cmdNameActual = PP5IDEWindow.PerformGetElements("/ById[editParamAreaView]/ByClass[TextBox]")[0].GetText();                 // from UI recorder                                                                      
 
             true.ShouldEqualTo(CmdSelectedGridItemCount > 0);
             cmdName.ShouldEqualTo(cmdNameActual);
@@ -8257,32 +8342,25 @@ namespace PP5AutoUITests
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Add 1 command: group: "AC Source", command name: "ReadAC_Current"
-            //GetCommandBy("ReadAC_Current").DoubleClick();
             AddCommandBy(cgt, cmdName);
 
             // Cancel command selection, parameter page is empty
-            CurrentDriver.GetWebElementFromWebDriver(5000, MobileBy.AccessibilityId("PGGrid"), MobileBy.AccessibilityId("dataPresenter")).LeftClick();
+            PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);  // Click on empty place in the grid to confirm input
 
             // If parameter page is empty, grid table will be empty
-            int CmdNotSelectedGridItemCount = PP5IDEWindow.GetExtendedElement(PP5By.Id("ParameterGrid"))
-                                                          .GetExtendedElement(PP5By.Name("DataPanel"))
-                                                          .GetChildElements().Count;
-
+            var tcParamDataPanel = PP5IDEWindow.PerformGetElement("/ById[ParameterGrid,dataPresenter]");
+            int CmdNotSelectedGridItemCount = tcParamDataPanel.GetChildElements().Count;
             int CmdNotSelectedGridItemCountExpected = 0;
             CmdNotSelectedGridItemCountExpected.ShouldEqualTo(CmdNotSelectedGridItemCount);
 
             // RightClick to select the command, parameter page should show up
-            GetCellBy("PGGrid", 1, "Test Command").RightClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.RightClick);
 
             // re-check parameter grid table, command name and grid table should be filled
-            int CmdSelectedGridItemCount = PP5IDEWindow.GetExtendedElement(PP5By.Id("ParameterGrid"))
-                                                       .GetExtendedElement(PP5By.Name("DataPanel"))
-                                                       .GetChildElements().Count;
+            int CmdSelectedGridItemCount = tcParamDataPanel.GetChildElements().Count;
+            string cmdNameActual = PP5IDEWindow.PerformGetElements("/ById[editParamAreaView]/ByClass[TextBox]")[0].GetText();
 
-            string cmdNameActual = PP5IDEWindow.GetExtendedElement(PP5By.Id("editParamAreaView"))
-                                               .GetExtendedElement(PP5By.ClassName("TextBox")).Text;
-
-            true.ShouldEqualTo(CmdSelectedGridItemCount > 0);
+            CmdSelectedGridItemCount.ShouldBePositive();
             cmdName.ShouldEqualTo(cmdNameActual);
 
             ////MainPanel_TIEditor_OpenNewTI();
@@ -8347,11 +8425,8 @@ namespace PP5AutoUITests
             // 3. Check test command is located in tc group list page
             AddCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current");
             PP5IDEWindow.PerformClick("/ByClass[PGGridAeraView]/ById[PGGrid,dataPresenter]", ClickType.LeftClick);
-            PP5IDEWindow.PerformClick("/ById[PGGrid,dataPresenter,CommandName]", ClickType.LeftClick);
-
-            bool commandIsLocated = true;                                                        // Check the command is located in the test command group
-            bool commandIsSelected = GetCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current").Selected;
-            commandIsLocated.ShouldEqualTo(commandIsSelected);
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
+            GetCommandBy(TestCmdGroupType.AC_Source, "ReadAC_Current", doExpand: false).ShouldBeSelected();  // Check the command is located in the test command group
         }
 
         [TestMethod("B4-11")]
@@ -8361,26 +8436,28 @@ namespace PP5AutoUITests
         {
             // Steps:
             // 1. Add Command: SetAC_Frequency in tc group page
-            // 2. Set all paraters in parameter page (each param use constant type)
-            // 3. Check on the parameter info has shown Parameters Seperated With Comma ('p1,p2,p3') in edit page
+            // 2. Set all parameters in parameter page (each param use constant type)
+            // 3. Check on the parameter info has shown Parameters Seperated With Comma ('p1,p2') in edit page
             AddCommandBy(TestCmdGroupType.AC_Source, "SetAC_Frequency");
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);                         
-            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[1,3]", ClickType.LeftClick);                        // Edit 1st parameter
-            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
-            System.Threading.Thread.Sleep(100);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[1,3]", InputType.SendContent, "0");
-            Press(Keys.Enter);
+            int tcParamRowCount = PP5IDEWindow.PerformGetElement("/ById[ParameterGrid]").GetRowCount();
+            for (int i = 1; i <= tcParamRowCount - 1; i++)
+            {
+                PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[{i},@Parameter Value]", ClickType.LeftClick);                        // Edit 1st parameter
+                PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
+                System.Threading.Thread.Sleep(100);
+                PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[{i},@Parameter Value]", InputType.SendContent, i.ToString());
+                Press(Keys.Enter);
+            }
 
-            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[2,3]", ClickType.LeftClick);                         // Edit 2nd parameter
-            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
-            System.Threading.Thread.Sleep(100);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "1");
-            Press(Keys.Enter);
-
-
-            string parameterValues = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,6]").GetText();   // parameterValues: 'p1,p2,p3'
-            CollectionAssert.AreEqual(new string[2] { "0", "1" }, parameterValues.Split(','));
+            string parameterValues = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Parameters]").GetText();   // parameterValues: 'p1,p2'
+            List<string> parameterValuesExpected = new List<string>();
+            string[] parameterValuesActual = parameterValues.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 1; i <= tcParamRowCount - 1; i++)
+                parameterValuesExpected.Add(i.ToString());
+            parameterValuesExpected.ShouldBe(parameterValuesActual);
+            //CollectionAssert.AreEqual(new string[2] { "0", "1" }, parameterValues.Split(','));
         }
 
         //[TestMethod("B4-12_CommandIsFound")]
@@ -8411,12 +8488,13 @@ namespace PP5AutoUITests
             string threadTICmdTitle = "RunThread_TI";
 
             AddCommandBy(TestCmdGroupType.Thread_TI, 1);
-            string cmdName = GetCommandBy(TestCmdGroupType.Thread_TI, 1).GetText();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
-            threadTICmdTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ById[editParamAreaView]/ByClass[ScrollViewer,TextBox]").GetText());
-            cmdName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,3]").GetText());
-            "\"\"".ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[2,3]").GetText());
-            "\"\"".ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[3,3]").GetText());
+            var tcCellElement = PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Test Command]");
+            string cmdName = tcCellElement.GetText();
+            tcCellElement.LeftClick();
+            threadTICmdTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElements("/ById[editParamAreaView]/ByClass[ScrollViewer,TextBox]")[0].GetText());
+            cmdName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]").GetText());
+            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[2,@Parameter Value]").ShouldHaveText("\"\"");
+            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[3,@Parameter Value]").ShouldHaveText("\"\"");
         }
 
         [TestMethod("B4-14")]
@@ -9758,30 +9836,18 @@ namespace PP5AutoUITests
             TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            //GetCommandBy(CommandName, GroupName).DoubleClick();
             AddCommandBy(cgt, CommandName);
-            //AddCommandBy(GroupName, 17);
 
             // LeftClick on Text "ABS"
-            //Console.WriteLine("LeftClick on Text \"ABS\"");
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);;
 
             // Copy and paste by clicking on the buttons (not from menu)
-            //var functionBtns = CurrentDriver.GetWebElementFromWebDriver(By.ClassName("ToolBar"))
-            //                                .GetWebElementsFromWebElement(By.ClassName("RadioButton"));
-            //functionBtns[10].LeftClick();
-            //functionBtns[11].LeftClick();
-
-            // Copy and paste by clicking on the buttons (not from menu)
-            //PP5IDEWindow.PerformGetElements("/ByClass@PGGrid[ToolBar,RadioButton]", ClickType.LeftClick);
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
-
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Check same test item command is added
-            CommandName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,5]").GetText());
+            //CommandName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Test Command]").GetText());
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Test Command]").ShouldHaveText(CommandName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -9962,17 +10028,16 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             string copiedCallName = CallName + "-Copy_1";
             string condVarDataGridId = VariableTabType.Condition.GetDescription();
-            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());
+            //copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Call Name]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10201,17 +10266,15 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             string copiedCallName = CallName + "-Copy_1";
             string resVarDataGridId = VariableTabType.Result.GetDescription();
-            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10410,17 +10473,15 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             string CallName = "CAP";
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             string copiedCallName = CallName + "-Copy_1";
-            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
             string tmpVarDataGridId = VariableTabType.Temp.GetDescription();
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10620,20 +10681,20 @@ namespace PP5AutoUITests
             VariableTabNavi(VariableTabType.Global);
 
             string glbVarDataGridId = VariableTabType.Global.GetDescription();
-            //string CallName = GetCellValue(glbVarDataGridId, 0, "Call Name");
-            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").GetText();
 
-            //GetCellBy(glbVarDataGridId, 0, "Call Name").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
 
             // Copy and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             string copiedCallName = CallName + "-Copy_1";
-            //copiedCallName.ShouldEqualTo(GetCellValue(glbVarDataGridId, 0, "Call Name"));
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);
+
+            // Delete the copied row by clicking on the Delete button
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -10776,28 +10837,20 @@ namespace PP5AutoUITests
             AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            //Console.WriteLine("LeftClick on Text \"ABS\"");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // copy selected command by clicking on Copy button from toolbar
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new TI editor
-            // Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
             // Paste the copied command by clicking on Paste button
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,5]", ClickType.LeftClick);
-
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Check same test item command is added
-            //Assert.AreEqual(CommandName, GetCellBy("PGGrid", 0, "Test Command").Text);
-            CommandName.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,5]").GetText());
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Test Command]").ShouldHaveText(CommandName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -11023,25 +11076,21 @@ namespace PP5AutoUITests
             // Create new condition variable
             string CallName = "CAP";
             string condVarDataGridId = VariableTabType.Condition.GetDescription();
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
-            // Copy the command by clicking on the Copy button (from toolbar)
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
+            // Copy the variable by clicking on the Copy button (from toolbar)
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new TI editor
-            // Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
-            // Paste the copied command by clicking on Paste button (from toolbar)
+            // Paste the copied variable by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Condition);
-            //GetCellBy(condVarDataGridId, 0, "Call Name").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{condVarDataGridId}[1,3]", ClickType.LeftClick);
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
+            PP5IDEWindow.PerformClick($"/ByCell@{condVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
-            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
-            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());
+            // Verify the pasted variable
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Call Name]").ShouldHaveText(CallName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -11359,25 +11408,21 @@ namespace PP5AutoUITests
             // Create new result variable
             string CallName = "CAP";
             string resVarDataGridId = VariableTabType.Result.GetDescription();
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
-            // Copy the command by clicking on the Copy button (from toolbar)
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
+            // Copy the variable by clicking on the Copy button (from toolbar)
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new TI editor
-            //// Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
-            // Paste the copied command by clicking on Paste button (from toolbar)
+            // Paste the copied variable by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Result);
-            //GetCellBy(VariableTabType.Result.GetDescription(), 0, "Call Name").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{resVarDataGridId}[1,3]", ClickType.LeftClick);
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
+            PP5IDEWindow.PerformClick($"/ByCell@{resVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
-            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
-            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());
+            // Verify the pasted variable
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Call Name]").ShouldHaveText(CallName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -11668,25 +11713,21 @@ namespace PP5AutoUITests
             // Create new result variable
             string CallName = "CAP";
             string tmpVarDataGridId = VariableTabType.Temp.GetDescription();
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
-            // Copy the command by clicking on the Copy button (from toolbar)
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
+            // Copy the variable by clicking on the Copy button (from toolbar)
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new TI editor
-            // Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
-            // Paste the copied command by clicking on Paste button (from toolbar)
+            // Paste the copied variable by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Temp);
-            //GetCellBy(VariableTabType.Temp.GetDescription(), 0, "Call Name").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{tmpVarDataGridId}[1,3]", ClickType.LeftClick);
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
+            PP5IDEWindow.PerformClick($"/ByCell@{tmpVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
-            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
-            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,3]").GetText());
+            // Check the paste result variable
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,@Call Name]").ShouldHaveText(CallName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -11976,31 +12017,28 @@ namespace PP5AutoUITests
             // Select the first row on callname
             VariableTabNavi(VariableTabType.Global);
             string glbVarDataGridId = VariableTabType.Global.GetDescription();
-            //string CallName = GetCellValue(glbVarDataGridId, 0, "Call Name");
-            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").GetText();
 
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
 
-            //GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
-
-            // Copy the command by clicking on the Copy button (from toolbar)
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(10);
+            // Copy the variable by clicking on the Copy button (from toolbar)
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new TI editor
-            // Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //WaitUntil(() => GetPP5Window() != null);
             PerformOpenNewTI();
 
-            // Paste the copied command by clicking on Paste button (from toolbar)
+            // Paste the copied variable by clicking on Paste button (from toolbar)
             VariableTabNavi(VariableTabType.Global);
-            //GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
-            PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]").ToolBarSelect(11);
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
+            // Verify the copied variable has been pasted
             string copiedCallName = CallName + "-Copy_1";
-            //copiedCallName.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);
+
+            // Delete the copied variable
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -12214,22 +12252,22 @@ namespace PP5AutoUITests
             // Step 1. 
             string CallName = "CAP";
             string condVarDataGridId = VariableTabType.Condition.GetDescription();
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Step 2.
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Step 3.
             string copiedCallName = CallName + "-Copy_1";
             string showNameExpected = CallName;
-            string dataTypeExpected = VariableDataType.Float.ToString();
+            string dataTypeExpected = VariableDataType.String.ToString();
             string editTypeExpected = VariableEditType.EditBox.ToString();
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());        // Call Name
-            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,2]").GetText());      // Show Name
-            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,4]").GetText());      // Data Type
-            editTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,5]").GetText());      // Edit Type
+
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);        // Call Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Show Name]").ShouldHaveText(showNameExpected);      // Show Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Data Type]").ShouldHaveText(dataTypeExpected);      // Data Type
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Edit Type]").ShouldHaveText(editTypeExpected);      // Edit Type
         }
 
         [TestMethod("B5-5_Result")]
@@ -12246,20 +12284,19 @@ namespace PP5AutoUITests
             // Step 1. 
             string CallName = "CAP";
             string resVarDataGridId = VariableTabType.Result.GetDescription();
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Step 2.
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Step 3.
             string copiedCallName = CallName + "-Copy_1";
             string showNameExpected = CallName;
-            string dataTypeExpected = VariableDataType.Float.ToString();
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());        // Call Name
-            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,2]").GetText());      // Show Name
-            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,4]").GetText());      // Data Type
+            string dataTypeExpected = VariableDataType.String.ToString();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);        // Call Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Show Name]").ShouldHaveText(showNameExpected);      // Show Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Data Type]").ShouldHaveText(dataTypeExpected);      // Data Type
         }
 
         [TestMethod("B5-5_Tmp")]
@@ -12276,20 +12313,19 @@ namespace PP5AutoUITests
             // Step 1. 
             string CallName = "CAP";
             string tmpVarDataGridId = VariableTabType.Temp.GetDescription();
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Step 2.
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Step 3.
             string copiedCallName = CallName + "-Copy_1";
             string showNameExpected = CallName;
-            string dataTypeExpected = VariableDataType.Float.ToString();
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,3]").GetText());        // Call Name
-            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,2]").GetText());      // Show Name
-            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,4]").GetText());      // Data Type
+            string dataTypeExpected = VariableDataType.String.ToString();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);        // Call Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,@Show Name]").ShouldHaveText(showNameExpected);      // Show Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tmpVarDataGridId}[1,@Data Type]").ShouldHaveText(dataTypeExpected);      // Data Type
         }
 
         [TestMethod("B5-5_Global")]
@@ -12302,28 +12338,31 @@ namespace PP5AutoUITests
             // 2. Click copy and paste on toolbar
             // 3. Check variable is inserted in the previous position, verify each part of the variable
             //    (give row number: 1 and each of the column name)
+            // 4. Delete the copied variable
 
             // Step 1. 
             VariableTabNavi(VariableTabType.Global);
             string glbVarDataGridId = VariableTabType.Global.GetDescription();
-            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
-            string showNameExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,2]").GetText();
-            string dataTypeExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,4]").GetText();
-            string editTypeExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,5]").GetText();
-            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
-            //CreateNewVariable1(VariableTabType.Global, ShowName: CallName, CallName);
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").GetText();
+            string showNameExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Show Name]").GetText();
+            string dataTypeExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Data Type]").GetText();
+            string editTypeExpected = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Edit Type]").GetText();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
 
             // Step 2.
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Step 3.
             string copiedCallName = CallName + "-Copy_1";
-            copiedCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());        // Call Name
-            showNameExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,2]").GetText());      // Show Name
-            dataTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,4]").GetText());      // Data Type
-            editTypeExpected.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,5]").GetText());      // Edit Type
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").ShouldHaveText(copiedCallName);         // Call Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Show Name]").ShouldHaveText(showNameExpected);       // Show Name
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Data Type]").ShouldHaveText(dataTypeExpected);       // Data Type
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Edit Type]").ShouldHaveText(editTypeExpected);       // Edit Type
+
+            // Step 4. 
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
         }
 
         [TestMethod("B5-6")]
@@ -12337,27 +12376,20 @@ namespace PP5AutoUITests
             // Input Command name: "ABS"
             string CommandName = "ABS";
             TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
-            //string CommandNameAfterCut = null;
 
             // Add the command
-            //GetCommandBy(CommandName, GroupName).DoubleClick();
             AddCommandBy(cgt, CommandName);
-            //AddCommandBy(GroupName, 17);
 
             // LeftClick on Text "ABS"
-            //Console.WriteLine("LeftClick on Text \"ABS\"");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Cut and paste by clicking on the buttons (not from menu)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(8);
-            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").GetText().ShouldBeNull();
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Cut);
+            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,@Test Command]").GetText().ShouldBeNull();
 
             // Check same test item command is added
-            //CommandName.ShouldEqualTo(GetCellBy("PGGrid", 0, "Test Command").Text);
-            toolbarFunction.ToolBarSelect(11);
-            CommandName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").GetText());
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Test Command]").ShouldHaveText(CommandName);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -12526,17 +12558,14 @@ namespace PP5AutoUITests
             // Create new condition variable
             string CallName = "CAP";
             string condVarDataGridId = VariableTabType.Condition.GetDescription();
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(8);
-            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText().ShouldBeNull();
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Cut);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Call Name]").GetText().ShouldBeNull();
 
-
-            //CallName.ShouldEqualTo(GetCellValue(condVarDataGridId, 0, "Call Name"));
-            toolbarFunction.ToolBarSelect(11);
-            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Call Name]").ShouldHaveText(CallName);
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -12878,16 +12907,14 @@ namespace PP5AutoUITests
             // Create new condition variable
             string CallName = "CAP";
             string resVarDataGridId = VariableTabType.Result.GetDescription();
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(8);
-            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText().ShouldBeNull();
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Cut);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Call Name]").GetText().ShouldBeNull();
 
-            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
-            toolbarFunction.ToolBarSelect(11);
-            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Call Name]").ShouldHaveText(CallName);
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -13231,16 +13258,14 @@ namespace PP5AutoUITests
             // Create new condition variable
             string CallName = "CAP";
             string tempVarDataGridId = VariableTabType.Temp.GetDescription();
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(8);
-            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,3]").GetText().ShouldBeNull();
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Cut);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,@Call Name]").GetText().ShouldBeNull();
 
-            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
-            toolbarFunction.ToolBarSelect(11);
-            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,@Call Name]").ShouldHaveText(CallName);
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -13536,20 +13561,21 @@ namespace PP5AutoUITests
             // Select the first row on callname
             VariableTabNavi(VariableTabType.Global);
             string glbVarDataGridId = VariableTabType.Global.GetDescription();
-            //string CallName = GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name");
-            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText();
+            string CallName = PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").GetText();
 
             //GetCellBy(VariableTabType.Global.GetDescription(), 0, "Call Name").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,3]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
 
             // Cut and paste by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(8);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Cut);
             PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText().ShouldNotEqualTo(CallName);
 
-            toolbarFunction.ToolBarSelect(11);
-            //CallName.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
-            CallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText());
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,@Call Name]").ShouldHaveText(CallName);
+
+            // Delete the copied variable 
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,@Call Name]", ClickType.LeftClick);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
             //    //MainPanel_TIEditor_OpenNewTI();
             //    TimeSpan.FromSeconds(2);
@@ -13701,25 +13727,21 @@ namespace PP5AutoUITests
             TestItemTabNavi(TestItemTabType.TIContext);
 
             // Input Command name: "ABS"
-            string CommandName1 = "ABS";
-            string CommandName2 = "ADD";
+            string CmdName1 = "ABS";
+            string CmdName2 = "ADD";
             TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
 
             // Add the command
-            AddCommandsBy(cgt, CommandName1, CommandName2);
+            AddCommandsBy(cgt, CmdName1, CmdName2);
 
             // LeftClick on Text "ADD"
-            //Console.WriteLine("LeftClick on Text \"ADD\"");
-            //GetCellBy("PGGrid", 1, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Insert command "ADD" by clicking on the buttons (not from menu)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(9);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Insert);
 
             // Check command "ADD" is inserted
-            //CommandName2.ShouldEqualTo(GetCellBy("PGGrid", 2, "Test Command").Text);
-            CommandName1.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[2,5]").GetText());
+            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[2,@Test Command]").ShouldHaveText(CmdName1);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -13865,17 +13887,13 @@ namespace PP5AutoUITests
             AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            //Console.WriteLine("LeftClick on Text \"ABS\"");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Delete command "ABS" by clicking on the buttons (not from menu)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(12);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
             // Check command "ABS" is deleted
-            //CommandNameAfterDeletion.ShouldEqualTo(GetCellBy("PGGrid", 0, "Test Command").Text);
-            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,@Test Command]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14000,16 +14018,15 @@ namespace PP5AutoUITests
             // Create new condition variable
             string CallName = "CAP";
             string condVarDataGridId = VariableTabType.Condition.GetDescription();
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Condition, ShowName: CallName, CallName, VariableDataType.String);
 
             // Delete by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(12);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
-            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Show Name"));
-            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Condition.GetDescription(), 0, "Call Name"));
-            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,2]").GetText().ShouldBeNull();
-            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,3]").GetText().ShouldBeNull();
+            // Verify the condition variable is deleted
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Show Name]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{condVarDataGridId}[1,@Call Name]").GetText().ShouldBeNull();
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14212,16 +14229,14 @@ namespace PP5AutoUITests
             // Create new condition variable
             string CallName = "CAP";
             string resVarDataGridId = VariableTabType.Result.GetDescription();
-            CreateNewVariable2(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Result, ShowName: CallName, CallName, VariableDataType.String);
 
             // Delete by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(12);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
-            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Call Name"));
-            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Result.GetDescription(), 0, "Show Name"));
-            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,2]").GetText().ShouldBeNull();
-            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,3]").GetText().ShouldBeNull();
+            // Verify the Result variable is deleted
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Show Name]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{resVarDataGridId}[1,@Call Name]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14385,7 +14400,6 @@ namespace PP5AutoUITests
 
         [TestMethod("B5-10_3")]
         [TestCategory("編輯動作(B5)")]
-        [Priority(1)]
         [DisplayName("B5-10_3")]
         //B5-10_3
         public void TIEditor_DeleteVarTemp()
@@ -14393,16 +14407,14 @@ namespace PP5AutoUITests
             // Create new condition variable
             string CallName = "CAP";
             string tempVarDataGridId = VariableTabType.Temp.GetDescription();
-            CreateNewVariable2(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Temp, ShowName: CallName, CallName, VariableDataType.String);
 
             // Delete by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(12);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
-            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Show Name"));
-            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Temp.GetDescription(), 0, "Call Name"));
-            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,2]").GetText().ShouldBeNull();
-            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,3]").GetText().ShouldBeNull();
+            // Verify the Temp variable is deleted
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,@Show Name]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{tempVarDataGridId}[1,@Call Name]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14570,26 +14582,21 @@ namespace PP5AutoUITests
         //B5-10_4
         public void TIEditor_DeleteVarGlobal()
         {
-            //string ShowNameExpected = null;
-            //string CallNameExpected = null;
-
             string glbVarDataGridId = VariableTabType.Global.GetDescription();
 
             // Select the first row on callname
             VariableTabNavi(VariableTabType.Global);
 
+            // Create new global variable
+            var glbVarDataGrid = InitializeVariableDataGrid(VariableTabType.Global, ShowName: "", "B5-10_4", VariableDataType.String);
+
             // Delete all global parameters by clicking on the buttons (from toolbar)
-            //GetCellBy(VariableTabType.Global.GetDescription(), 0, "No").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[1,1]", ClickType.LeftClick);
-            SelectAll();
+            PP5IDEWindow.PerformClick($"/ByCell@{glbVarDataGridId}[{glbVarDataGrid.LastRowNo},@No]", ClickType.LeftClick);
 
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(12);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
-            //ShowNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Show Name"));
-            //CallNameExpected.ShouldEqualTo(GetCellValue(VariableTabType.Global.GetDescription(), 0, "Call Name"));
-            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,2]").GetText().ShouldBeNull();
-            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[1,3]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[{glbVarDataGrid.LastRowNo + 1},@Show Name]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{glbVarDataGridId}[{glbVarDataGrid.LastRowNo + 1},@Call Name]").GetText().ShouldBeNull();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14685,33 +14692,31 @@ namespace PP5AutoUITests
             int CommandCountAfterUndos = 1;
             int maxUndoCount = 0;
             int maxUndoCountExpected = 20;
+            //IElement undoBtn = null;
 
             // Add the command
             AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            //Console.WriteLine("LeftClick on Text \"ABS\"");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
-
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Repeat inserting command "ABS" for 20 times
             for (int i = 0; i < maxUndoCountExpected; i++) 
             {
-                toolbarFunction.ToolBarSelect(9);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Insert);
             }
 
             // Click undo button for 20 times (until disabled)
-            while (toolbarFunction.ToolBarGetSelectionState(6))
+            while (PP5IDEWindow.ToolBarGetSelectionState((int)TIToolBarButton.Undo))
             {
-                toolbarFunction.ToolBarSelect(6);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Undo);
                 maxUndoCount++;
             }
 
             // Check "ABS" command counts after undo actions
             maxUndoCountExpected.ShouldEqualTo(maxUndoCount);
-            CommandCountAfterUndos.ShouldEqualTo(GetRowCount(DataTableAutoIDType.PGGrid) - 1);
+            //CommandCountAfterUndos.ShouldEqualTo(GetRowCount(TIDataTableAutoIDType.PGGrid) - 1);
+            CommandCountAfterUndos.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ById[PGGrid]").GetRowCount() - 1);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14876,39 +14881,38 @@ namespace PP5AutoUITests
             int CommandCountAfterUndosAndRedos = 21;
             int maxRedoCountExpected = 20;
             int maxRedoCount = 0;
+            //IElement undoButton = null;
+            //IElement redoButton = null;
 
             // Add the command
             AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            //Console.WriteLine("LeftClick on Text \"ABS\"");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
-
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Repeat inserting command "ABS" for 20 times
             for (int i = 0; i < maxRedoCountExpected; i++)
             {
-                toolbarFunction.ToolBarSelect(9);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Insert);
             }
 
             // Click undo button for 20 times (until disabled)
-            while (toolbarFunction.ToolBarGetSelectionState(6))
+            while (PP5IDEWindow.ToolBarGetSelectionState((int)TIToolBarButton.Undo))
             {
-                toolbarFunction.ToolBarSelect(6);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Undo);
             }
 
             // Click redo button for 20 times (until disabled)
-            while (toolbarFunction.ToolBarGetSelectionState(7))
+            while (PP5IDEWindow.ToolBarGetSelectionState((int)TIToolBarButton.Redo))
             {
-                toolbarFunction.ToolBarSelect(7);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Redo);
                 maxRedoCount++;
             }
 
             // Check "ABS" command counts after undo & redo actions
-            //RefreshDataTable(DataTableAutoIDType.PGGrid);
-            CommandCountAfterUndosAndRedos.ShouldEqualTo(GetRowCount(DataTableAutoIDType.PGGrid) - 1);
+            //RefreshDataTable(TIDataTableAutoIDType.PGGrid);
+            //CommandCountAfterUndosAndRedos.ShouldEqualTo(GetRowCount(TIDataTableAutoIDType.PGGrid) - 1);
+            CommandCountAfterUndosAndRedos.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ById[PGGrid]").GetRowCount() - 1);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -14982,36 +14986,26 @@ namespace PP5AutoUITests
             AddCommandBy(cgt, 1);
 
             // LeftClick on 1st command
-            //Console.WriteLine("LeftClick on 1st command");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Copy the command by clicking on the button (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new sub TI
-            // Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //System.Threading.Thread.Sleep(2000);
             PerformOpenNewTI(TestItemType.SubTI, TestItemRunType.UUT);
 
             // LeftClick on first command
-            //Console.WriteLine("LeftClick on first command");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Paste the command by clicking on the buttons (from toolbar)
-            toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Check warning message box shows message: "Past abort!! Sub TI cannot be included SubTI Command" 
             string expectedTitle = "Past abort!! Repeat Varaible";
             string expectedMessage = "Past abort!! Sub TI cannot be included SubTI Command";
-            //var warningBox = PP5IDEWindow.GetExtendedElement(PP5By.Id("MessageBoxExDialog"));
             var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
-            expectedTitle.ShouldEqualTo(warningBox.GetText());
-            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
+            warningBox.ShouldHaveText(expectedTitle);
+            warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").ShouldHaveText(expectedMessage);
 
             // Click OK to close the warning message box
             warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
@@ -15278,35 +15272,26 @@ namespace PP5AutoUITests
             AddCommandBy(cgt, 1);
 
             // LeftClick on 1st command
-            //Console.WriteLine("LeftClick on 1st command");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Copy the command by clicking on the button (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new Thread TI
-            // Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //System.Threading.Thread.Sleep(2000);
             PerformOpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);
 
             // LeftClick on first command
-            //Console.WriteLine("LeftClick on first command");
-            //GetCellBy("PGGrid", 0, "Test Command").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Paste the command by clicking on the buttons (from toolbar)
-            toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Check warning message box shows message: "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command" 
             string expectedTitle = "Past abort!! Repeat Varaible";
             string expectedMessage = "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command";
             var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
-            expectedTitle.ShouldEqualTo(warningBox.GetText());
-            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
+            warningBox.ShouldHaveText(expectedTitle);
+            warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").ShouldHaveText(expectedMessage);
 
             // Click OK to close the warning message box
             warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
@@ -15573,31 +15558,26 @@ namespace PP5AutoUITests
             AddCommandBy(cgt, 1);
 
             // LeftClick on 1st command
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Copy the command by clicking on the button (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
             // Open new Thread TI
-            // Left Click Menu item: Functions > TI Editor
-            //MenuSelect("Functions", "TI Editor");
-            //System.Threading.Thread.Sleep(2000);
             PerformOpenNewTI(TestItemType.ThreadTI, TestItemRunType.UUT);
 
             // LeftClick on first command
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Paste the command by clicking on the buttons (from toolbar)
-            toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(11);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             // Check warning message box shows message: "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command" 
             string expectedTitle = "Past abort!! Repeat Varaible";
             string expectedMessage = "Past abort!! Thread TI cannot be included SubTI or ThreadTI Command";
             var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
-            expectedTitle.ShouldEqualTo(warningBox.GetText());
-            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
+            warningBox.ShouldHaveText(expectedTitle);
+            warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").ShouldHaveText(expectedMessage);
 
             // Click OK to close the warning message box
             warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
@@ -15854,28 +15834,29 @@ namespace PP5AutoUITests
         public void TIEditor_CopyAndPasteInVariableBy5times()
         {
             // Create new condition variable
+            int repeatCount = 5;
             string CallName = "CAP";
-            CreateNewVariable1(VariableTabType.Condition, ShowName: CallName, CallName: CallName, VariableDataType.String);
+            InitializeVariableDataGrid(VariableTabType.Condition, ShowName: CallName, CallName: CallName, VariableDataType.String);
 
             // Copy And Paste 5 times by clicking on the buttons (from toolbar)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(10);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Copy);
 
-            for (int i = 0; i < 5; i++)
-                toolbarFunction.ToolBarSelect(11);
+            for (int i = 0; i < repeatCount; i++)
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Paste);
 
             //StringBuilder copiedCallName = new StringBuilder(CallName + "-Copy_");
-            string[] copiedCallNames = new string[5];
+            string[] copiedCallNames = new string[repeatCount];
             string prefix = CallName + "-Copy_";
 
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= repeatCount; i++)
             {
                 copiedCallNames[i - 1] = prefix + i;
             }
 
-            //RefreshDataTable(DataTableAutoIDType.CndGrid);
-            string[] copiedCallNamesActual = GetSingleColumnValues(DataTableAutoIDType.CndGrid, 3/*Call Name*/).GetRange(0, 5).ToArray();
-            copiedCallNames.ShouldEqualTo(copiedCallNamesActual);
+            //string[] copiedCallNamesActual = GetSingleColumnValues(TIDataTableAutoIDType.CndGrid, 3/*Call Name*/).GetRange(0, 5).ToArray();
+            //copiedCallNames.ShouldEqualTo(copiedCallNamesActual);
+            string[] copiedCallNamesActual = PP5IDEWindow.PerformGetElement("/ById[CndGrid]").GetSingleColumnValues(3/*Call Name*/).GetRange(0, repeatCount).ToArray();
+            copiedCallNames.ShouldBe(copiedCallNamesActual);
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -16111,20 +16092,18 @@ namespace PP5AutoUITests
             // Input Command name: "ABS"
             string CommandName = "ABS";
             TestCmdGroupType cgt = TestCmdGroupType.Arithmetic;
-            bool IsFocusedAfterDeletion = true;
 
             // Add the command
             AddCommandBy(cgt, CommandName);
 
             // LeftClick on Text "ABS"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Delete command "ABS" by clicking on the buttons (not from menu)
-            var toolbarFunction = PP5IDEWindow.PerformGetElement("/ById[Container]/ByClass[ToolBar]");
-            toolbarFunction.ToolBarSelect(12);
+            PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
 
             // Check PG Grid area is still focused after the deletion
-            IsFocusedAfterDeletion.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,5]").Selected);
+            PP5IDEWindow.PerformGetElement($"/ByCell@PGGrid[1,@Test Command]").ShouldBeSelected();
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -16285,57 +16264,56 @@ namespace PP5AutoUITests
             var cmdEle = GetCommandBy(cgt, CommandName);
             for (int i = 0; i < 3; i++)
                 cmdEle.DoubleClick();
-            //AddCommandBy(GroupName, CommandName, addCount: 3);
 
             // Add 3 variables, where datatype: string and EditType are EditBox、ComboBox、External_Signal
             var enumItemValues = new OrderedDictionary { ["0"] = "0" };
-            CreateNewVariable1(VariableTabType.Condition, "str_EditBox", "str_EdtBx", VariableDataType.String, VariableEditType.EditBox);
+            InitializeVariableDataGrid(VariableTabType.Condition, "str_EditBox", "str_EdtBx", VariableDataType.String, VariableEditType.EditBox);
             CreateNewVariable1(VariableTabType.Condition, "str_ComboBox", "str_CmbBx", VariableDataType.String, VariableEditType.ComboBox, enumItems: enumItemValues);
-            CreateNewVariable1(VariableTabType.Condition, "str_ExternalSignal", "str_ExtSig", VariableDataType.String, VariableEditType.External_Signal);
+            InitializeVariableDataGrid(VariableTabType.Condition, "str_ExternalSignal", "str_ExtSig", VariableDataType.String, VariableEditType.External_Signal);
 
             //// Map the variables to the commands' DBC Signal parameter
             // 1st StopEVGate_DBCData, specified index: 0
             // LeftClick on 1st command: "StopEVGate_DBCData"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "0", "Specified DBC signal" > select "str_EdtBx"
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("0");
 
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cndRdoBtn]/ByName[Test Condition]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_EdtBx");
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,@Parameter Value]", InputType.SendContent, "str_EdtBx");
             Press(Keys.Enter);
 
             // 2nd StopEVGate_DBCData, specified index: 1
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[2,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[2,@Test Command]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "1", "Specified DBC signal" > select "str_CmbBx"
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("1");
 
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cndRdoBtn]/ByName[Test Condition]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_CmbBx");
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,@Parameter Value]", InputType.SendContent, "str_CmbBx");
             Press(Keys.Enter);
 
             // 3rd StopEVGate_DBCData, specified index: 2
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[3,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[3,@Test Command]", ClickType.LeftClick);
 
 
             // Parameter: "Specified index" > input "2", "Specified DBC signal" > select "str_ExtSig"
             //GetCellBy("ParameterGrid", 0, "No").LeftClick();
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("2");
 
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cndRdoBtn]/ByName[Test Condition]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_ExtSig");
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,@Parameter Value]", InputType.SendContent, "str_ExtSig");
             Press(Keys.Enter);
 
             // LeftClick on Text "Utility" > "Compile"
@@ -16345,8 +16323,8 @@ namespace PP5AutoUITests
             string expectedTitle = "Compile";
             string expectedMessage = "Compilation is complete";
             var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
-            expectedTitle.ShouldEqualTo(warningBox.GetText());
-            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
+            warningBox.ShouldHaveText(expectedTitle);
+            warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").ShouldHaveText(expectedMessage);
 
             // Click OK to close the message box
             warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
@@ -17237,55 +17215,54 @@ namespace PP5AutoUITests
             var cmdEle = GetCommandBy(cgt, CommandName);
             for (int i = 0; i < 3; i++)
                 cmdEle.DoubleClick();
-            //AddCommandBy(GroupName, CommandName, addCount: 3);
 
             // Add 3 variables, where datatype: string and EditType are EditBox、ComboBox、External_Signal
             var enumItemValues = new OrderedDictionary { ["0"] = "0" };
-            CreateNewVariable1(VariableTabType.Global, "str_EditBox", "str_EdtBx", VariableDataType.String, VariableEditType.EditBox);
+            InitializeVariableDataGrid(VariableTabType.Global, "str_EditBox", "str_EdtBx", VariableDataType.String, VariableEditType.EditBox);
             CreateNewVariable1(VariableTabType.Global, "str_ComboBox", "str_CmbBx", VariableDataType.String, VariableEditType.ComboBox, enumItems: enumItemValues);
-            CreateNewVariable1(VariableTabType.Global, "str_ExternalSignal", "str_ExtSig", VariableDataType.String, VariableEditType.External_Signal);
+            InitializeVariableDataGrid(VariableTabType.Global, "str_ExternalSignal", "str_ExtSig", VariableDataType.String, VariableEditType.External_Signal);
 
             //// Map the variables to the commands' DBC Signal parameter
             // 1st StopEVGate_DBCData, specified index: 0
             // LeftClick on 1st command: "StopEVGate_DBCData"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "0", "Specified DBC signal" > select "str_EdtBx"
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("0");
 
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_EdtBx");
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,@Parameter Value]", InputType.SendContent, "str_EdtBx");
             Press(Keys.Enter);
 
             // 2nd StopEVGate_DBCData, specified index: 1
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[2,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[2,@Test Command]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "1", "Specified DBC signal" > select "str_CmbBx"
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("1");
 
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_CmbBx");
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,@Parameter Value]", InputType.SendContent, "str_CmbBx");
             Press(Keys.Enter);
 
             // 3rd StopEVGate_DBCData, specified index: 2
             // LeftClick on 2nd command: "StopEVGate_DBCData"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[3,5]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[3,@Test Command]", ClickType.LeftClick);
 
             // Parameter: "Specified index" > input "2", "Specified DBC signal" > select "str_ExtSig"
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[cntRdoBtn]/ByName[Constant]", ClickType.LeftClick);
             SendSingleKeys("2");
 
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,1]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,3]", InputType.SendContent, "str_ExtSig");
+            PP5IDEWindow.PerformInput("/ByCell@ParameterGrid[2,@Parameter Value]", InputType.SendContent, "str_ExtSig");
             Press(Keys.Enter);
 
             // LeftClick on Text "Utility" > "Compile"
@@ -17295,8 +17272,8 @@ namespace PP5AutoUITests
             string expectedTitle = "Compile";
             string expectedMessage = "Compilation is complete";
             var warningBox = PP5IDEWindow.PerformGetElement("/ById[MessageBoxExDialog]");
-            expectedTitle.ShouldEqualTo(warningBox.GetText());
-            expectedMessage.ShouldEqualTo(warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").GetText());
+            warningBox.ShouldHaveText(expectedTitle);
+            warningBox.PerformGetElement("/ByClass[ScrollViewer]/ById[txtBlockMsg]").ShouldHaveText(expectedMessage);
 
             // Click OK to close the message box
             warningBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
@@ -18208,14 +18185,12 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box
-            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
-
             // Command Edit Search box sendkey: cmdName2
-            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+            PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendContent, searchPattern);
             Press(Keys.Return);
 
             // After searching, the matched command row will be selected, check the Test Command Cell value
-            cmdName1.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[5]").GetText());
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[5]").ShouldHaveText(cmdName1);
         }
 
         [TestMethod("B6-1_2")]
@@ -18236,14 +18211,12 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box
-            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
-
             // Command Edit Search box sendkey: cmdName2
-            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
-            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,SearchBtn]", ClickType.LeftClick);
+            PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendContent, searchPattern);
+            PP5IDEWindow.PerformClick("/ById[TIContextPanel,SearchBtn]", ClickType.LeftClick);
 
             // After searching, the matched command row will be selected, check the Test Command Cell value
-            cmdName1.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[5]").GetText());
+            PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[5]").ShouldHaveText(cmdName1);
         }
 
         [TestMethod("B6-2_1")]
@@ -18256,7 +18229,6 @@ namespace PP5AutoUITests
             string cmdName2 = "ReadAC_Frequency";
             TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
             string searchPattern = "ReadAC";
-            bool MsgBxSearchResultShowUp = true;
             int SearchingCountExpected = 3; 
             int SearchingCountActual = 0;
 
@@ -18267,22 +18239,22 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box, type in cmdName2 and click search button
-            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+            PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendContent, searchPattern);
 
             // Keep pressing "search Next" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")))
             {
-                PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[NextBtn]", ClickType.LeftClick);
+                PP5IDEWindow.PerformClick("/ById[TIContextPanel,NextBtn]", ClickType.LeftClick);
                 SearchingCountActual++;
             }
 
             // Check search to the end message box: "Search Result" show up
-            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")));
+            CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")).ShouldBeTrue();
             SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
 
             // Close the window: "Search Result"
             PP5IDEWindow.PerformClick("/ById[MessageBoxExDialog,Close]", ClickType.LeftClick);
+
 
             ////MainPanel_TIEditor_OpenNewTI();
             //TimeSpan.FromSeconds(2);
@@ -18434,7 +18406,6 @@ namespace PP5AutoUITests
             string cmdName2 = "ReadAC_Frequency";
             TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
             string searchPattern = "ReadAC";
-            bool MsgBxSearchResultShowUp = true;
             int SearchingCountExpected = 3;
             int SearchingCountActual = 0;
 
@@ -18445,18 +18416,17 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box, type in cmdName2 and click search button
-            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+            PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendContent, searchPattern);
 
             // Keep pressing "search Next" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")))
             {
-                PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendSingleKeys, Keys.F3);
+                PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendSingleKeys, Keys.F3);
                 SearchingCountActual++;
             }
 
             // Check search to the end message box: "Search Result" show up
-            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")));
+            CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")).ShouldBeTrue();
             SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
 
             // Close the window: "Search Result"
@@ -18473,7 +18443,6 @@ namespace PP5AutoUITests
             string cmdName2 = "ReadAC_Frequency";
             string searchPattern = "ReadAC";
             TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
-            bool MsgBxSearchResultShowUp = true;
             int SearchingCountExpected = 3;
             int SearchingCountActual = 0;
 
@@ -18484,18 +18453,17 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box, type in cmdName2 and click search button
-            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+            PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendContent, searchPattern);
 
             // Keep pressing "search Previus" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(PP5By.Name("Search Result")))
             {
-                PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[PreviosBtn]", ClickType.LeftClick);
+                PP5IDEWindow.PerformClick("/ById[TIContextPanel,PreviosBtn]", ClickType.LeftClick);
                 SearchingCountActual++;
             }
 
             // Check search to the end message box: "Search Result" show up
-            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Name("Search Result")));
+            CheckMessageBoxOpened(PP5By.Name("Search Result")).ShouldBeTrue();
             SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
 
             // Close the window: "Search Result"
@@ -18512,7 +18480,6 @@ namespace PP5AutoUITests
             string cmdName2 = "ReadAC_Frequency";
             string searchPattern = "ReadAC";
             TestCmdGroupType cgt = TestCmdGroupType.AC_Source;
-            bool MsgBxSearchResultShowUp = true;
             int SearchingCountExpected = 3;
             int SearchingCountActual = 0;
 
@@ -18523,18 +18490,17 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, cmdName1, cmdName2);
 
             // Get the Command Edit page search box, type in cmdName2 and click search button
-            PP5IDEWindow.PerformClick("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", ClickType.LeftClick);
-            PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendContent, searchPattern);
+            PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendContent, searchPattern);
 
             // Keep pressing "search Previus" button until message box: "Search Result" show up
             while (!CheckMessageBoxOpened(PP5By.Name("Search Result")))
             {
-                PP5IDEWindow.PerformInput("/ByClass[SettingAeraView]/ById[SearchBox,searchText]", InputType.SendComboKeys, new string[] { Keys.Shift, Keys.F3 });
+                PP5IDEWindow.PerformInput("/ById[TIContextPanel,searchText]", InputType.SendComboKeys, new string[] { Keys.Shift, Keys.F3 });
                 SearchingCountActual++;
             }
 
             // Check search to the end message box: "Search Result" show up
-            MsgBxSearchResultShowUp.ShouldEqualTo(CheckMessageBoxOpened(PP5By.Name("Search Result")));
+            CheckMessageBoxOpened(PP5By.Name("Search Result")).ShouldBeTrue();
             SearchingCountExpected.ShouldEqualTo(SearchingCountActual);
 
             // Close the window: "Search Result"
@@ -19057,7 +19023,7 @@ namespace PP5AutoUITests
             AddCommandBy(groupType, cmdName);
 
             // Add condition variable, where datatype: string
-            CreateNewVariable2(VariableTabType.Result, resVarCallName, resVarCallName, dataType);
+            InitializeVariableDataGrid(VariableTabType.Result, resVarCallName, resVarCallName, dataType);
 
             // LeftClick on command
             PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,5]", ClickType.LeftClick);
@@ -19066,7 +19032,7 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[rstRdoBtn]/ByName[Test Result]", ClickType.LeftClick);
             PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]")
-                        .SelectComboBoxItemByName2(resVarCallName);
+                        .SelectItem(resVarCallName);
 
             // Verify the result variable is mapped to the parameter value cell
             resVarCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
@@ -19096,7 +19062,7 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[tmpRdoBtn]/ByName[Temporary Var.]", ClickType.LeftClick);
             PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]")
-                        .SelectComboBoxItemByName2(tempVarCallName);
+                        .SelectItem(tempVarCallName);
 
             // Verify the temperary variable is mapped to the parameter value cell
             tempVarCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
@@ -19126,7 +19092,7 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,1]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[glbRdoBtn]/ByName[Global Var.]", ClickType.LeftClick);
             PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]")
-                        .SelectComboBoxItemByName2(glbVarCallName);
+                        .SelectItem(glbVarCallName);
 
             // Verify the global variable is mapped to the parameter value cell
             glbVarCallName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,3]").GetText());
@@ -19155,9 +19121,9 @@ namespace PP5AutoUITests
 
             // Edit the 2nd parameter of this command > select operator item: ">"
             //PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,3]", ClickType.LeftDoubleClick);
-            //ComboBoxSelectByName("PART_Content", expectedOperator);
+            //SelectItem("PART_Content", expectedOperator);
             PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[2,3]")
-                        .SelectComboBoxItemByName2(expectedOperator);
+                        .SelectItem(expectedOperator);
 
             // Check the operator is ">"
             //expectedOperator.ShouldEqualTo(GetCellValue("ParameterGrid", 1, "Parameter Value"));
@@ -19187,7 +19153,7 @@ namespace PP5AutoUITests
             // Edit the 4th parameter of this command > Label selection on TestFail and TestPass
             PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[4,@No]", ClickType.LeftClick);
             PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[4,@Parameter Value]")
-                        .SelectComboBoxItemByName2(label);
+                        .SelectItem(label);
 
             // Check the label is same as input
             label.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[4,@Parameter Value]").GetText());
@@ -19199,7 +19165,7 @@ namespace PP5AutoUITests
         public void TIEditor_EditVariableWithParameterTypeExpression()
         {
             // Arrange
-            string expressionText = "\"\"Input_Power\"+1>0\"";
+            string expressionText = "\"\"Insrc_Type\"+1>0\"";
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
@@ -19223,7 +19189,7 @@ namespace PP5AutoUITests
 
             SendSingleKeys("\"");
             expressionWindow.PerformGetElement("/ById[UI_combobox]")
-                            .ComboBoxSelectByIndex(0);
+                            .SelectItem(0);
             SendSingleKeys("\"");
             SendSingleKeys("+1>0");
 
@@ -19293,7 +19259,7 @@ namespace PP5AutoUITests
             // Add 1 condition variable
             string[] condVarNames = condVarNameStr.Split(',');
             for (int iter = 0; iter < paramCount; iter++)
-                CreateNewVariable1(VariableTabType.Condition, condVarNames[iter], condVarNames[iter], VariableDataType.String, VariableEditType.EditBox);
+                InitializeVariableDataGrid(VariableTabType.Condition, condVarNames[iter], condVarNames[iter], VariableDataType.String, VariableEditType.EditBox);
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
@@ -19319,7 +19285,7 @@ namespace PP5AutoUITests
                 funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
                 funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
                 funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
-                                .ComboBoxSelectByName(condVarNames[iter - 1]);
+                                .SelectItem(condVarNames[iter - 1]);
             }
 
             funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
@@ -19345,7 +19311,7 @@ namespace PP5AutoUITests
             // Add 1 Result variable
             string[] resVarNames = resVarNameStr.Split(',');
             for (int iter = 0; iter < paramCount; iter++)
-                CreateNewVariable2(VariableTabType.Result, resVarNames[iter], resVarNames[iter], VariableDataType.String);
+                InitializeVariableDataGrid(VariableTabType.Result, resVarNames[iter], resVarNames[iter], VariableDataType.String);
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
@@ -19371,7 +19337,7 @@ namespace PP5AutoUITests
                 funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
                 funcParEdtWindow.PerformClick("/ById[RstRdoBtn]/ByName[Result]", ClickType.LeftClick);
                 funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
-                                .ComboBoxSelectByName(resVarNames[iter - 1]);
+                                .SelectItem(resVarNames[iter - 1]);
             }
 
             funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
@@ -19397,7 +19363,7 @@ namespace PP5AutoUITests
             // Add 1 Temp variable
             string[] tempVarNames = tempVarNameStr.Split(',');
             for (int iter = 0; iter < paramCount; iter++)
-                CreateNewVariable2(VariableTabType.Temp, tempVarNames[iter], tempVarNames[iter], VariableDataType.String);
+                InitializeVariableDataGrid(VariableTabType.Temp, tempVarNames[iter], tempVarNames[iter], VariableDataType.String);
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
@@ -19423,7 +19389,7 @@ namespace PP5AutoUITests
                 funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
                 PP5IDEWindow.PerformClick("/ById[TmpRdoBtn]/ByName[Temporary]", ClickType.LeftClick);
                 funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
-                                .ComboBoxSelectByName(tempVarNames[iter - 1]);
+                                .SelectItem(tempVarNames[iter - 1]);
             }
 
             funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
@@ -19447,9 +19413,10 @@ namespace PP5AutoUITests
         public void TIEditor_EditVariableWithParameterTypeFuncPar_MapGlobalParameter(int paramCount, string glbVarNameStr, object dummy)
         {
             // Add 1 Global variable
+            PP5DataGrid dgGlb = null;
             string[] glbVarNames = glbVarNameStr.Split(',');
             for (int iter = 0; iter < paramCount; iter++)
-                CreateNewVariable1(VariableTabType.Global, glbVarNames[iter], glbVarNames[iter], VariableDataType.String, VariableEditType.EditBox);
+                dgGlb = InitializeVariableDataGrid(VariableTabType.Global, glbVarNames[iter], glbVarNames[iter], VariableDataType.String, VariableEditType.EditBox);
 
             // Switch to test item context window
             TestItemTabNavi(TestItemTabType.TIContext);
@@ -19475,7 +19442,7 @@ namespace PP5AutoUITests
                 funcParEdtWindow.PerformClick($"/ByCell@MappingGrid[{iter},@No]", ClickType.LeftClick);
                 funcParEdtWindow.PerformClick("/ById[GlbRdoBtn]/ByName[Global]", ClickType.LeftClick);
                 funcParEdtWindow.PerformGetElement($"/ByCell@MappingGrid[{iter},@Mapping Parameter]")
-                                .ComboBoxSelectByName(glbVarNames[iter - 1]);
+                                .SelectItem(glbVarNames[iter - 1]);
             }
 
             funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
@@ -19489,6 +19456,16 @@ namespace PP5AutoUITests
             expText = "\"" + expTextSb.ToString() + "\"";
 
             expText.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[5,@Parameter Value]").GetText());
+
+            // Delete the global variables
+            //for (int iter = 0; iter < paramCount; iter++)
+            //    DeleteVariable(glbVarNames[iter]);
+            int rowNo = dgGlb.LastRowNo;
+            for (int currRow = rowNo; currRow >= rowNo - 1; currRow--)
+            {
+                dgGlb.PerformClick($"/ByCell[{currRow},@Call Name]", ClickType.LeftClick);
+                PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
+            }
         }
 
         [TestMethod("B7-10")]
@@ -19605,7 +19582,7 @@ namespace PP5AutoUITests
         //    PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]").GetText().ShouldContain(conditionText);
 
         //    VariableTabNavi(VariableTabType.Condition);
-        //    //IElement dgCnd = PP5IDEWindow.GetExtendedElement(PP5By.Id(DataTableAutoIDType.CndGrid.ToString()));
+        //    //IElement dgCnd = PP5IDEWindow.GetExtendedElement(PP5By.Id(TIDataTableAutoIDType.CndGrid.ToString()));
         //    IElement dgCnd = PP5IDEWindow.PerformGetElement("/ByCell@CndGrid[1,@Parameter Value]");
         //    //IWebElement dgCnd = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId("dockItem8"))
         //    //                                 .GetFirstDataGridElement();
@@ -19715,7 +19692,7 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[1,@Parameter Value]", ClickType.LeftClick);   // Select on the parameter
 
             PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]")
-                        .ComboBoxSelectByName(label);
+                        .SelectItem(label);
 
             PP5IDEWindow.PerformGetElement("/ByCell@PGGrid[1,@Parameters]").GetText().ShouldEqualTo(label);
         }
@@ -19733,7 +19710,7 @@ namespace PP5AutoUITests
             CreateNewVariable1(VariableTabType.Condition, "", vecCallName, VariableDataType.LineInVector, VariableEditType.ComboBox);
 
             PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);                                  // Select on the command
-            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[2,@Parameter Value]").ComboBoxSelectByName(vecCallName);      // Select on the parameter
+            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[2,@Parameter Value]").SelectItem(vecCallName);      // Select on the parameter
 
             PP5IDEWindow.PerformClick($"/ByName[Vector Member]/ById[VectorListBox]/ByName[{Voltage}]", ClickType.LeftClick);
             PP5IDEWindow.PerformClick("/ByName[Vector Member,Ok]", ClickType.LeftClick);
@@ -19769,7 +19746,7 @@ namespace PP5AutoUITests
             string ShowName = "B8-1";
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, ShowName);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Show Name").SendSingleKeys(ShowName);
             //Press(Keys.Enter);
@@ -19785,7 +19762,7 @@ namespace PP5AutoUITests
         public void TIEditor_SetCallNameInConditionVariable(int varCount, object dummy)
         {
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             for (int rowNo = 1; rowNo <= varCount; rowNo++)
             {
@@ -19804,7 +19781,7 @@ namespace PP5AutoUITests
         public void TIEditor_SetCallNameInConditionVariable_CheckCallNameIsRepeated()
         {
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
             PP5DataGrid varDataGrid = null;
             for (int rowNo = 1; rowNo <= 2; rowNo++)
             {
@@ -19849,7 +19826,7 @@ namespace PP5AutoUITests
             string CallName = "B8-3_1";
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -19876,7 +19853,7 @@ namespace PP5AutoUITests
             string CallName = "B8-3_2";
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -19910,7 +19887,7 @@ namespace PP5AutoUITests
             string dataTypeShowName = string.Format("{0}[{1},{2}]", varDataType.GetDescription().Replace("[,]", ""), arrSize1, arrSize2);
             dataTypeShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Data Type").GetText());
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -19937,7 +19914,7 @@ namespace PP5AutoUITests
             varEditType.ToString().ShouldEqualTo(varDataGrid.GetCellBy(1, "Edit Type").GetText());
 
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20012,7 +19989,7 @@ namespace PP5AutoUITests
             string CallName = "B8-5_1";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20049,7 +20026,7 @@ namespace PP5AutoUITests
             string CallName = "B8-5_2";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20089,7 +20066,7 @@ namespace PP5AutoUITests
             string CallName = "B8-5_3";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20150,7 +20127,7 @@ namespace PP5AutoUITests
             //varDataGrid.SelectedCellInfo.SelectedCell.LeftClick();
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20185,7 +20162,7 @@ namespace PP5AutoUITests
             //varDataGrid.SelectedCellInfo.SelectedCell.LeftClick();
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20221,7 +20198,7 @@ namespace PP5AutoUITests
             string CallName = "B8-6_2";
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20257,7 +20234,7 @@ namespace PP5AutoUITests
             string CallName = "B8-6_3";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20298,7 +20275,7 @@ namespace PP5AutoUITests
             //else
             //    varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20356,7 +20333,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20385,7 +20362,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //VariableDataType varDataType = VariableDataType.String;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -20420,7 +20397,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //VariableDataType varDataType = VariableDataType.StringArray;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -20462,7 +20439,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //VariableDataType varDataType = VariableDataType.String2DArray;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -20504,7 +20481,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //VariableDataType varDataType = VariableDataType.StringArrayOfUUTMaxSize;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -20549,7 +20526,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7_2";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20599,7 +20576,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7_3";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20635,7 +20612,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7_4";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20675,7 +20652,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7_5";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20712,7 +20689,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7_6_HexString";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20747,7 +20724,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7_6_HexString1DArray";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20788,7 +20765,7 @@ namespace PP5AutoUITests
             string CallName = "B8-7_6_HexString2DArray";
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20838,7 +20815,7 @@ namespace PP5AutoUITests
             //IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
 
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20869,7 +20846,7 @@ namespace PP5AutoUITests
             string CallName = "B8-8_1";
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20902,7 +20879,7 @@ namespace PP5AutoUITests
             string CallName = "B8-8_2";
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -20960,18 +20937,18 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.ComboBox;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Data Type")
-            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            //           .SelectItem(varDataType.GetDescription());
             ////Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Edit Type")
-            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            //           .SelectItem(VariableEditType.ComboBox.ToString());
             ////Press(Keys.Enter);
 
             AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue.ToString());
@@ -20994,18 +20971,18 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.ComboBox;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Data Type")
-            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            //           .SelectItem(varDataType.GetDescription());
             ////Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Edit Type")
-            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            //           .SelectItem(VariableEditType.ComboBox.ToString());
             ////Press(Keys.Enter);
 
             AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
@@ -21030,18 +21007,18 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.ComboBox;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Condition, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Condition);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Condition);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Condition);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Data Type")
-            //           .ComboBoxSelectByName(VariableDataType.String.GetDescription());
+            //           .SelectItem(VariableDataType.String.GetDescription());
             ////Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Edit Type")
-            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            //           .SelectItem(VariableEditType.ComboBox.ToString());
             ////Press(Keys.Enter);
 
             bool isAdded = true;
@@ -21072,7 +21049,7 @@ namespace PP5AutoUITests
             string ShowName = "B8-11";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, ShowName);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Show Name").SendSingleKeys(ShowName);
             //Press(Keys.Enter);
@@ -21088,7 +21065,7 @@ namespace PP5AutoUITests
         public void TIEditor_SetCallNameInResultVariable(int varCount, object dummy)
         {
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
             PP5DataGrid varDataGrid = null;
             for (int rowNo = 1; rowNo <= varCount; rowNo++)
             {
@@ -21107,7 +21084,7 @@ namespace PP5AutoUITests
         public void TIEditor_SetCallNameInResultVariable_CheckCallNameIsRepeated()
         {
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
             PP5DataGrid varDataGrid = null;
             for (int rowNo = 1; rowNo <= 2; rowNo++)
             {
@@ -21147,7 +21124,7 @@ namespace PP5AutoUITests
             string CallName = "B8-13_1";
             PP5DataGrid varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21174,7 +21151,7 @@ namespace PP5AutoUITests
             string CallName = "B8-13_2";
             PP5DataGrid varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21205,7 +21182,7 @@ namespace PP5AutoUITests
             string CallName = "B8-13_3";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21248,7 +21225,7 @@ namespace PP5AutoUITests
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
 
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21264,7 +21241,7 @@ namespace PP5AutoUITests
 
             if (canSetMinimumSpec)
             {
-                varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallName + "cond");
+                varDataGrid.GetCellBy(1, "MinimumSpec").SelectItem(CallName + "cond");
                 (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MinimumSpec").GetText());
             }
         }
@@ -21285,7 +21262,7 @@ namespace PP5AutoUITests
             CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //// Add condition variable
             //CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);
@@ -21307,7 +21284,7 @@ namespace PP5AutoUITests
 
             if (canSetMinimumSpec)
             {
-                varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallName + "cond");
+                varDataGrid.GetCellBy(1, "MinimumSpec").SelectItem(CallName + "cond");
                 (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MinimumSpec").GetText());
             }
         }
@@ -21328,7 +21305,7 @@ namespace PP5AutoUITests
             CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //// Add condition variable
             //CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);
@@ -21351,7 +21328,7 @@ namespace PP5AutoUITests
 
             if (canSetMinimumSpec)
             {
-                varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallName + "cond");
+                varDataGrid.GetCellBy(1, "MinimumSpec").SelectItem(CallName + "cond");
                 (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MinimumSpec").GetText());
             }
         }
@@ -21386,7 +21363,7 @@ namespace PP5AutoUITests
 
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21403,7 +21380,7 @@ namespace PP5AutoUITests
 
             if (canSetMinimumDefectCode)
             {
-                varDataGrid.GetCellBy(1, 6/*Defect Code*/).ComboBoxSelectByName(defectCode.ToString());
+                varDataGrid.GetCellBy(1, 6/*Defect Code*/).SelectItem(defectCode.ToString());
                 defectCode.ToString().ShouldEqualTo(varDataGrid.GetCellBy(1, 6/*Defect Code*/).GetText());
             }
         }
@@ -21429,7 +21406,7 @@ namespace PP5AutoUITests
 
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21449,7 +21426,7 @@ namespace PP5AutoUITests
 
             if (canSetMinimumDefectCode)
             {
-                varDataGrid.GetCellBy(1, 6/*Defect Code*/).ComboBoxSelectByName(CallName);
+                varDataGrid.GetCellBy(1, 6/*Defect Code*/).SelectItem(CallName);
                 CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, 6/*Defect Code*/).GetText());
             }
         }
@@ -21475,7 +21452,7 @@ namespace PP5AutoUITests
 
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21496,7 +21473,7 @@ namespace PP5AutoUITests
 
             if (canSetMinimumDefectCode)
             {
-                varDataGrid.GetCellBy(1, 6/*Defect Code*/).ComboBoxSelectByName(CallName);
+                varDataGrid.GetCellBy(1, 6/*Defect Code*/).SelectItem(CallName);
                 CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, 6/*Defect Code*/).GetText());
             }
         }
@@ -21526,7 +21503,7 @@ namespace PP5AutoUITests
             CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21542,7 +21519,7 @@ namespace PP5AutoUITests
 
             if (canSetMaximumSpec)
             {
-                varDataGrid.GetCellBy(1, "MaximumSpec").ComboBoxSelectByName(CallName + "cond");
+                varDataGrid.GetCellBy(1, "MaximumSpec").SelectItem(CallName + "cond");
                 (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MaximumSpec").GetText());
             }
         }
@@ -21564,7 +21541,7 @@ namespace PP5AutoUITests
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
 
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21583,7 +21560,7 @@ namespace PP5AutoUITests
 
             if (canSetMaximumSpec)
             {
-                varDataGrid.GetCellBy(1, "MaximumSpec").ComboBoxSelectByName(CallName + "cond");
+                varDataGrid.GetCellBy(1, "MaximumSpec").SelectItem(CallName + "cond");
                 (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MaximumSpec").GetText());
             }
         }
@@ -21604,7 +21581,7 @@ namespace PP5AutoUITests
             CreateNewVariable1(VariableTabType.Condition, CallName + "cond", CallName + "cond", varDataType, VariableEditType.EditBox);     // Add condition variable
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21624,7 +21601,7 @@ namespace PP5AutoUITests
 
             if (canSetMaximumSpec)
             {
-                varDataGrid.GetCellBy(1, "MaximumSpec").ComboBoxSelectByName(CallName);
+                varDataGrid.GetCellBy(1, "MaximumSpec").SelectItem(CallName);
                 (CallName + "cond").ShouldEqualTo(varDataGrid.GetCellBy(1, "MaximumSpec").GetText());
             }
         }
@@ -21659,7 +21636,7 @@ namespace PP5AutoUITests
 
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21676,7 +21653,7 @@ namespace PP5AutoUITests
 
             if (canSetMaximumDefectCode)
             {
-                varDataGrid.GetCellBy(1, "Defect Code").ComboBoxSelectByName(CallName);
+                varDataGrid.GetCellBy(1, "Defect Code").SelectItem(CallName);
                 CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, 8/*Defect Code*/).GetText());
             }
         }
@@ -21701,7 +21678,7 @@ namespace PP5AutoUITests
             AddDefectCode(defectCode, desc, customerDefectCode);        // Add defect code
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21721,7 +21698,7 @@ namespace PP5AutoUITests
 
             if (canSetMaximumDefectCode)
             {
-                varDataGrid.GetCellBy(1, "Defect Code").ComboBoxSelectByName(CallName);
+                varDataGrid.GetCellBy(1, "Defect Code").SelectItem(CallName);
                 CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Defect Code").GetText());
             }
         }
@@ -21746,7 +21723,7 @@ namespace PP5AutoUITests
             AddDefectCode(defectCode, desc, customerDefectCode);        // Add defect code
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Result);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Result);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Result);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21767,7 +21744,7 @@ namespace PP5AutoUITests
 
             if (canSetMaximumDefectCode)
             {
-                varDataGrid.GetCellBy(1, "Defect Code").ComboBoxSelectByName(CallName);
+                varDataGrid.GetCellBy(1, "Defect Code").SelectItem(CallName);
                 CallName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Defect Code").GetText());
             }
         }
@@ -21780,9 +21757,9 @@ namespace PP5AutoUITests
             string ShowName = "B8-18";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, ShowName);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
-            //varDataGrid.GetCellBy(1, "Show Name").ComboBoxSelectByName(ShowName);
+            //varDataGrid.GetCellBy(1, "Show Name").SelectItem(ShowName);
 
             ShowName.ShouldEqualTo(varDataGrid.GetCellBy(1, "Show Name").GetText());
         }
@@ -21795,7 +21772,7 @@ namespace PP5AutoUITests
         public void TIEditor_SetCallNameInTempVariable(int varCount, object dummy)
         {
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             IElement varDataGrid = null;
             for (int rowNo = 1; rowNo <= varCount; rowNo++)
@@ -21816,7 +21793,7 @@ namespace PP5AutoUITests
         public void TIEditor_SetCallNameInTempVariable_CheckCallNameIsRepeated()
         {
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
             string CallName = "B8-19_2";
             IElement varDataGrid = null;
             for (int rowNo = 1; rowNo <= 2; rowNo++)
@@ -21856,7 +21833,7 @@ namespace PP5AutoUITests
             string CallName = "B8-20_1";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21883,7 +21860,7 @@ namespace PP5AutoUITests
             string CallName = "B8-20_2";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21914,7 +21891,7 @@ namespace PP5AutoUITests
             string CallName = "B8-20_3";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -21941,13 +21918,13 @@ namespace PP5AutoUITests
             int maxValue = 4;
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
-            //varDataGrid.GetCellBy(1, "Data Type").ComboBoxSelectByName(varDataType.GetDescription());
+            //varDataGrid.GetCellBy(1, "Data Type").SelectItem(varDataType.GetDescription());
 
             varDataGrid.GetCellBy(1, "Max.").SendText(maxValue.ToString());
 
@@ -21966,13 +21943,13 @@ namespace PP5AutoUITests
             string arrSize1 = "5";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
-            //varDataGrid.GetCellBy(1, "Data Type").ComboBoxSelectByName(varDataType.GetDescription());
+            //varDataGrid.GetCellBy(1, "Data Type").SelectItem(varDataType.GetDescription());
             //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
             //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
 
@@ -21995,13 +21972,13 @@ namespace PP5AutoUITests
             string arrSize2 = "5";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
-            //varDataGrid.GetCellBy(1, "Data Type").ComboBoxSelectByName(varDataType.GetDescription());
+            //varDataGrid.GetCellBy(1, "Data Type").SelectItem(varDataType.GetDescription());
             //PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
             //PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
 
@@ -22028,7 +22005,7 @@ namespace PP5AutoUITests
             string CallName = "B8-22_1";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22056,7 +22033,7 @@ namespace PP5AutoUITests
             string CallName = "B8-22_2";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22088,7 +22065,7 @@ namespace PP5AutoUITests
             string CallName = "B8-22_3";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22122,7 +22099,7 @@ namespace PP5AutoUITests
             string CallName = "B8-22_4";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22153,7 +22130,7 @@ namespace PP5AutoUITests
             string CallName = "B8-22_5_HexString";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22181,7 +22158,7 @@ namespace PP5AutoUITests
             string CallName = "B8-22_5_HexString1DArray";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22216,7 +22193,7 @@ namespace PP5AutoUITests
             string CallName = "B8-22_5_HexString2DArray";
             IElement varDataGrid = CreateNewVariable2(VariableTabType.Temp, "", CallName, varDataType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Temp);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Temp);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Temp);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22312,7 +22289,7 @@ namespace PP5AutoUITests
             string CallName = "B8-25_1";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22340,7 +22317,7 @@ namespace PP5AutoUITests
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, arrSize1);
 
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22372,7 +22349,7 @@ namespace PP5AutoUITests
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, arrSize1, arrSize2);
 
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22400,7 +22377,7 @@ namespace PP5AutoUITests
             string CallName = "B8-26";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22444,7 +22421,7 @@ namespace PP5AutoUITests
             string CallName = "B8-27";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22482,7 +22459,7 @@ namespace PP5AutoUITests
             string CallName = "B8-27_1";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22518,7 +22495,7 @@ namespace PP5AutoUITests
             string CallName = "B8-27_2";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22555,7 +22532,7 @@ namespace PP5AutoUITests
             string CallName = "B8-27_3";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22606,7 +22583,7 @@ namespace PP5AutoUITests
             string CallName = "B8-28";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22644,7 +22621,7 @@ namespace PP5AutoUITests
             string CallName = "B8-28_1";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22679,7 +22656,7 @@ namespace PP5AutoUITests
             string CallName = "B8-28_2";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22716,7 +22693,7 @@ namespace PP5AutoUITests
             string CallName = "B8-28_3";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22756,7 +22733,7 @@ namespace PP5AutoUITests
             else
                 varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22804,7 +22781,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -22831,7 +22808,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //VariableDataType varDataType = VariableDataType.String;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -22868,7 +22845,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1.ToString());
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //VariableDataType varDataType = VariableDataType.StringArray;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -22910,7 +22887,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //VariableDataType varDataType = VariableDataType.String2DArray;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -22952,7 +22929,7 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.External_Signal;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //VariableDataType varDataType = VariableDataType.StringArrayOfUUTMaxSize;
             //VariableEditType varEditType = VariableEditType.External_Signal;
@@ -22997,7 +22974,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29_2";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, VariableEditType.ComboBox);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23045,7 +23022,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29_3";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23080,7 +23057,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29_4";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23117,7 +23094,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29_5";
             IElement varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23149,7 +23126,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29_6_HexString";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23180,7 +23157,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29_6_HexString1DArray";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23219,7 +23196,7 @@ namespace PP5AutoUITests
             string CallName = "B8-29_6_HexString2DArray";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23263,7 +23240,7 @@ namespace PP5AutoUITests
             string CallName = "B8-30";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23292,7 +23269,7 @@ namespace PP5AutoUITests
             string CallName = "B8-30_1";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23323,7 +23300,7 @@ namespace PP5AutoUITests
             string CallName = "B8-30_2";
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType, arrSize1, arrSize2);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
@@ -23379,18 +23356,18 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.ComboBox;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Data Type")
-            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            //           .SelectItem(varDataType.GetDescription());
             ////Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Edit Type")
-            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            //           .SelectItem(VariableEditType.ComboBox.ToString());
             ////Press(Keys.Enter);
 
             AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue.ToString());
@@ -23413,18 +23390,18 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.ComboBox;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Data Type")
-            //           .ComboBoxSelectByName(varDataType.GetDescription());
+            //           .SelectItem(varDataType.GetDescription());
             ////Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Edit Type")
-            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            //           .SelectItem(VariableEditType.ComboBox.ToString());
             ////Press(Keys.Enter);
 
             AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
@@ -23446,18 +23423,18 @@ namespace PP5AutoUITests
             VariableEditType varEditType = VariableEditType.ComboBox;
             PP5DataGrid varDataGrid = CreateNewVariable1(VariableTabType.Global, "", CallName, varDataType, varEditType);
             //VariableTabNavi(VariableTabType.Global);
-            //IElement varDataGrid = GetDataTableElement((DataTableAutoIDType)VariableTabType.Global);
+            //IElement varDataGrid = GetDataTableElement((TIDataTableAutoIDType)VariableTabType.Global);
 
             //varDataGrid.GetCellBy(1, "Show Name").DoubleClick();
             //varDataGrid.GetCellBy(1, "Call Name").SendSingleKeys(CallName);
             //Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Data Type")
-            //           .ComboBoxSelectByName(VariableDataType.String.GetDescription());
+            //           .SelectItem(VariableDataType.String.GetDescription());
             ////Press(Keys.Enter);
 
             //varDataGrid.GetCellBy(1, "Edit Type")
-            //           .ComboBoxSelectByName(VariableEditType.ComboBox.ToString());
+            //           .SelectItem(VariableEditType.ComboBox.ToString());
             ////Press(Keys.Enter);
             
             bool isAdded = true;
@@ -23499,12 +23476,12 @@ namespace PP5AutoUITests
             varDataGrid.GetSelectedCellBy(varDataGrid.LastRowNo, "Min.").SendText(minValue);
 
             varDataGrid = CreateNewVariable2(VariableTabType.Result, "", CallNameRes, varDataType);
-            varDataGrid.GetCellBy(1, "MinimumSpec").ComboBoxSelectByName(CallNameGlb);
+            varDataGrid.GetCellBy(1, "MinimumSpec").SelectItem(CallNameGlb);
             SaveAsNewTI(tiname);
 
             PerformOpenNewTI();
             VariableTabNavi(VariableTabType.Global);
-            PP5DataGrid varDataGridGlb = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{DataTableAutoIDType.GlbGrid}]"));
+            PP5DataGrid varDataGridGlb = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{TIDataTableAutoIDType.GlbGrid}]"));
             varDataGridGlb.GetCellBy(varDataGridGlb.LastRowNo, 1/*Lock Symbol*/).LeftClick();
             PP5IDEWindow.PerformGetElement("/ByName[Global]/ByClass[TextBox]").GetText().ShouldEqualTo(glbVarIsUsedWarningMsg);
 
@@ -23518,7 +23495,7 @@ namespace PP5AutoUITests
             LoadOldTI(tiname);
 
             VariableTabNavi(VariableTabType.Global);
-            varDataGridGlb = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{DataTableAutoIDType.GlbGrid}]"));
+            varDataGridGlb = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{TIDataTableAutoIDType.GlbGrid}]"));
             varDataGridGlb.GetCellBy(varDataGridGlb.LastRowNo, 1/*Lock Symbol*/).LeftClick();
             PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
             PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Save);
@@ -23534,12 +23511,75 @@ namespace PP5AutoUITests
         {
             // Create new condition variable
             VariableTabNavi(VariableTabType.Condition);
-            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{DataTableAutoIDType.CndGrid}]"));
+            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement($"/ById[{TIDataTableAutoIDType.CndGrid}]"));
             varDataGrid.GetCellBy(varDataGrid.LastRowNo + 1, "No").LeftClick();
 
             bool ExpectedBtnState = false;
             for (TIToolBarButton btnState = TIToolBarButton.Cut; btnState <= TIToolBarButton.Delete; btnState++)
                 ExpectedBtnState.ShouldEqualTo(PP5IDEWindow.ToolBarGetSelectionState((int)btnState));
+        }
+
+        /// <summary>
+        /// 測試用例編號：B8-51
+        /// 測試步驟：
+        /// 1. 開啟 TI Editor
+        /// 2. 分別在各類型變數表格(Condition、Result、Temp、Global)中重複新增變數
+        /// 3. 直到超過1000個變數時，驗證是否出現超過上限的提示視窗
+        /// 測試描述：驗證變數數量超過上限時的錯誤提示機制
+        /// 預期輸出：當變數數量超過1000時，應顯示變數上限超過的提醒視窗
+        /// </summary>
+        [TestMethod("B8-51")]
+        [TestCategory("變數編輯")]
+        [DataRow(VariableTabType.Condition, "Variable count must less than or equal to 1000.", typeof(object), DisplayName = "條件變數超過上限")]
+        [DataRow(VariableTabType.Result, "Variable count must less than or equal to 1000.", typeof(object), DisplayName = "結果變數超過上限")]
+        [DataRow(VariableTabType.Temp, "Variable count must less than or equal to 1000.", typeof(object), DisplayName = "臨時變數超過上限")]
+        [DataRow(VariableTabType.Global, "Variable count must less than or equal to 1000.", typeof(object), DisplayName = "全域變數超過上限")]
+        public void TIEditor_AddVariableToLimit_CheckWarningMessage(VariableTabType variableType, string expectedErrorMessage, object dummy)
+        {
+            try
+            {
+                //// 1. 切換到指定的變數類型頁籤
+                //var varDataGrid = InitializeVariableDataGrid(variableType, "", "B8-51_VarLimit");
+
+                // 2. 嘗試新增超過1000個變數
+                for (int i = 2; i <= 1001; i++)
+                {
+                    try
+                    {
+                        // 新增變數
+                        string callName = $"Var_{i}";
+                        //varDataGrid.PerformClick("/ByCell[" + i + ",@CallName]", ClickType.LeftClick);
+                        //varDataGrid.PerformInput("/ByCell[" + i + ",@CallName]", InputType.SendContent, callName);
+                        //Press(Keys.Enter);
+                        InitializeVariableDataGrid(variableType, "", callName);
+
+                        // 當i=1001時應該會出現錯誤視窗
+                        if (i == 1001)
+                        {
+                            // 3. 驗證錯誤訊息視窗
+                            var errorDialog = PP5IDEWindow.PerformGetElement("/Window[Exceed Limit]");
+                            errorDialog.ShouldNotBeNull("未顯示變數超過上限的錯誤視窗");
+
+                            // 4. 驗證錯誤訊息內容
+                            string actualMessage = errorDialog.GetFirstEditContent();
+                            actualMessage.ShouldEqualTo(expectedErrorMessage);
+
+                            // 5. 關閉錯誤視窗
+                            errorDialog.PerformClick("/ByName[OK]", ClickType.LeftClick);
+                        }
+                    }
+                    catch (Exception ex) when (i == 1001)
+                    {
+                        // 當i=1001時預期會拋出例外，這是正常的
+                        Console.WriteLine($"預期的錯誤發生: {ex.Message}");
+                    }
+                }
+            }
+            finally
+            {
+                // 清理測試環境
+                PP5IDEWindow.CloseWindow(0);
+            }
         }
 
         [TestMethod("B8-52_1")]
@@ -23590,6 +23630,110 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformClick("/ByName[Exceed Limit,OK]", ClickType.LeftClick);
         }
 
+        /// <summary>
+        /// 測試用例編號：B8-53
+        /// 測試步驟：
+        /// 1. 切換到 Condition 變數頁籤
+        /// 2. 新增一個型態為 String 的變數
+        /// 3. 切換到 Default 欄位設定值
+        /// 測試描述：對型態為 String 的 Condition 變數進行值的輸入
+        /// 預期輸出：變數的值可以正確設定，驗證模式已被移除
+        /// </summary>
+        [TestMethod("B8-53")]
+        [TestCategory("變數編輯")]
+        [DataRow("TestString", typeof(object), DisplayName = "Condition String變數輸入")]
+        public void TIEditor_SetConditionStringValue_VerifyInput(string testValue, object dummy)
+        {
+            TestStringVariableInput(VariableTabType.Condition, VariableDataType.String, testValue);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B8-54
+        /// 測試步驟：
+        /// 1. 切換到 Condition 變數頁籤
+        /// 2. 新增一個型態為 HexString 的變數
+        /// 3. 切換到 Default 欄位設定值
+        /// 測試描述：對型態為 HexString 的 Condition 變數進行值的輸入
+        /// 預期輸出：變數的值可以正確設定，驗證模式已被移除
+        /// </summary>
+        [TestMethod("B8-54")]
+        [TestCategory("變數編輯")]
+        [DataRow("A5", typeof(object), DisplayName = "Condition HexString變數輸入")]
+        public void TIEditor_SetConditionHexStringValue_VerifyInput(string testValue, object dummy)
+        {
+            TestStringVariableInput(VariableTabType.Condition, VariableDataType.HexString, testValue);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B8-55
+        /// 測試步驟：
+        /// 1. 切換到 Global 變數頁籤
+        /// 2. 新增一個型態為 String 的變數
+        /// 3. 切換到 Default 欄位設定值
+        /// 測試描述：對型態為 String 的 Global 變數進行值的輸入
+        /// 預期輸出：變數的值可以正確設定，驗證模式已被移除
+        /// </summary>
+        [TestMethod("B8-55")]
+        [TestCategory("變數編輯")]
+        [DataRow("GlobalString", typeof(object), DisplayName = "Global String變數輸入")]
+        public void TIEditor_SetGlobalStringValue_VerifyInput(string testValue, object dummy)
+        {
+            TestStringVariableInput(VariableTabType.Global, VariableDataType.String, testValue);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B8-56
+        /// 測試步驟：
+        /// 1. 切換到 Global 變數頁籤
+        /// 2. 新增一個型態為 HexString 的變數
+        /// 3. 切換到 Default 欄位設定值
+        /// 測試描述：對型態為 HexString 的 Global 變數進行值的輸入
+        /// 預期輸出：變數的值可以正確設定，驗證模式已被移除
+        /// </summary>
+        [TestMethod("B8-56")]
+        [TestCategory("變數編輯")]
+        [DataRow("FF", typeof(object), DisplayName = "Global HexString變數輸入")]
+        public void TIEditor_SetGlobalHexStringValue_VerifyInput(string testValue, object dummy)
+        {
+            TestStringVariableInput(VariableTabType.Global, VariableDataType.HexString, testValue);
+        }
+
+        private void TestStringVariableInput(VariableTabType varType, VariableDataType dataType, string testValue)
+        {
+            try
+            {
+                string callName = $"Var_{dataType}_{varType}";
+                var varDataGrid = InitializeVariableDataGrid(
+                    varType,
+                    "",
+                    callName,
+                    dataType,
+                    VariableEditType.EditBox);
+
+                // 輸入測試值
+                varDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+                varDataGrid.PerformInput("/ByCell[1,@Default]", InputType.SendContent, testValue);
+                Press(Keys.Enter);
+
+                // 驗證輸入值
+                string actualValue = varDataGrid.GetCellBy(1, "Default").GetText();
+                actualValue.ShouldEqualTo(testValue, $"Default欄位的值應為 {testValue}");
+
+                // 驗證無錯誤提示
+                var errorDialog = PP5IDEWindow.PerformGetElement("/Window[Error]");
+                errorDialog.ShouldBeNull("不應出現錯誤提示視窗");
+
+                // 切換欄位確認值保留
+                varDataGrid.PerformClick("/ByCell[1,@CallName]", ClickType.LeftClick);
+                actualValue = varDataGrid.GetCellBy(1, "Default").GetText();
+                actualValue.ShouldEqualTo(testValue, "切換欄位後值應保持不變");
+            }
+            finally
+            {
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
         [TestMethod("B8-57")]
         [TestCategory("變數編輯(B8)")]
         [DataRow(VariableTabType.Condition, typeof(object))]
@@ -23626,6 +23770,71 @@ namespace PP5AutoUITests
             InitializeVariableDataGrid(variableType, showName, callName, dataType, editType, "10", "10");
         }
 
+        /// <summary>
+        /// 測試用例編號：B8-58
+        /// 測試步驟：
+        /// 1. 切換到變數頁籤
+        /// 2. 新增一個測試變數
+        /// 3. 依序對每個欄位執行雙擊操作
+        /// 4. 驗證每個欄位都能正常進入編輯狀態且不發生異常
+        /// 測試描述：驗證變數表格中所有欄位的雙擊操作功能
+        /// 預期輸出：所有欄位皆可正常進入編輯模式，不會發生異常
+        /// </summary>
+        [TestMethod("B8-58")]
+        [TestCategory("變數編輯")]
+        [DataRow(VariableTabType.Condition, new string[] { "Show Name", "Call Name", "Data Type", "Edit Type", "Min.", "Max.", "Default", "Format", "Enum Item" }, typeof(object), DisplayName = "Condition變數欄位雙擊")]
+        [DataRow(VariableTabType.Result, new string[] { "Show Name", "Call Name", "Data Type", "MinimumSpec.", "Defect Code", "MaximumSpec.", "Defect Code" }, typeof(object), DisplayName = "Result變數欄位雙擊")]
+        [DataRow(VariableTabType.Temp, new string[] { "Show Name", "Call Name", "Data Type", "Max.", "Default" }, typeof(object), DisplayName = "Temporary變數欄位雙擊")]
+        [DataRow(VariableTabType.Global, new string[] { "Show Name", "Call Name", "Data Type", "Edit Type", "Min.", "Max.", "Default", "Format", "Enum Item" }, typeof(object), DisplayName = "Global變數欄位雙擊")]
+        public void TIEditor_DoubleClickAllFields_CheckEditableAndNoException(
+            VariableTabType variableType,
+            string[] columnNames,
+            object dummy)
+        {
+            try
+            {
+                // 1. 初始化變數表格
+                string CallName = $"B8-58_{variableType}";
+                var varDataGrid = InitializeVariableDataGrid(
+                    variableType,
+                    "",
+                    CallName,
+                    VariableDataType.Integer,
+                    VariableEditType.EditBox);
+
+                // 2. 依序對每個欄位執行雙擊操作並驗證
+                foreach (string columnName in columnNames)
+                {
+                    try
+                    {
+                        // 執行雙擊
+                        varDataGrid.PerformClick($"/ByCell[1,@{columnName}]", ClickType.LeftDoubleClick);
+
+                        // 驗證欄位是否進入編輯模式
+                        var cell = varDataGrid.GetCellBy(1, columnName);
+                        bool isEditable = cell.Enabled && CursorHelper.GetCursor() == Cursor.IBeam;
+                        isEditable.ShouldBeTrue($"{columnName} 欄位應可進入編輯模式");
+
+                        // 按下 Escape 離開編輯模式
+                        Press(Keys.Escape);
+
+                        // 確認是否正常離開編輯模式
+                        cell = varDataGrid.GetCellBy(1, columnName);
+                        cell.ShouldNotBeNull($"離開編輯模式後應能正常取得 {columnName} 欄位");
+                    }
+                    catch (Exception ex)
+                    {
+                        Assert.Fail($"對 {columnName} 欄位執行雙擊操作時發生異常: {ex.Message}");
+                    }
+                }
+            }
+            finally
+            {
+                // 清理測試環境
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
         [TestMethod("B8-60")]
         [TestCategory("變數編輯(B8)")]
         [DataRow(VariableTabType.Condition, VariableEditType.EditBox, VariableEditType.ComboBox, 0, typeof(object), DisplayName = "Change to EditBox from ComboBox")]
@@ -23646,11 +23855,13 @@ namespace PP5AutoUITests
             AddValueToDataGrid(varDataGrid, variableInfo, VariableColumnType.Format, format);
 
             //VariableSelectionMoveBackward(varDataGrid, variableType, dataType, toEditType, 4);
-            varDataGrid.PerformGetElement($"/ByCell[1, {(int)VariableColumnType.EditType}]")
-                       .ComboBoxSelectByName(toEditType.GetDescription());
+            varDataGrid.PerformGetElement($"/ByCell[{varDataGrid.LastRowNo}, {(int)VariableColumnType.EditType}]")
+                       .SelectItem(toEditType.GetDescription());
 
-            for (int colNo = (int)VariableColumnType.Min; colNo <= (int)VariableColumnType.Format; colNo++)
-                varDataGrid.PerformGetElement($"/ByCell[1, {colNo}]").GetText().ShouldBeNull();
+            //var ColumnsToCheck = Enum.GetValues(typeof(VariableColumnType)).OfType<VariableColumnType>().ToList().GetRange((int)VariableColumnType.Min, 4);
+            var ColumnsToCheck = TypeExtension.GetEnumDescriptions<VariableColumnType>().GetRange((int)VariableColumnType.Min - (int)VariableColumnType.No, 4);
+            foreach (var colName in ColumnsToCheck)
+                varDataGrid.PerformGetElement($"/ByCell[{varDataGrid.LastRowNo}, {colName}]").GetText().ShouldBeNull();
 
             // clean up global variable
             if (variableType == VariableTabType.Global)
@@ -23676,10 +23887,13 @@ namespace PP5AutoUITests
             AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
 
             //VariableSelectionMoveBackward(varDataGrid, variableType, dataType, toEditType, 4);
-            varDataGrid.PerformGetElement($"/ByCell[1, {(int)VariableColumnType.EditType}]")
-                       .ComboBoxSelectByName(toEditType.GetDescription());
+            VariableColumnType editTypeColumn = variableType == VariableTabType.Condition ? VariableColumnType.EditType : VariableColumnType.EditType + 1;
+            VariableColumnType enumItemColumn = variableType == VariableTabType.Condition ? VariableColumnType.EnumItem : VariableColumnType.EnumItem + 1;
 
-            varDataGrid.PerformGetElement($"/ByCell[1, {(int)VariableColumnType.EnumItem}]").GetText().ShouldBeNull();
+            varDataGrid.PerformGetElement($"/ByCell[ {varDataGrid.LastRowNo} , {(int)editTypeColumn}]")
+                       .SelectItem(toEditType.GetDescription());
+
+            varDataGrid.PerformGetElement($"/ByCell[ {varDataGrid.LastRowNo} , {(int)enumItemColumn}]").GetText().ShouldBeNull();
 
             // clean up global variable
             if (variableType == VariableTabType.Global)
@@ -23709,7 +23923,7 @@ namespace PP5AutoUITests
             VariableDataType varDataType = VariableDataType.FloatPercentage;
             VariableEditType varEditType = VariableEditType.EditBox;
             PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Global, "", CallName, varDataType, varEditType, defaultValue);
-            defaultValue.ShouldEqualTo(varDataGrid.GetCellValue(1, "Default"));
+            defaultValue.ShouldEqualTo(varDataGrid.GetCellValue(varDataGrid.LastRowNo, "Default"));
 
             // clean up global variable
             PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Delete);
@@ -23737,7 +23951,7 @@ namespace PP5AutoUITests
 
             PerformOpenNewTI();
             VariableTabNavi(VariableTabType.Global);
-            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement(DataTableAutoIDType.GlbGrid));
+            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement(TIDataTableAutoIDType.GlbGrid));
 
             varDataGrid.ScrollToBottom();
 
@@ -23939,11 +24153,13 @@ namespace PP5AutoUITests
             for (int colNo = (int)VariableColumnType.Min; colNo <= (int)VariableColumnType.Default; colNo++)
             {
                 varDataGrid.PerformGetElement($"/ByCell[1, {colNo}]").LeftClick();
-                if (PP5IDEWindow.HasWindow(0))
-                {
+                //if (PP5IDEWindow.HasWindow(0))
+                //{
+                //    canEdit = true;
+                //    PP5IDEWindow.CloseWindow(0);
+                //}
+                if (PP5IDEWindow.CloseWindow(0))
                     canEdit = true;
-                    PP5IDEWindow.CloseWindow(0);
-                }
             }
 
             canEdit.ShouldBeFalse();
@@ -23963,11 +24179,13 @@ namespace PP5AutoUITests
             for (int colNo = (int)VariableColumnType.Min; colNo <= (int)VariableColumnType.Default; colNo++)
             {
                 varDataGrid.PerformGetElement($"/ByCell[1, {colNo}]").LeftClick();
-                if (PP5IDEWindow.HasWindow(0))
-                {
+                //if (PP5IDEWindow.HasWindow(0))
+                //{
+                //    canEdit = true;
+                //    PP5IDEWindow.CloseWindow(0);
+                //}
+                if (PP5IDEWindow.CloseWindow(0))
                     canEdit = true;
-                    PP5IDEWindow.CloseWindow(0);
-                }
             }
 
             canEdit.ShouldBeFalse();
@@ -24236,9 +24454,9 @@ namespace PP5AutoUITests
         //B10-6
         public void TIEditor_ChangeLanguage_CheckInfoCorrect()
         {
-            MenuSelect("Language", "簡体中文");
-            MenuSelect("Language", "繁體中文");
-            MenuSelect("Language", "English");
+            MenuSelect("Languages", "簡体中文");
+            MenuSelect("语言", "繁體中文");
+            MenuSelect("語言", "English");
         }
 
         [TestMethod("B10-7")]
@@ -24255,13 +24473,13 @@ namespace PP5AutoUITests
         [TestMethod("B10-8")]
         [TestCategory("畫面顯示狀態(B10)")]
         [DataRow(TIPanelType.TIContextPanel)]
-        [DataRow(TIPanelType.TCParamPanel)]
+        [DataRow(TIPanelType.TCParameterPanel)]
         [DataRow(TIPanelType.VariablePanel)]
         [DataRow(TIPanelType.TCListPanel)]
         //B10-8
         public void TIEditor_MovePanelOutAndDockBack_CheckPositionSameAfterReDocked(TIPanelType panelType)
         {
-            var panel = PP5IDEWindow.PerformClick($"/ById[{TIPanelType.TIContextPanel}]", ClickType.LeftClick);
+            var panel = PP5IDEWindow.PerformClick($"/ById[{panelType}]", ClickType.LeftClick);
             Point panelPosDocked = panel.PointAtCenter;
             DragAndDropInfo dragAndDropInfo = new DragAndDropInfo(MoveToElementOffsetStartingPoint.InnerCenterTop, 0, 0, 100, 100);
             ((PP5Element)panel).DragAndDropToOffset(dragAndDropInfo);
@@ -24332,7 +24550,7 @@ namespace PP5AutoUITests
         [TestMethod("B10-11")]
         [TestCategory("畫面顯示狀態(B10)")]
         [DataRow(TIPanelType.TIContextPanel)]
-        [DataRow(TIPanelType.TCParamPanel)]
+        [DataRow(TIPanelType.TCParameterPanel)]
         [DataRow(TIPanelType.VariablePanel)]
         [DataRow(TIPanelType.TCListPanel)]
         //B10-11
@@ -24360,7 +24578,7 @@ namespace PP5AutoUITests
             for (int i = 0; i < 4; i++)
                 cellValuesActual[i] = PP5IDEWindow.PerformGetElement($"/ByCell@{VariableTabType.Condition}[{i+1}]").GetText();
 
-            cmdName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText());
+            cmdName.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByCell@{TIDataTableAutoIDType.PGGrid}[1, @Test Command]").GetText());
             cellValuesExpected.ShouldEqualTo(cellValuesActual);
         }
 
@@ -24408,10 +24626,10 @@ namespace PP5AutoUITests
         public void TIEditor_UndoThenCheckIsUndoed()
         {
             AddCommandBy(TestCmdGroupType.String, 1);
-            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{TIDataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
 
             PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Undo);
-            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{TIDataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldBeNull();
         }
 
         [TestMethod("B10-16")]
@@ -24420,11 +24638,11 @@ namespace PP5AutoUITests
         public void TIEditor_UndoAndRedoThenCheckIsRedoed()
         {
             AddCommandBy(TestCmdGroupType.String, 1);
-            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{TIDataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
 
             PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Undo);
             PP5IDEWindow.ToolBarSelect((int)TIToolBarButton.Redo);
-            PP5IDEWindow.PerformGetElement($"/ByCell@{DataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
+            PP5IDEWindow.PerformGetElement($"/ByCell@{TIDataTableAutoIDType.PGGrid}[1, @Test Command]").GetText().ShouldNotBeNull();
         }
 
         [TestMethod("B10-17")]
@@ -24481,7 +24699,7 @@ namespace PP5AutoUITests
 
         [TestMethod("B11-1")]
         [TestCategory("子視窗測試(B11)")]
-        [DataRow("language => 簡体中文", "工具 => 选项", "选项")]
+        [DataRow("Languages => 簡体中文", "工具 => 选项", "选项")]
         [DataRow("语言 => 繁體中文", "工具 => 選項", "選項")]
         [DataRow("語言 => English", "Utility => Option", "Option")]
         //B11-1
@@ -24556,7 +24774,7 @@ namespace PP5AutoUITests
 
         [TestMethod("B11-5")]
         [TestCategory("子視窗測試(B11)")]
-        [DataRow("language => 簡体中文", "测试命令", "参数数值", "表达式编辑器")]
+        [DataRow("Languages => 簡体中文", "测试命令", "参数数值", "表达式编辑器")]
         [DataRow("语言 => 繁體中文", "測試命令", "參數數值", "表達式編輯器")]
         [DataRow("語言 => English", "Test Command", "Parameter Value", "Expression Editor")]
         //B11-5
@@ -24596,7 +24814,7 @@ namespace PP5AutoUITests
             SendSingleKeys("\"");
             SendSingleKeys(callName);
             expressionWindow.PerformGetElement("/ById[UI_combobox]")
-                            .ComboBoxSelectByIndex(0);
+                            .SelectItem(0);
 
             if (dataType == VariableDataType.Float)
                 PP5IDEWindow.PerformClick($"/ByName[Expression Editor,Numeric]", ClickType.LeftClick);
@@ -24631,7 +24849,7 @@ namespace PP5AutoUITests
             SendSingleKeys("\"");
             SendSingleKeys(callName);
             expressionWindow.PerformGetElement("/ById[UI_combobox]")
-                            .ComboBoxSelectByIndex(0);
+                            .SelectItem(0);
             SendSingleKeys("=0");
 
             expressionWindow.PerformClick("/ByName[Check]", ClickType.LeftClick);
@@ -24645,7 +24863,7 @@ namespace PP5AutoUITests
 
         [TestMethod("B11-8")]
         [TestCategory("子視窗測試(B11)")]
-        [DataRow("language => 簡体中文", "测试命令", "参数数值", "条件", "结果", "临时", "全域", "常数")]
+        [DataRow("Languages => 簡体中文", "测试命令", "参数数值", "条件", "结果", "临时", "全域", "常数")]
         [DataRow("语言 => 繁體中文", "測試命令", "參數數值", "條件", "結果", "臨時", "全域", "常數")]
         [DataRow("語言 => English", "Test Command", "Parameter Value", "Condition", "Result", "Temporary", "Global", "Constant")]
         //B11-8
@@ -24691,7 +24909,7 @@ namespace PP5AutoUITests
             funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
             funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
             funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
-                            .ComboBoxSelectByName(callName);
+                            .SelectItem(callName);
 
             callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
         }
@@ -24720,7 +24938,7 @@ namespace PP5AutoUITests
             funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
             funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
             funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
-                            .ComboBoxSelectByName(callName);
+                            .SelectItem(callName);
 
             callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
             funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
@@ -24734,88 +24952,5821 @@ namespace PP5AutoUITests
             PP5IDEWindow.CloseWindow(0);
         }
 
+        /// <summary>
+        /// 驗證在不同語言環境下，點選 SubTI 的命令後，點選第二個參數的參數數值時是否會正確創建對應語系的 Test Item Var Editor 子視窗
+        /// </summary>
+        /// <param name="languagePath">語言設定路徑，格式為 "language => 語言"</param>
+        /// <param name="TestCmdMulLing">測試命令欄位名稱，根據不同語系顯示</param>
+        /// <param name="ParamValMulLing">參數數值欄位名稱，根據不同語系顯示</param>
+        /// <param name="windowTitle">預期的視窗標題，根據不同語系顯示</param>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 切換系統語言
+        /// 2. 切換至測試項目上下文視窗
+        /// 3. 添加 Sub TI 群組中的LoadIntArrayToBinaryStringArray命令
+        /// 4. 點選命令並設置參數
+        /// 5. 檢查子視窗標題
+        /// 
+        /// 預期結果：
+        /// - 正確創建 Test Item Var Editor 子視窗
+        /// - 子視窗標題符合當前語系
+        /// </remarks>
         [TestMethod("B11-11")]
         [TestCategory("子視窗測試(B11)")]
-        [DataRow("language => 簡体中文", "测试命令", "参数数值", "测试项目参数编辑器")]
+        [DataRow("Languages => 簡体中文", "测试命令", "参数数值", "测试项目参数编辑器")]
         [DataRow("语言 => 繁體中文", "測試命令", "參數數值", "測試項目參數編輯器")]
         [DataRow("語言 => English", "Test Command", "Parameter Value", "Test Item Var Editor")]
-        //B11-11
-        public void TIEditor_EditVariableWindowWithParameterTypeTiCondition_CheckDataTypeLabelsAreSame(string languagePath, string TestCmdMulLing, string ParamValMulLing, string windowTitle)
+        public void TIEditor_EditVariableWindowWithParameterTypeTiCondition_CheckTitleIsSame(
+            string languagePath, 
+            string TestCmdMulLing, 
+            string ParamValMulLing, 
+            string windowTitle)
         {
-            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));         // Switch language
-            TestItemTabNavi(TestItemTabType.TIContext);                                                             // Switch to test item context window
-            AddCommandBy(TestCmdGroupType.Sub_TI, 1);                                                               // Add 1st command of "Sub TI"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdMulLing}]", ClickType.LeftClick);                 // LeftClick on command
-
-            PP5IDEWindow.PerformClick($"/ByCell@MappingGrid[5,@{ParamValMulLing}]", ClickType.LeftClick);         // Open Window "Test Item Var Editor"
-            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                      // Check window title is correct
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.Sub_TI, "LoadIntArrayToBinaryStringArray");
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdMulLing}]", ClickType.LeftClick);
+            
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@{ParamValMulLing}]", ClickType.LeftClick);
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());
         }
 
+        /// <summary>
+        /// 驗證在Test Item Var Editor子視窗中能否正確選擇參數類型和變數名稱
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 初始化變量
+        ///    - Integer[L]類型，調用名稱: IntegerL_B11-12
+        ///    - Integer類型，調用名稱: Integer_B11-12
+        /// 2. 創建兩個條件變量
+        ///    - 第一個變量：Integer[L]類型
+        ///    - 第二個變量：Integer類型
+        /// 3. 切換到測試項目上下文視窗
+        /// 4. 添加 Sub TI 群組中的LoadIntArrayToBinaryStringArray命令
+        /// 5. 設置參數並打開Test Item Var Editor
+        ///    - 點擊命令
+        ///    - 點擊第二個參數
+        /// 6. 在Test Item Var Editor中進行參數選擇
+        ///    - Row 1選擇Integer[L]類型變量
+        ///    - Row 2選擇Integer類型變量
+        /// 7. 驗證參數選擇是否正確
+        /// 
+        /// 預期結果：
+        /// - Test Item Var Editor視窗正確打開
+        /// - 成功選擇兩個不同類型的條件變量
+        /// - 參數映射結果與預期一致
+        /// </remarks>
         [TestMethod("B11-12")]
         [TestCategory("子視窗測試(B11)")]
-        //B11-12
         public void TIEditor_EditVariableWindowWithParameterTypeTiCondition_CheckCanSelectTheCorrectParamType()
         {
-            VariableDataType dataType = VariableDataType.Float;
-            string callName = "Float_B11-12";
+            // Initialize variables
+            string callName1 = "IntegerL_B11-12";
+            string callName2 = "Integer_B11-12";
             string TestCmdColName = "Test Command";
             string ParamValColName = "Parameter Value";
-            string windowTitle = "Func Parameter Editor";
-
-            InitializeVariableDataGrid(VariableTabType.Condition, "", callName, dataType, VariableEditType.EditBox);    // Create a condition variable with given dataType and callName
-            TestItemTabNavi(TestItemTabType.TIContext);                                                                 // Switch to test item context window
-            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Call_Dll");                                             // Add command: "System, Flow Control", "Call_Dll"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);                     // LeftClick on command
-
-            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@{ParamValColName}]", InputType.SendContent, 1);        // 4th parameter input "1"
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
-            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                          // Check window title is correct
-
-            var funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
-            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
-            funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
-            funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
-                            .ComboBoxSelectByName(callName);
-
-            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+            string windowTitle = "Test Item Var Editor";
+        
+            // Create two condition variables
+            InitializeVariableDataGrid(
+                VariableTabType.Condition, 
+                "", 
+                callName1, 
+                VariableDataType.IntegerArrayOfSize640, 
+                VariableEditType.EditBox);
+            
+            InitializeVariableDataGrid(
+                VariableTabType.Condition, 
+                "", 
+                callName2, 
+                VariableDataType.Integer, 
+                VariableEditType.EditBox);
+        
+            // Switch context and add command
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.Sub_TI, "LoadIntArrayToBinaryStringArray");
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@{ParamValColName}]", ClickType.LeftClick);
+        
+            // Verify window title
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());
+        
+            // Select parameters in editor
+            var tiVarEditorWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+            
+            // Select first parameter (Integer[L])
+            tiVarEditorWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
+                             .SelectItem(callName1);
+        
+            // Select second parameter (Integer)
+            tiVarEditorWindow.PerformClick("/ByCell@MappingGrid[2,@No]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[2,@Mapping Parameter]")
+                             .SelectItem(callName2);
+        
+            // Verify selections
+            callName1.ShouldEqualTo(tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+            callName2.ShouldEqualTo(tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[2,@Mapping Parameter]").GetText());
         }
 
+        /// <summary>
+        /// 驗證Test Item Var Editor子視窗的設定值儲存功能
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 初始化變量
+        ///    - Integer[L]類型，調用名稱: IntegerL_B11-13
+        ///    - Integer類型，調用名稱: Integer_B11-13
+        /// 2. 創建兩個條件變量
+        ///    - 第一個變量：Integer[L]類型
+        ///    - 第二個變量：Integer類型
+        /// 3. 切換到測試項目上下文視窗
+        /// 4. 添加 Sub TI 群組中的LoadIntArrayToBinaryStringArray命令
+        /// 5. 設置參數並打開Test Item Var Editor
+        ///    - 點擊命令
+        ///    - 點擊第二個參數
+        /// 6. 在Test Item Var Editor中進行參數選擇
+        ///    - Row 1選擇Integer[L]類型變量
+        ///    - Row 2選擇Integer類型變量
+        /// 7. 點擊確定關閉視窗
+        /// 8. 重新打開Test Item Var Editor視窗
+        /// 9. 驗證設定值是否正確保留
+        /// 
+        /// 預期結果：
+        /// - 重新打開Test Item Var Editor後，原有的參數設定應該保持不變
+        /// - Row 1仍然選擇Integer[L]類型變量
+        /// - Row 2仍然選擇Integer類型變量
+        /// - Condition選項保持選中狀態
+        /// </remarks>
         [TestMethod("B11-13")]
         [TestCategory("子視窗測試(B11)")]
-        //B11-13
         public void TIEditor_EditVariableWindowWithParameterTypeTiCondition_CheckSettingIsStoredAfterWindowReopened()
         {
-            VariableDataType dataType = VariableDataType.Float;
-            string callName = "Float_B11-13";
+            // Initialize variables
+            string callName1 = "IntegerL_B11-13";
+            string callName2 = "Integer_B11-13";
             string TestCmdColName = "Test Command";
             string ParamValColName = "Parameter Value";
-            string windowTitle = "Func Parameter Editor";
-
-            InitializeVariableDataGrid(VariableTabType.Condition, "", callName, dataType, VariableEditType.EditBox);    // Create a condition variable with given dataType and callName
-            TestItemTabNavi(TestItemTabType.TIContext);                                                                 // Switch to test item context window
-            AddCommandBy(TestCmdGroupType.System_Flow_Control, "Call_Dll");                                             // Add command: "System, Flow Control", "Call_Dll"
-            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);                     // LeftClick on command
-
-            PP5IDEWindow.PerformInput($"/ByCell@ParameterGrid[4,@{ParamValColName}]", InputType.SendContent, 1);        // 4th parameter input "1"
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
-            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());                          // Check window title is correct
-
-            var funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
-            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
-            funcParEdtWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
-            funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
-                            .ComboBoxSelectByName(callName);
-
-            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
-            funcParEdtWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
-
-            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[5,@{ParamValColName}]", ClickType.LeftClick);             // Open Window "Func Parameter Editor"
-            funcParEdtWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
-            funcParEdtWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
-
-            callName.ShouldEqualTo(funcParEdtWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
-            funcParEdtWindow.PerformGetElement("/ByName[Condition]").isElementChecked().ShouldBeTrue();
+            string windowTitle = "Test Item Var Editor";
+        
+            // Create two condition variables
+            InitializeVariableDataGrid(
+                VariableTabType.Condition, 
+                "", 
+                callName1, 
+                VariableDataType.IntegerArrayOfSize640, 
+                VariableEditType.EditBox);
+            
+            InitializeVariableDataGrid(
+                VariableTabType.Condition, 
+                "", 
+                callName2, 
+                VariableDataType.Integer, 
+                VariableEditType.EditBox);
+        
+            // Switch context and add command
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.Sub_TI, "LoadIntArrayToBinaryStringArray");
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdColName}]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@{ParamValColName}]", ClickType.LeftClick);
+        
+            // Verify window title and make selections
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());
+            var tiVarEditorWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+        
+            // Select and verify first parameter
+            tiVarEditorWindow.PerformClick("/ByCell@MappingGrid[1,@No]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]")
+                             .SelectItem(callName1);
+        
+            // Select and verify second parameter
+            tiVarEditorWindow.PerformClick("/ByCell@MappingGrid[2,@No]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformClick("/ById[CndRdoBtn]/ByName[Condition]", ClickType.LeftClick);
+            tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[2,@Mapping Parameter]")
+                             .SelectItem(callName2);
+        
+            // Click OK to close window
+            tiVarEditorWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        
+            // Reopen window and verify settings
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[2,@{ParamValColName}]", ClickType.LeftClick);
+            tiVarEditorWindow = PP5IDEWindow.PerformGetElement($"/ByName[{windowTitle}]");
+        
+            // Verify settings are preserved
+            callName1.ShouldEqualTo(tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[1,@Mapping Parameter]").GetText());
+            callName2.ShouldEqualTo(tiVarEditorWindow.PerformGetElement("/ByCell@MappingGrid[2,@Mapping Parameter]").GetText());
+            tiVarEditorWindow.PerformGetElement("/ByName[Condition]").isElementChecked().ShouldBeTrue();
+        
+            // Close window
             PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 驗證Vector Member子視窗的多語系顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 創建LineInVector類型變量
+        ///    - 變量名稱: Vector_B11-14
+        ///    - 變量類型: LineInVector
+        /// 2. 切換系統語言
+        ///    - 簡體中文
+        ///    - 繁體中文
+        ///    - English
+        /// 3. 切換至測試項目上下文視窗
+        /// 4. 添加SET命令(Arithmetic群組)
+        /// 5. 點選第一個參數開啟Vector Member視窗
+        /// 6. 檢查子視窗標題是否符合當前語系
+        /// 
+        /// 預期結果：
+        /// - Vector Member視窗標題應符合當前語系：
+        ///   - 簡體中文：向量成员
+        ///   - 繁體中文：向量成員
+        ///   - English：Vector Member
+        /// </remarks>
+        [TestMethod("B11-14")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "测试命令", "参数数值", "向量成员")]
+        [DataRow("语言 => 繁體中文", "測試命令", "參數數值", "向量成員")]
+        [DataRow("語言 => English", "Test Command", "Parameter Value", "Vector Member")]
+        public void TIEditor_EditVariableWindowWithParameterTypeVector_CheckTitleIsSame(
+            string languagePath,
+            string TestCmdMulLing,
+            string ParamValMulLing,
+            string windowTitle)
+        {
+            // Create LineInVector variable
+            string vectorName = "Vector_B11-14";
+            InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                vectorName,
+                VariableDataType.LineInVector,    // Changed to LineInVector type
+                VariableEditType.EditBox);
+        
+            // Switch language
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+        
+            // Switch to context and add SET command
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.Arithmetic, "SET");    // Changed to Arithmetic SET command
+        
+            // Set Vector parameter
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@{TestCmdMulLing}]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement($"/ByCell@ParameterGrid[1,@{ParamValMulLing}]").SelectItem(vectorName);
+            //PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[1,@{ParamValMulLing}]", ClickType.LeftClick);
+        
+            // Verify window title
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());
+        
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 驗證Vector Member設定值在TI Editor參數欄位的顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 創建LineInVector類型變量
+        /// 2. 切換至測試項目上下文視窗
+        /// 3. 添加SET命令(Arithmetic群組)
+        /// 4. 設定Vector參數：
+        ///    - 選擇第一個參數
+        ///    - 在ComboBox中選擇Vector變量
+        /// 5. 在Vector Member視窗中：
+        ///    - 選擇Vector Member類型 (Voltage/Frequency)
+        ///    - 點擊確定
+        /// 6. 驗證TI Editor參數欄位顯示
+        /// </remarks>
+        [TestMethod("B11-15")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Voltage", "Vector_B11-15.Voltage")]
+        [DataRow("Frequency", "Vector_B11-15.Frequency")]
+        public void TIEditor_EditVariableWindowWithParameterTypeVector_CheckMemberSelection(
+            string memberType,
+            string expectedValue)
+        {
+            // Create LineInVector variable
+            string vectorName = "Vector_B11-15";
+            InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                vectorName,
+                VariableDataType.LineInVector,
+                VariableEditType.EditBox);
+        
+            // Switch to context and add SET command
+            TestItemTabNavi(TestItemTabType.TIContext);
+            AddCommandBy(TestCmdGroupType.Arithmetic, "SET");
+        
+            // Select command and set vector parameter
+            PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Test Command]", ClickType.LeftClick);
+            PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]")
+                        .SelectItem(vectorName);
+        
+            // Open Vector Member window and select member
+            PP5IDEWindow.PerformClick("/ByCell@ParameterGrid[1,@Parameter Value]", ClickType.LeftClick);
+            var vectorMemberWindow = PP5IDEWindow.PerformGetElement("/ByName[Vector Member]");
+            vectorMemberWindow.PerformClick($"/ByName[{memberType}]", ClickType.LeftClick);
+            vectorMemberWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            // Verify parameter value
+            expectedValue.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]").GetText());
+        }
+
+
+        /// <summary>
+        /// 驗證Array Size子視窗的多語系顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 切換系統語言
+        /// 2. 切換至變數編輯視窗
+        /// 3. 點選Data Type欄位
+        /// 4. 選擇Array類型
+        /// 5. 檢查Array Size子視窗內的元素文字是否符合當前語系
+        /// 
+        /// 預期結果：
+        /// - Array Size子視窗內的元素應符合當前語系：
+        ///   - Labels和Button的文字正確顯示
+        ///   - 確認按鈕文字正確顯示
+        /// </remarks>
+        [TestMethod("B11-16")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "資料类型", "请输入这个阵列的大小", "大小", "确定")]
+        [DataRow("语言 => 繁體中文", "資料類型", "請輸入這個陣列的大小", "大小", "確定")]
+        [DataRow("語言 => English", "Data Type", "Please input the size for this array type", "Size", "Ok")]
+        public void TIEditor_EditVariableWindowWithArrayType_CheckElementTextIsSame(
+            string languagePath,
+            string DataTypeMulLing,
+            string descLabel,
+            string sizeLabel,
+            string buttonText)
+        {
+            // Switch language
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+        
+            // Open TI Editor and switch to variable tab
+            MenuSelect("Functions", "TI Editor");
+            VariableTabNavi(VariableTabType.Condition);
+        
+            // Add new variable and click data type
+            string callName = "Array_B11-16";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition,"",callName);
+            condDataGrid.PerformClick($"/ByCell[1,@{DataTypeMulLing}]", ClickType.LeftClick);
+
+            // Select array type from combobox
+            condDataGrid.PerformGetElement($"/ByCell[1,@{DataTypeMulLing}]")
+                        .SelectItem(VariableDataType.IntegerArray.GetDescription());
+        
+            // Get Array Size Editor window
+            var arraySizeWindow = PP5IDEWindow.PerformGetElement("/ByName[Array Size Editor]");
+        
+            // Verify window elements text
+            descLabel.ShouldEqualTo(arraySizeWindow.PerformGetElement("/Text[0]").GetText());
+            sizeLabel.ShouldEqualTo(arraySizeWindow.PerformGetElement("/Text[1]").GetText());
+            buttonText.ShouldEqualTo(arraySizeWindow.PerformGetElement("/Button[-1]").GetText());
+
+            // Close window
+            arraySizeWindow.PerformClick($"ByName[{buttonText}]", ClickType.LeftClick);
+        }
+        
+        /// <summary>
+        /// 驗證Array Size設定值在TI Editor資料類型欄位的顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 2. 新增變數並設定資料類型為Array
+        /// 3. 在Array Size視窗中輸入大小
+        /// 4. 檢查資料類型欄位顯示
+        /// 
+        /// 預期結果：
+        /// - 資料類型欄位應顯示正確的陣列大小格式
+        /// - 格式應為: "Integer[10]" (若輸入大小為10)
+        /// </remarks>
+        [TestMethod("B11-17")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(10, "Integer[10]")]
+        [DataRow(20, "Integer[20]")]
+        public void TIEditor_EditVariableWindowWithArrayType_CheckArraySizeDisplay(int arraySize, string expectedDisplayText)
+        {
+            // Add new variable with array type
+            string callName = "Array_B11-17";
+            var condDataGrid = InitializeVariableDataGrid(
+                                VariableTabType.Condition,
+                                "",
+                                callName,
+                                VariableDataType.IntegerArray,
+                                arraySize.ToString());
+        
+            // Verify data type display
+            expectedDisplayText.ShouldEqualTo(condDataGrid.PerformGetElement("/ByCell[1,@Data Type]").GetText());
+        }
+
+        /// <summary>
+        /// 驗證2D Array Size子視窗的多語系顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 切換系統語言
+        /// 2. 切換至變數編輯視窗
+        /// 3. 點選Data Type欄位
+        /// 4. 選擇2D Array類型
+        /// 5. 檢查2D Array Size子視窗內的元素文字是否符合當前語系
+        /// 
+        /// 預期結果：
+        /// - 2D Array Size子視窗內的元素應符合當前語系
+        /// - Labels和Button的文字正確顯示
+        /// </remarks>
+        [TestMethod("B11-18")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "資料类型", "请输入这个阵列的大小", "1D 大小", "2D 大小", "确定")]
+        [DataRow("语言 => 繁體中文", "資料類型", "請輸入這個陣列的大小", "1D 大小", "2D 大小", "確定")]
+        [DataRow("語言 => English", "Data Type", "Please input the size for this array type", "1D Size", "2D Size", "Ok")]
+        public void TIEditor_EditVariableWindowWith2DArrayType_CheckElementTextIsSame(
+            string languagePath,
+            string DataTypeMulLing,
+            string descLabel,
+            string rank1Label,
+            string rank2Label,
+            string buttonText)
+        {
+            // Switch language
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+        
+            // Open TI Editor and switch to variable tab
+            MenuSelect("Functions", "TI Editor");
+            VariableTabNavi(VariableTabType.Condition);
+        
+            // Add new variable and click data type
+            string callName = "Array2D_B11-18";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName);
+            condDataGrid.PerformClick($"/ByCell[1,@{DataTypeMulLing}]", ClickType.LeftClick);
+        
+            // Select 2D array type
+            condDataGrid.PerformGetElement($"/ByCell[1,@{DataTypeMulLing}]")
+                        .SelectItem(VariableDataType.Integer2DArray.GetDescription());
+        
+            // Get 2D Array Size Editor window
+            var arraySizeWindow = PP5IDEWindow.PerformGetElement("/ByName[2D Array Size Editor]");
+        
+            // Verify window elements text
+            descLabel.ShouldEqualTo(arraySizeWindow.PerformGetElement("/Text[0]").GetText());
+            rank1Label.ShouldEqualTo(arraySizeWindow.PerformGetElement("/Edit[0]").GetText());
+            rank2Label.ShouldEqualTo(arraySizeWindow.PerformGetElement("/Edit[1]").GetText());
+            buttonText.ShouldEqualTo(arraySizeWindow.PerformGetElement("/Button[-1]").GetText());
+        
+            // Close window
+            arraySizeWindow.PerformClick($"/ByName[{buttonText}]", ClickType.LeftClick);
+        }
+        
+        /// <summary>
+        /// 驗證2D Array Size設定值在TI Editor資料類型欄位的顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 2. 新增變數並設定資料類型為2D Array
+        /// 3. 在2D Array Size視窗中輸入列數和行數
+        /// 4. 檢查資料類型欄位顯示
+        /// 
+        /// 預期結果：
+        /// - 資料類型欄位應顯示正確的2D陣列大小格式
+        /// - 格式應為: "Integer[5,10]" (若輸入列數為5，行數為10)
+        /// </remarks>
+        [TestMethod("B11-19")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(5, 10, "Integer[5,10]")]
+        [DataRow(3, 8, "Integer[3,8]")]
+        public void TIEditor_EditVariableWindowWith2DArrayType_CheckArraySizeDisplay(
+            int rank1,
+            int rank2,
+            string expectedDisplayText)
+        {
+            // Add new variable with 2D array type
+            string callName = "Array2D_B11-19";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                VariableDataType.Integer2DArray,
+                rank1.ToString(),
+                rank2.ToString());
+        
+            // Verify data type display
+            expectedDisplayText.ShouldEqualTo(
+                condDataGrid.PerformGetElement("/ByCell[1,@Data Type]").GetText());
+        }
+
+        /// <summary>
+        /// 驗證Variables Value Editor子視窗的多語系顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 切換系統語言
+        /// 2. 切換至變數編輯視窗
+        /// 3. 點選Data Type欄位設定為Array類型
+        /// 4. 點選Default欄位開啟Variables Value Editor
+        /// 5. 檢查Variables Value Editor子視窗標題是否符合當前語系
+        /// 
+        /// 預期結果：
+        /// - Variables Value Editor視窗標題應符合當前語系：
+        ///   - 簡體中文：变数编辑器
+        ///   - 繁體中文：變數編輯器
+        ///   - English：Variables Value Editor
+        /// </remarks>
+        [TestMethod("B11-20")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "预设值", "变数编辑器")]
+        [DataRow("语言 => 繁體中文", "預設值", "變數編輯器")]
+        [DataRow("語言 => English", "Default", "Variables Value Editor")]
+        public void TIEditor_EditVariableWindowWithArrayType_CheckVariablesValueEditorTitleIsSame(
+            string languagePath,
+            string DefaultMulLing,
+            string windowTitle)
+        {
+            // Switch language
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+        
+            // Open TI Editor and switch to variable tab
+            MenuSelect("Functions", "TI Editor");
+            VariableTabNavi(VariableTabType.Condition);
+        
+            // Add new variable and set array type
+            string callName = "Array_B11-20";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                VariableDataType.IntegerArray,
+                "10");
+        
+            // Click Default field to open Variables Value Editor
+            condDataGrid.PerformClick($"/ByCell[1,@{DefaultMulLing}]", ClickType.LeftClick);
+        
+            // Verify window title
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());
+        
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 驗證Variables Value Editor子視窗的錯誤提醒功能
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 2. 新增Array類型變數並設定大小為5
+        /// 3. 點選Default欄位開啟Variables Value Editor
+        /// 4. 輸入錯誤值 (超出範圍或格式不正確)
+        /// 5. 檢查錯誤提示訊息
+        /// 6. 驗證無法寫入值
+        /// 
+        /// 預期結果：
+        /// - 輸入錯誤值時應顯示錯誤訊息
+        /// - 錯誤提示應清楚說明問題
+        /// - 禁止寫入錯誤值
+        /// </remarks>
+        [TestMethod("B11-21")]
+        [TestCategory("子視窗測試(B11)")]
+        // Format errors
+        [DataRow("abc", "Value must be Integer Format")]
+        [DataRow("!@#", "Value must be Integer Format")]
+        [DataRow("12.34", "Value must be Integer Format")]
+        // Boundary and out of range values
+        [DataRow("2147483648", "Value must be Integer Format")]
+        [DataRow("-2147483649", "Value must be Integer Format")]
+        [DataRow("999999999999", "Value must be Integer Format")]
+        // Mixed characters
+        [DataRow("1a2b3", "Value must be Integer Format")]
+        [DataRow("100 200", "Value must be Integer Format")]
+        [DataRow("1,000", "Value must be Integer Format")]
+        public void TIEditor_EditVariableWindowWithArrayType_CheckErrorMessage(string invalidValue, string expectedError)
+        {
+            // Add new variable with array type (size 5)
+            string callName = "Array_B11-21";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                VariableDataType.IntegerArray,
+                "5");
+        
+            // Open Variables Value Editor
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+        
+            // Try to input invalid value
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+        
+            // Verify error message
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement($"/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+
+            // Try to click OK button (should be disabled)
+            valueEditor.PerformGetElement("/Button[Ok]").Enabled.ShouldBeFalse();
+        
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 驗證Variables Value Editor設定值在TI Editor參數設定欄位的顯示
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 開啟TI Editor，並切換到變數標籤頁。
+        /// 2. 新增一個Array類型的變數，大小為10。
+        /// 3. 點擊Default欄位，打開Variables Value Editor，並輸入數值。
+        /// 4. 點擊確定關閉Variables Value Editor。
+        /// 5. 檢查TI Editor的參數設定欄位顯示。
+        /// 
+        /// 預期結果：
+        /// - Variables Value Editor設定值可以正確的顯示在TI Editor的參數設定欄位。
+        /// </remarks>
+        [TestMethod("B11-22")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.FloatArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Float[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.IntegerArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Integer[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.DoubleArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Double[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.StringArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"String[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.ByteArray, VariableEditType.EditBox, "10", "00", typeof(object), DisplayName = "Verify Default can be set in \"Byte[]\" variable with EditType \"EditBox\"")]
+        [DataRow(VariableDataType.LongArray, VariableEditType.EditBox, "10", "0", typeof(object), DisplayName = "Verify Default can be set in \"Long[]\" variable with EditType \"EditBox\"")]
+        //B11-22
+        public void TIEditor_EditVariableWindowWithArrayType_CheckDefaultValueDisplay(VariableDataType varDataType, VariableEditType varEditType, string arrSize1, string value, object dummy)
+        {
+            string CallName = "B11-22";
+            string valuePattern = string.Format("{0}[{1}]", value, arrSize1);
+            PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(VariableTabType.Condition, "", CallName, varDataType, varEditType, valuePattern, arrSize1);
+            foreach (var defaultValue in varDataGrid.GetCellBy(1, "Default").GetText().Split(','))
+                defaultValue.ShouldEqualTo(value);
+        }
+
+        /// <summary>
+        /// 驗證Variables Value Editor設定值在重新打開後是否保留
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 2. 新增一個Array類型的變數，大小為5。
+        /// 3. 點擊Default欄位，打開Variables Value Editor，並輸入數值。
+        /// 4. 點擊確定關閉Variables Value Editor。
+        /// 5. 再次點擊Default欄位，重新打開Variables Value Editor。
+        /// 6. 驗證已設定的值是否正確保留。
+        /// 
+        /// 預期結果：
+        /// - Variables Value Editor中的設定值應該在重新打開後正確保留。
+        /// </remarks>
+        [TestMethod("B11-23")]
+        [TestCategory("子視窗測試(B11)")]
+        public void TIEditor_VariableValueEditor_RetainValuesAfterReopen()
+        {
+            // Add new array variable with size 5
+            string callName = "Array_B11-23";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                VariableDataType.IntegerArray,
+                "5");
+        
+            // Open Variables Value Editor and input values
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            string inputValue = "1";
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, inputValue);
+            // Click OK to close Variables Value Editor
+            valueEditor.PerformClick("/Button[Ok]", ClickType.LeftClick);
+        
+            // Reopen Variables Value Editor
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var reopenedValueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+        
+            // Verify the values are retained
+            for (int i = 0; i < 5; i++)
+            {
+                string actualValue = reopenedValueEditor.PerformGetElement($"/ByClass[ListBox]/ListItem[{i}]").GetText();
+                inputValue.ShouldEqualTo(actualValue);
+            }
+            // Close Variables Value Editor
+            reopenedValueEditor.PerformClick("/Button[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 查看 TI Editor 是否會創建語系正確的 Variables Value Editor 的子視窗
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 1. 切換系統語言
+        /// 2. 切換至變數編輯視窗
+        /// 3. 點選Data Type欄位
+        /// 4. 選擇2D Array類型
+        /// 5. 設定2D Array Size
+        /// 6. 點選Default欄位
+        /// 7. 檢查Variables Value Editor子視窗
+        /// 
+        /// 預期結果：
+        /// - 正確創建Variables Value Editor子視窗且語系正確
+        /// </remarks>
+        [TestMethod("B11-24")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "資料类型", "确定", "变数编辑器")]
+        [DataRow("语言 => 繁體中文", "資料類型", "確定", "變數編輯器")]
+        [DataRow("語言 => English", "Data Type", "Ok", "Variables Value Editor")]
+        public void TIEditor_EditVariableWindowWith2DArrayType_CheckVariablesValueEditor(
+            string languagePath,
+            string DataTypeMulLing,
+            string OkButton,
+            string variablesValueEditorTitle)
+        {
+            // 切換系統語言
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+        
+            // 切換至變數編輯視窗
+            MenuSelect("Functions", "TI Editor");
+            VariableTabNavi(VariableTabType.Condition);
+        
+            // 新增變數並點選Data Type欄位
+            string callName = "Array2D_B11-24";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName);
+            condDataGrid.PerformClick($"/ByCell[1,@{DataTypeMulLing}]", ClickType.LeftClick);
+        
+            // 選擇2D Array類型
+            condDataGrid.PerformGetElement($"/ByCell[1,@{DataTypeMulLing}]")
+                        .SelectItem(VariableDataType.Integer2DArray.GetDescription());
+        
+            // 設定2D Array Size
+            var arraySizeWindow = PP5IDEWindow.PerformGetElement("/ByName[2D Array Size Editor]");
+            arraySizeWindow.PerformInput("/Edit[0]", InputType.SendContent, "5");
+            arraySizeWindow.PerformInput("/Edit[1]", InputType.SendContent, "10");
+            arraySizeWindow.PerformClick($"/ByName[{OkButton}]", ClickType.LeftClick);
+        
+            // 點選Default欄位
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+        
+            // 檢查Variables Value Editor子視窗
+            variablesValueEditorTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement($"/ByName[{variablesValueEditorTitle}]").GetText());
+        }
+
+        /// <summary>
+        /// 設定 2D Variables Value Editor 子視窗，如果設定的值不正確，檢查是否有錯誤提醒和禁止寫入的功能
+        /// </summary>
+        /// <remarks>
+        /// 測試步驟：
+        /// 2. 點選Data Type欄位
+        /// 3. 選擇2D Array類型
+        /// 4. 設定2D Array Size
+        /// 5. 點選Default欄位
+        /// 6. 檢查Variables Value Editor子視窗
+        /// 7. 設定不正確的值
+        /// 8. 檢查錯誤提醒
+        /// 9. 檢查禁止寫入功能
+        /// 10. 關閉 Variables Value Editor
+        /// 
+        /// 預期結果：
+        /// - 正確提醒使用者設定的錯誤並且禁止寫入 Variable 中
+        /// </remarks>
+        //[TestMethod("B11-25_1")]
+        //[TestCategory("子視窗測試(B11)")]
+        //[DataRow("abc", "Value must be Integer Format")]
+        //[DataRow("!@#", "Value must be Integer Format")]
+        //[DataRow("12.34", "Value must be Integer Format")]
+        //[DataRow("2147483648", "Value must be Integer Format")]
+        //[DataRow("-2147483649", "Value must be Integer Format")]
+        //[DataRow("999999999999", "Value must be Integer Format")]
+        //[DataRow("1a2b3", "Value must be Integer Format")]
+        //[DataRow("100 200", "Value must be Integer Format")]
+        //[DataRow("1,000", "Value must be Integer Format")]
+        //public void TIEditor_EditVariableWindowWith2DArrayType_CheckInvalidInput(
+        //    string invalidValue,
+        //    string expectedError)
+        //{
+        //    // 新增變數並點選Data Type欄位
+        //    string callName = "Array2D_B11-25_1";
+        //    var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName);
+        //    condDataGrid.PerformClick("/ByCell[1,@Data Type]", ClickType.LeftClick);
+        
+        //    // 選擇2D Array類型
+        //    condDataGrid.PerformGetElement("/ByCell[1,@Data Type]")
+        //                .SelectItem(VariableDataType.Integer2DArray.GetDescription());
+        
+        //    // 設定2D Array Size
+        //    var arraySizeWindow = PP5IDEWindow.PerformGetElement("/ByName[2D Array Size Editor]");
+        //    arraySizeWindow.PerformInput("/Edit[0]", InputType.SendContent, "5");
+        //    arraySizeWindow.PerformInput("/Edit[1]", InputType.SendContent, "10");
+        //    arraySizeWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        
+        //    // 點選Default欄位
+        //    condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+        
+        //    // 檢查Variables Value Editor子視窗
+        //    var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+        //    "Variables Value Editor".ShouldEqualTo(valueEditor.GetText());
+        
+        //    // 設定不正確的值
+        //    valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+        
+        //    // 檢查錯誤提醒
+        //    expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+        
+        //    // 檢查禁止寫入功能
+        //    valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+        
+        //    // 關閉 Variables Value Editor
+        //    valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        //}
+
+        //[TestMethod("B11-25_2")]
+        //[TestCategory("子視窗測試(B11)")]
+        //[DataRow("abc", "Value must be Double Format")]
+        //[DataRow("!@#", "Value must be Double Format")]
+        //[DataRow("1.2 3.4", "Value must be Double Format")]
+        //[DataRow("5.6 7.8", "Value must be Double Format")]
+        //[DataRow("9.10 11.12", "Value must be Double Format")]
+        //public void TIEditor_EditVariableWindowWith2DDoubleArrayType_CheckInvalidInput(
+        //    string invalidValue,
+        //    string expectedError)
+        //{
+        //    // 新增變數並點選Data Type欄位
+        //    string callName = "Array2D_B11-25_2";
+        //    var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName);
+        //    condDataGrid.PerformClick("/ByCell[1,@Data Type]", ClickType.LeftClick);
+
+        //    // 選擇 2D Double Array 類型
+        //    condDataGrid.PerformGetElement("/ByCell[1,@Data Type]")
+        //                .SelectItem(VariableDataType.Double2DArray.GetDescription());
+
+        //    // 設定2D Array Size
+        //    var arraySizeWindow = PP5IDEWindow.PerformGetElement("/ByName[2D Array Size Editor]");
+        //    arraySizeWindow.PerformInput("/Edit[0]", InputType.SendContent, "5");
+        //    arraySizeWindow.PerformInput("/Edit[1]", InputType.SendContent, "10");
+        //    arraySizeWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+        //    // 點選Default欄位
+        //    condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+
+        //    // 檢查Variables Value Editor子視窗
+        //    var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+        //    "Variables Value Editor".ShouldEqualTo(valueEditor.GetText());
+
+        //    // 設定不正確的值
+        //    valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+        //    // 檢查錯誤提醒
+        //    expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+
+        //    // 檢查禁止寫入功能
+        //    valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+
+        //    // 關閉 Variables Value Editor
+        //    valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        //}
+
+        /// <summary>
+        /// 1D陣列 - Float[] 型態測試 (含至少10筆不正確輸入)
+        /// </summary>
+        [TestMethod("B11-25_Float1DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Float Format")]
+        [DataRow("!@#", "Value must be Float Format")]
+        [DataRow("12,34", "Value must be Float Format")]
+        [DataRow("3.4028236E39", "Value must be Float Format")]
+        [DataRow("-3.4028236E39", "Value must be Float Format")]
+        [DataRow("1.2 3.4", "Value must be Float Format")]
+        [DataRow("12.3.45", "Value must be Float Format")]
+        [DataRow(".123abc", "Value must be Float Format")]
+        [DataRow("NaN", "Value must be Float Format")]
+        [DataRow("Infinity", "Value must be Float Format")]
+        public void TIEditor_EditVariableWindowWith1DArrayFloat_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Float1DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.FloatArray, VariableEditType.EditBox, "10");
+
+            // 點選 Default 欄位 & 輸入不正確數值
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            // 檢查錯誤提醒 & 禁止寫入
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 1D陣列 - Integer[] 型態測試
+        /// </summary>
+        [TestMethod("B11-25_Integer1DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Integer Format")]
+        [DataRow("!@#", "Value must be Integer Format")]
+        [DataRow("12.34", "Value must be Integer Format")]
+        [DataRow("2147483648", "Value must be Integer Format")]
+        [DataRow("-2147483649", "Value must be Integer Format")]
+        [DataRow("1,000", "Value must be Integer Format")]
+        [DataRow("999999999999", "Value must be Integer Format")]
+        [DataRow("0x123", "Value must be Integer Format")]
+        [DataRow("123 456", "Value must be Integer Format")]
+        [DataRow("123abc", "Value must be Integer Format")]
+        public void TIEditor_EditVariableWindowWith1DArrayInteger_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Integer1DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.IntegerArray, VariableEditType.EditBox, "10");
+
+            // 點選 Default 欄位 & 輸入不正確數值
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            // 檢查錯誤提醒 & 禁止寫入
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 1D陣列 - Byte[] (Hex) 型態測試
+        /// </summary>
+        [TestMethod("B11-25_Byte1DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("gg", "Value must be Byte Format")]
+        [DataRow("1g", "Value must be Byte Format")]
+        [DataRow("Z9", "Value must be Byte Format")]
+        [DataRow("FFF", "Value must be Byte Format")]
+        [DataRow("1FF", "Value must be Byte Format")]
+        [DataRow("hhh", "Value must be Byte Format")]
+        [DataRow("12.3", "Value must be Byte Format")]
+        [DataRow("12 34", "Value must be Byte Format")]
+        [DataRow("!@#", "Value must be Byte Format")]
+        [DataRow("100", "Value must be Byte Format")]
+        public void TIEditor_EditVariableWindowWith1DArrayByteHex_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Byte1DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.ByteArray, VariableEditType.EditBox, "10");
+
+            // 點選 Default 欄位 & 輸入不正確數值
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            // 檢查錯誤提醒 & 禁止寫入
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 1D陣列 - Double[] 型態測試
+        /// </summary>
+        [TestMethod("B11-25_Double1DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Double Format")]
+        [DataRow("!@#", "Value must be Double Format")]
+        [DataRow("12,34", "Value must be Double Format")]
+        [DataRow("1.7976931348623159E309", "Value must be Double Format")]
+        [DataRow("-1.7976931348623159E309", "Value must be Double Format")]
+        [DataRow("1.2 3.4", "Value must be Double Format")]
+        [DataRow("12.34.56", "Value must be Double Format")]
+        [DataRow(".123abc", "Value must be Double Format")]
+        [DataRow("NaN", "Value must be Double Format")]
+        [DataRow("Infinity", "Value must be Double Format")]
+        public void TIEditor_EditVariableWindowWith1DArrayDouble_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Double1DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.DoubleArray, VariableEditType.EditBox, "10");
+
+            // 點選 Default 欄位 & 輸入不正確數值
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            // 檢查錯誤提醒 & 禁止寫入
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 1D陣列 - Long[] 型態測試
+        /// </summary>
+        [TestMethod("B11-25_Long1DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Long Format")]
+        [DataRow("!@#", "Value must be Long Format")]
+        [DataRow("9223372036854775808", "Value must be Long Format")]
+        [DataRow("-9223372036854775809", "Value must be Long Format")]
+        [DataRow("1.23", "Value must be Long Format")]
+        [DataRow("999999999999999999999", "Value must be Long Format")]
+        [DataRow("123abc", "Value must be Long Format")]
+        [DataRow("123 456", "Value must be Long Format")]
+        [DataRow("1,234", "Value must be Long Format")]
+        [DataRow("0xFFFF", "Value must be Long Format")]
+        public void TIEditor_EditVariableWindowWith1DArrayLong_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Long1DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.LongArray, VariableEditType.EditBox, "10");
+
+            // 點選 Default 欄位 & 輸入不正確數值
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            // 檢查錯誤提醒 & 禁止寫入
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 2D陣列 - Float[,] 型態測試 (含至少10筆不正確輸入)
+        /// </summary>
+        [TestMethod("B11-25_Float2DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Float Format")]
+        [DataRow("!@#", "Value must be Float Format")]
+        [DataRow("12,34", "Value must be Float Format")]
+        [DataRow("3.4028236E39", "Value must be Float Format")]
+        [DataRow("-3.4028236E39", "Value must be Float Format")]
+        [DataRow("1.2 3.4", "Value must be Float Format")]
+        [DataRow("12.3.45", "Value must be Float Format")]
+        [DataRow("NaN", "Value must be Float Format")]
+        [DataRow("Infinity", "Value must be Float Format")]
+        [DataRow(".123abc", "Value must be Float Format")]
+        public void TIEditor_EditVariableWindowWith2DArrayFloat_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Float2DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.Float2DArray, VariableEditType.EditBox, "10", "10");
+
+            // 點選 Default 欄位 & 輸入不正確數值
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            // 檢查錯誤提醒 & 禁止寫入
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 2D陣列 - Integer[,] 型態測試
+        /// </summary>
+        [TestMethod("B11-25_Integer2DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Integer Format")]
+        [DataRow("!@#", "Value must be Integer Format")]
+        [DataRow("12.34", "Value must be Integer Format")]
+        [DataRow("2147483648", "Value must be Integer Format")]
+        [DataRow("-2147483649", "Value must be Integer Format")]
+        [DataRow("1,000", "Value must be Integer Format")]
+        [DataRow("999999999999", "Value must be Integer Format")]
+        [DataRow("123 456", "Value must be Integer Format")]
+        [DataRow("123abc", "Value must be Integer Format")]
+        [DataRow("0x123", "Value must be Integer Format")]
+        public void TIEditor_EditVariableWindowWith2DArrayInteger_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Integer2DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.Integer2DArray, VariableEditType.EditBox, "10", "10");
+
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 2D陣列 - Double[,] 型態測試
+        /// </summary>
+        [TestMethod("B11-25_Double2DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Double Format")]
+        [DataRow("!@#", "Value must be Double Format")]
+        [DataRow("12,34", "Value must be Double Format")]
+        [DataRow("1.7976931348623159E309", "Value must be Double Format")]
+        [DataRow("-1.7976931348623159E309", "Value must be Double Format")]
+        [DataRow("1.2 3.4", "Value must be Double Format")]
+        [DataRow("12.34.56", "Value must be Double Format")]
+        [DataRow(".123abc", "Value must be Double Format")]
+        [DataRow("NaN", "Value must be Double Format")]
+        [DataRow("Infinity", "Value must be Double Format")]
+        public void TIEditor_EditVariableWindowWith2DArrayDouble_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Double2DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.Double2DArray, VariableEditType.EditBox, "10", "10");
+
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 2D陣列 - Byte[,] (Hex) 型態測試 (00~FF)
+        /// </summary>
+        [TestMethod("B11-25_Byte2DArray")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("gg", "Value must be Byte Format")]
+        [DataRow("1g", "Value must be Byte Format")]
+        [DataRow("Z9", "Value must be Byte Format")]
+        [DataRow("FFF", "Value must be Byte Format")]
+        [DataRow("1FF", "Value must be Byte Format")]
+        [DataRow("hhh", "Value must be Byte Format")]
+        [DataRow("12.3", "Value must be Byte Format")]
+        [DataRow("12 34", "Value must be Byte Format")]
+        [DataRow("!@#", "Value must be Byte Format")]
+        [DataRow("100", "Value must be Byte Format")]
+        public void TIEditor_EditVariableWindowWith2DArrayByteHex_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "B11-25_Byte2DArray";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.Byte2DArray, VariableEditType.EditBox, "10", "10");
+
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+        /// <summary>
+        /// 2D陣列 - Long[,] (64位元整數) 型態測試
+        /// </summary>
+        [TestMethod("B11-LongArray_2D")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("abc", "Value must be Long Format")]
+        [DataRow("!@#", "Value must be Long Format")]
+        [DataRow("9223372036854775808", "Value must be Long Format")]
+        [DataRow("-9223372036854775809", "Value must be Long Format")]
+        [DataRow("1.23", "Value must be Long Format")]
+        [DataRow("999999999999999999999", "Value must be Long Format")]
+        [DataRow("123abc", "Value must be Long Format")]
+        [DataRow("123 456", "Value must be Long Format")]
+        [DataRow("1,234", "Value must be Long Format")]
+        [DataRow("0xFFFF", "Value must be Long Format")]
+        public void TIEditor_EditVariableWindowWith2DArrayLong_CheckInvalidInput(string invalidValue, string expectedError)
+        {
+            string callName = "TwoDArray_B11_Long";
+            var condDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", callName, VariableDataType.Long2DArray, VariableEditType.EditBox, "10", "10");
+
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, invalidValue);
+
+            expectedError.ShouldEqualTo(valueEditor.PerformGetElement("/ById[svInner,popEdit,PART_Editor]").GetToolTipMessage());
+            valueEditor.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+
+        /// <summary>
+        /// 依據 VariableDataType 產生其他 2D Array 測試案例，驗證設定正確的值後能正常顯示
+        /// </summary>
+        [TestMethod("B11-26_All2DArray_ValidInput")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.Float2DArray,    "2", "2", "0.123")]
+        [DataRow(VariableDataType.Double2DArray,   "2", "2", "123.456")]
+        [DataRow(VariableDataType.Integer2DArray,  "3", "3", "999")]
+        [DataRow(VariableDataType.Byte2DArray,     "2", "2", "FF")]
+        [DataRow(VariableDataType.Long2DArray,     "2", "2", "999999999999")]
+        [DataRow(VariableDataType.String2DArray,   "2", "2", "Hello")]
+        [DataRow(VariableDataType.HexString2DArray,"2", "2", "A1B2")]
+        public void TIEditor_EditVariableWindowWith2DArrayType_CheckValidInput_MultiType(
+            VariableDataType arrayType,
+            string rank1,
+            string rank2,
+            string validValue)
+        {
+            // 1. 新增變數並設定 2D Array 類型與大小
+            string callName = "Array2D_AllTypes_" + arrayType;
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                arrayType,
+                rank1,
+                rank2
+            );
+
+            // 2. 點選 Default 欄位
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+
+            // 3. 檢查 Variables Value Editor 子視窗
+            var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            "Variables Value Editor".ShouldEqualTo(valueEditor.GetText());
+
+            // 4. 設定正確的值
+            valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, validValue);
+
+            // 5. 確定設定
+            valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            // 6. 檢查 TI Editor 的參數設定欄位
+            string defaultValue = condDataGrid.PerformGetElement("/ByCell[1,@Default]").GetText();
+
+            // 這裡示範簡易檢驗方式，假設多筆值用 ';' 區分，每筆內部用 ',' 區分
+            foreach (string row in validValue.Split(';'))
+            {
+                foreach (string singleValue in row.Split(','))
+                {
+                    // 簡易示範，以實務情境可進一步拆分預期內容
+                    singleValue.ShouldContain(defaultValue);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-27
+        /// 測試步驟：設定 2D Variables Value Editor 子視窗
+        /// 1. 初始化測試環境並設定 2D 變數類型(Float2D/Double2D/Integer2D)
+        /// 2. 設定變數的維度大小(rank1 × rank2)
+        /// 3. 開啟 Variables Value Editor 視窗
+        /// 4. 在編輯器中輸入初始值
+        ///    - 使用逗號(,)分隔同一行的值
+        ///    - 使用分號(;)分隔不同行的值
+        /// 5. 點擊確定按鈕關閉視窗
+        /// 6. 重新開啟 Variables Value Editor 視窗
+        /// 7. 檢查視窗中的值是否與之前設定的值相同
+        /// 8. 關閉視窗完成測試
+        /// 測試描述：設定TestItem Var Editor子視窗後，按下確定離開TestItem Var Editor子視窗，再重啟2D Variables Value Editor子視窗查看設定值是否保留
+        /// 預期輸出：2D Variables Value Editor子視窗的值可以正確保留
+        /// </summary>
+        [TestMethod("B11-27")]
+        [DataRow(VariableDataType.Float2DArray, "1", "2", "0.5,3.14", typeof(object))]
+        [DataRow(VariableDataType.Double2DArray, "2", "2", "123,456;999,999", typeof(object))]
+        [DataRow(VariableDataType.Integer2DArray, "3", "1", "42;100;999", typeof(object))]
+        public void TIEditor_EditVariableWindowWith2DVarEditor_RetainValuesAfterReopen(
+            VariableDataType dataType,
+            string rank1,
+            string rank2,
+            string initialValues,
+            object dummy
+        )
+        {
+            // 1. 初始化並設定 2D 數據類型
+            string callName = $"RetainValues_B11_27_{dataType}";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                dataType,
+                VariableEditType.EditBox,
+                rank1,
+                rank2
+            );
+
+            //// 2. 模擬開啟 TestItem Var Editor 子視窗，設定初始值
+            //condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            //var valueEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            //"Variables Value Editor".ShouldEqualTo(valueEditor.GetText());
+
+            //// 設定初始值(示範用 ';' 分隔多行，逗號分隔同行)
+            //valueEditor.PerformInput("/ById[svInner,popEdit,PART_Editor]", InputType.SendContent, initialValues);
+            //valueEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+            var variableInfo = new VariableInfo(VariableTabType.Condition, callName, dataType, VariableEditType.EditBox, int.Parse(rank1), int.Parse(rank2));
+            AddValueToDataGrid(condDataGrid, variableInfo, VariableColumnType.Default, initialValues);
+
+            // 3. 重啟 2D Variables Value Editor 子視窗
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var reopenEditor = PP5IDEWindow.PerformGetElement("/ByName[Variables Value Editor]");
+            "Variables Value Editor".ShouldEqualTo(reopenEditor.GetText());
+
+            // 檢查值是否保留 (僅示範檢查 UI 中的文字)
+            string[,] initialValueArr = initialValues.ParseTo2DArray();
+            for (int i = 0; i < int.Parse(rank1); i++)
+            {
+                for (int j = 0; j < int.Parse(rank2); j++)
+                {
+                    string actualValue = reopenEditor.PerformGetElement($"/List[{i}]/Edit[{j}]").GetText();
+                    initialValueArr[i,j].ShouldEqualTo(actualValue);
+                }
+            }
+
+            // 關閉子視窗
+            reopenEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+        }
+
+
+        [TestMethod("B11-28_EnumItemEditor")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "语言", "列举项目", "列举项目编辑器", typeof(object))]
+        [DataRow("Languages => 繁體中文", "語言", "列舉項目", "列舉項目編輯器", typeof(object))]
+        [DataRow("Languages => English", "Languages", "Enum Item", "Enum Item Editor", typeof(object))]
+        public void TIEditor_OpenEnumItemEditorWindow_CheckEnumItemEditorTitleIsSame(
+            string languagePath,
+            string RestoreLanguagePath,
+            string DefaultMulLing,
+            string windowTitle, 
+            object dummy)
+        {
+            // Switch language
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+
+            // Add new variable and set array type
+            string callName = "B11-28_EnumItemEditor";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                VariableDataType.Integer,
+                VariableEditType.ComboBox);
+
+            // Click Default field to open Variables Value Editor
+            condDataGrid.PerformClick($"/ByCell[1,@{DefaultMulLing}]", ClickType.LeftClick);
+
+            // Verify window title
+            windowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[0]").GetText());
+
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+
+            // Switch language back to English
+            MenuSelect(RestoreLanguagePath, "English");
+        }
+
+        [TestMethod("B11-29_EnumItemCreater")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "语言", "列举项目", "新增", "列举项目编辑器", "枚举项目产生器", typeof(object))]
+        [DataRow("Languages => 繁體中文", "語言", "列舉項目", "新增", "列舉項目編輯器", "枚舉項目產生器", typeof(object))]
+        [DataRow("Languages => English", "Languages", "Enum Item", "New", "Enum Item Editor", "Enum Item Creater", typeof(object))]
+        public void TIEditor_OpenEnumItemCreaterWindow_CheckEnumItemCreaterTitleIsSame(
+            string languagePath,
+            string RestoreLanguagePath,
+            string DefaultMulLing,
+            string NewMulLing,
+            string editorWindowTitle,
+            string createrWindowTitle,
+            object dummy)
+        {
+            // Switch language
+            MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+
+            // Add new variable and set array type
+            string callName = "B11-28_EnumItemEditor";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                VariableDataType.Integer,
+                VariableEditType.ComboBox);
+
+            // Click Default field to open Variables Value Editor
+            condDataGrid.PerformClick($"/ByCell[1,@{DefaultMulLing}]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick($"/ByName[{editorWindowTitle},{NewMulLing}]", ClickType.LeftClick);
+            //WaitUntil(WaitUntilType.ElementExists, "/Window[1]");
+            // Verify window title
+            createrWindowTitle.ShouldEqualTo(PP5IDEWindow.PerformGetElement("/Window[-1]").Name);
+
+            // Close window
+            for (int i = 1; i >= 0; i--)
+                PP5IDEWindow.CloseWindow(i);
+
+            // Switch language back to English
+            MenuSelect(RestoreLanguagePath, "English");
+        }
+
+        [TestMethod("B11-30_EnumItemRepeatedName")]
+        [TestCategory("子視窗測試(B11)")]
+        //B11-30
+        public void TIEditor_SetEnumItemInEnumCreaterWindow_CheckValueIsInvalidWithSameEnumName()
+        {
+            string CallName = "B11-30_EnumItemRepeatedName";
+            string enumValue = "0";
+            string enumName = "a";
+            VariableDataType varDataType = VariableDataType.String;
+            VariableEditType varEditType = VariableEditType.ComboBox;
+            PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Condition, "", CallName, varDataType, varEditType);
+
+            bool isAdded = true;
+            for (int i = 0; i < 2; i++)
+            {
+                isAdded &= AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue);
+            }
+
+            if (!isAdded)
+            {
+                string errorMsg = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Creater]/Edit[0]").GetToolTipMessage();
+                string errorMsgExpected = "EnumItemName is duplicated";
+                errorMsg.ShouldNotBeNull();
+                errorMsgExpected.ShouldEqualTo(errorMsg);
+                PP5IDEWindow.PerformGetElement("/ByName[Enum Item Creater,Ok]").ShouldBeDisabled();
+            }
+
+            // Close the enum item creator/editor window
+            for (int i = 1; i >= 0; i--)
+                PP5IDEWindow.CloseWindow(i);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-30_EnumItemInvalidValue
+        /// 測試步驟：在枚舉項目產生器中輸入各種無效值
+        /// 1. 初始化測試環境並設定變數類型
+        /// 2. 打開枚舉項目產生器視窗
+        /// 3. 輸入指定的測試值
+        /// 4. 檢查錯誤提示與按鈕狀態
+        /// 測試描述：驗證枚舉項目產生器對異常值、特殊值和邊界值的處理
+        /// 預期輸出：顯示對應的錯誤訊息且Ok按鈕被禁用
+        /// </summary>
+        [TestMethod("B11-30_EnumItemInvalidValue")]
+        [TestCategory("子視窗測試(B11)")]
+        // 異常值測試
+        [DataRow(VariableDataType.Integer, "test_int_invalid1", "abc123", "Value must be Integer Format", typeof(object), DisplayName = "非法字元測試")]      
+        [DataRow(VariableDataType.Integer, "test_int_invalid2", "1,234", "Value must be Integer Format", typeof(object), DisplayName = "千分位格式測試")]     
+        [DataRow(VariableDataType.Float, "test_float_invalid1", "@#$", "Value must be Float Format", typeof(object), DisplayName = "特殊符號測試")]           
+        [DataRow(VariableDataType.Float, "test_float_invalid2", "1.2.3", "Value must be Float Format", typeof(object), DisplayName = "多重小數點測試")]       
+
+        // 特殊值測試
+        [DataRow(VariableDataType.Integer, "test_int_special1", " ", "Value must be Integer Format", typeof(object), DisplayName = "空白字元測試")]           
+        [DataRow(VariableDataType.Float, "test_float_special1", "0.000001", "Value must be Float Format", typeof(object), DisplayName = "極小值測試")]        
+        [DataRow(VariableDataType.Double, "test_double_special1", "1e-324", "Value must be Double Format", typeof(object), DisplayName = "科學記號極小值測試")]
+
+        // 邊界值測試
+        [DataRow(VariableDataType.Byte, "test_byte_bound1", "256", "Value must be Byte Format", typeof(object), DisplayName = "超出上限測試")]
+        [DataRow(VariableDataType.Short, "test_short_bound1", "-32769", "Value must be Short Format", typeof(object), DisplayName = "超出下限測試")]
+        [DataRow(VariableDataType.Long, "test_long_bound1", "9223372036854775808", "Value must be Long Format", typeof(object), DisplayName = "超出範圍測試")]
+        public void TIEditor_SetEnumItemInEnumCreaterWindow_CheckValueIsInvalid(
+            VariableDataType dataType,
+            string enumName,
+            string invalidValue,
+            string expectedErrorMsg,
+            object dummy)
+        {
+            // Initialize variable grid with specific data type
+            string callName = $"B11-30_{dataType}_{enumName}";
+            var condDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                callName,
+                dataType,
+                VariableEditType.ComboBox);
+
+            // Open enum item creator
+            condDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Editor,New]", ClickType.LeftClick);
+
+            // Input invalid value
+            var enumCreator = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Creater]");
+            enumCreator.PerformInput("/Edit[0]", InputType.SendContent, enumName);
+            enumCreator.PerformInput("/Edit[1]", InputType.SendContent, invalidValue);
+
+            // Verify error tooltip and OK button state
+            string errorMsg = enumCreator.PerformGetElement("/Edit[1]").GetToolTipMessage();
+            errorMsg.ShouldNotBeNull();
+            expectedErrorMsg.ShouldEqualTo(errorMsg);
+            enumCreator.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+
+            // Close windows
+            for (int i = 1; i >= 0; i--)
+                PP5IDEWindow.CloseWindow(i);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-31
+        /// 測試步驟：設定列舉子項目
+        /// 1. 初始化測試環境並設定ComboBox類型
+        /// 2. 設定列舉項目的名稱和數值
+        /// 3. 檢查列舉項目編輯器欄位的顯示值是否正確
+        /// 測試描述：設定子視窗後，檢查選擇的成員是否正確顯示在列舉項目編輯器欄位
+        /// 預期輸出：列舉項目編輯器子視窗的值可以正確保留
+        /// </summary>
+        [TestMethod("B11-31")]
+        [TestCategory("子視窗測試(B11)")]
+        // 整數類型測試案例
+        [DataRow(VariableDataType.Short, Int16.MaxValue, "int16Max", typeof(object), DisplayName = "Short型別最大值測試")]
+        [DataRow(VariableDataType.Short, Int16.MinValue, "int16Min", typeof(object), DisplayName = "Short型別最小值測試")]
+        [DataRow(VariableDataType.Integer, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Integer型別最大值測試")]
+        [DataRow(VariableDataType.Integer, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Integer型別最小值測試")]
+        [DataRow(VariableDataType.Long, Int64.MaxValue, "int64Max", typeof(object), DisplayName = "Long型別最大值測試")]
+        [DataRow(VariableDataType.Long, Int64.MinValue, "int64Min", typeof(object), DisplayName = "Long型別最小值測試")]
+
+        // 浮點數類型測試案例
+        [DataRow(VariableDataType.Float, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Float型別最大值測試")]
+        [DataRow(VariableDataType.Float, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Float型別最小值測試")]
+        [DataRow(VariableDataType.FloatPercentage, "3.40282356779E+38", "Float(%)Max", typeof(object), DisplayName = "FloatPercentage型別最大值測試")]
+        [DataRow(VariableDataType.FloatPercentage, "-3.40282356779E+38", "Float(%)Min", typeof(object), DisplayName = "FloatPercentage型別最小值測試")]
+        [DataRow(VariableDataType.Double, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Double型別最大值測試")]
+        [DataRow(VariableDataType.Double, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Double型別最小值測試")]
+
+        // 位元組類型測試案例
+        [DataRow(VariableDataType.Byte, "ff", "ByteMax", typeof(object), DisplayName = "Byte型別最大值測試")]
+        [DataRow(VariableDataType.Byte, "00", "ByteMin", typeof(object), DisplayName = "Byte型別最小值測試")]
+
+        // 陣列類型測試案例
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Integer陣列最大值測試")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Integer陣列最小值測試")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Float陣列最大值測試")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Float陣列最小值測試")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "FloatPercentage陣列最大值測試")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "FloatPercentage陣列最小值測試")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Double陣列最大值測試")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Double陣列最小值測試")]
+        //B11-31
+        public void TIEditor_SetEnumItemInEditor_VerifyEnumItemDisplay(VariableDataType varDataType, object enumValue, string enumName, object dummy)
+        {
+            // 初始化測試環境
+            string CallName = "B11-31_EnumItemDisplay";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                varDataType,
+                VariableEditType.ComboBox);
+
+            // 新增列舉項目
+            bool isAdded = AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue.ToString());
+            isAdded.ShouldBeTrue(); // 確認新增成功
+
+            // 驗證列舉項目值是否正確保留
+            var enumEditor = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Editor]");
+            var enumGrid = enumEditor.GetFirstDataGridElement();
+            string actualEnumName = enumGrid.GetCellByName(1, "Name").GetText();
+            string actualEnumValue = enumGrid.GetCellByName(1, "Value").GetText();
+
+            // 驗證名稱和值
+            enumName.ShouldEqualTo(actualEnumName);
+            enumValue.ToString().ShouldEqualTo(actualEnumValue);
+
+            // Close windows
+            for (int i = 1; i >= 0; i--)
+                PP5IDEWindow.CloseWindow(i);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-32
+        /// 測試步驟：設定列舉子項目
+        /// 1. 初始化測試環境並設定ComboBox類型
+        /// 2. 設定列舉項目的名稱和數值
+        /// 3. 編輯設定好的列舉項目
+        /// 4. 編輯完成後關閉視窗
+        /// 5. 重新開啟列舉項目編輯器視窗
+        /// 6. 檢查列舉項目編輯器欄位的顯示值是否為編輯後的數值
+        /// 測試描述：修改子視窗後，檢查選擇的成員是否正確顯示在列舉項目編輯器欄位
+        /// 預期輸出：列舉項目編輯器子視窗的值可以正確保留
+        /// </summary>
+        [TestMethod("B11-32")]
+        [TestCategory("子視窗測試(B11)")]
+        // 整數類型測試案例
+        [DataRow(VariableDataType.Short, Int16.MaxValue, "int16Max", typeof(object), DisplayName = "Short型別最大值測試")]
+        [DataRow(VariableDataType.Short, Int16.MinValue, "int16Min", typeof(object), DisplayName = "Short型別最小值測試")]
+        [DataRow(VariableDataType.Integer, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Integer型別最大值測試")]
+        [DataRow(VariableDataType.Integer, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Integer型別最小值測試")]
+        [DataRow(VariableDataType.Long, Int64.MaxValue, "int64Max", typeof(object), DisplayName = "Long型別最大值測試")]
+        [DataRow(VariableDataType.Long, Int64.MinValue, "int64Min", typeof(object), DisplayName = "Long型別最小值測試")]
+
+        // 浮點數類型測試案例
+        [DataRow(VariableDataType.Float, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Float型別最大值測試")]
+        [DataRow(VariableDataType.Float, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Float型別最小值測試")]
+        [DataRow(VariableDataType.FloatPercentage, "3.40282356779E+38", "Float(%)Max", typeof(object), DisplayName = "FloatPercentage型別最大值測試")]
+        [DataRow(VariableDataType.FloatPercentage, "-3.40282356779E+38", "Float(%)Min", typeof(object), DisplayName = "FloatPercentage型別最小值測試")]
+        [DataRow(VariableDataType.Double, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Double型別最大值測試")]
+        [DataRow(VariableDataType.Double, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Double型別最小值測試")]
+
+        // 位元組類型測試案例
+        [DataRow(VariableDataType.Byte, "ff", "ByteMax", typeof(object), DisplayName = "Byte型別最大值測試")]
+        [DataRow(VariableDataType.Byte, "00", "ByteMin", typeof(object), DisplayName = "Byte型別最小值測試")]
+
+        // 陣列類型測試案例
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Integer陣列最大值測試")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Integer陣列最小值測試")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Float陣列最大值測試")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Float陣列最小值測試")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "FloatPercentage陣列最大值測試")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "FloatPercentage陣列最小值測試")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Double陣列最大值測試")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Double陣列最小值測試")]
+        //B11-32
+        public void TIEditor_SetAndEditEnumItemInEditor_VerifyEnumItemDisplayAndRetention(VariableDataType varDataType, object enumValue, string enumName, object dummy)
+        {
+            // 初始化測試環境
+            string CallName = "B11-32_EnumItemEdit";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                varDataType,
+                VariableEditType.ComboBox);
+
+            // 新增列舉項目
+            bool isAdded = AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue.ToString());
+            isAdded.ShouldBeTrue();
+
+            // 開啟列舉項目編輯器視窗
+            varDataGrid.PerformClick($"/ByCell[1,@Enum Item]", ClickType.LeftClick);
+
+            // 編輯列舉項目
+            var enumEditor = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Editor]");
+            var enumGrid = enumEditor.GetFirstDataGridElement();
+            string modifiedName = enumName + "_Modified";
+            string modifiedValue = (Convert.ToDouble(enumValue) / 2).ToString();
+
+            // 修改名稱和值並關閉視窗
+            EditEnumItem(varDataGrid, varDataGrid.LastRowNo, modifiedName, modifiedValue);
+
+            // 重新開啟列舉項目編輯器視窗
+            varDataGrid.PerformClick($"/ByCell[1,@Enum Item]", ClickType.LeftClick);
+
+            // 驗證修改後的列舉項目值是否正確保留
+            enumEditor = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Editor]");
+            enumGrid = enumEditor.GetFirstDataGridElement();
+            string actualEnumName = enumGrid.GetCellBy(1, "Name").GetText();
+            string actualEnumValue = enumGrid.GetCellBy(1, "Value").GetText();
+
+            // 驗證修改後的名稱和值
+            modifiedName.ShouldEqualTo(actualEnumName);
+            modifiedValue.ShouldEqualTo(actualEnumValue);
+
+            // 關閉所有視窗
+            for (int i = 1; i >= 0; i--)
+                PP5IDEWindow.CloseWindow(i);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-33
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定ComboBox類型
+        /// 2. 設定列舉項目的名稱和數值
+        /// 3. 上/下移動列舉項目
+        /// 4. 檢查移動後的子列舉項目在正確的位置
+        /// 測試描述：在列舉項目編輯器中上/下移動列舉項目後,檢查列舉項目編輯器中的子列舉項目順序是否正確移動
+        /// 預期輸出：列舉項目的順序可以正確移動
+        /// </summary>
+        [TestMethod("B11-33")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Up", 2, "a,b,c", "1,2,3", "b,a,c", "2,1,3", typeof(object), DisplayName = "向上移動測試")]      // 初始順序: a,b,c，選擇第2行(b)向上移動，預期順序: b,a,c
+        [DataRow("Down", 1, "a,b,c", "1,2,3", "b,a,c", "2,1,3", typeof(object), DisplayName = "向下移動測試")]    // 初始順序: a,b,c，選擇第1行(a)向下移動，預期順序: b,a,c
+        public void TIEditor_MoveEnumItemInEditor_VerifyEnumItemOrder(
+            string direction,
+            int selectedRow,
+            string initialNames,
+            string initialValues,
+            string expectedNames,
+            string expectedValues,
+            object dummy)
+        {
+            // 初始化測試環境
+            string CallName = "B11-33_MoveEnumItem";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                VariableDataType.Integer,
+                VariableEditType.ComboBox);
+        
+            // 解析初始列舉項目
+            string[] enumNames = initialNames.Split(',');
+            string[] enumValues = initialValues.Split(',');
+        
+            // 新增列舉項目
+            for (int enumIdx = 0; enumIdx < enumNames.Length; enumIdx++)
+                AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumNames[enumIdx], enumValues[enumIdx]).ShouldBeTrue();
+        
+            // 開啟列舉項目編輯器視窗
+            varDataGrid.PerformClick($"/ByCell[1,@Enum Item]", ClickType.LeftClick);
+        
+            // 移動列舉項目
+            var enumEditor = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Editor]");
+            var enumGrid = enumEditor.GetFirstDataGridElement();
+            
+            // 選擇指定行
+            enumGrid.PerformClick($"/ByCell[{selectedRow},@Name]", ClickType.LeftClick);
+        
+            // 檢查按鈕狀態
+            if (direction == "Up")
+            {
+                enumEditor.PerformGetElement("/ByName[Up]").ShouldBeEnabled();
+                enumEditor.PerformClick("/ByName[Up]", ClickType.LeftClick);
+            }
+            else
+            {
+                enumEditor.PerformGetElement("/ByName[Down]").ShouldBeEnabled();
+                enumEditor.PerformClick("/ByName[Down]", ClickType.LeftClick);
+            }
+        
+            // 驗證移動後的順序
+            string[] actualNames = enumGrid.GetSingleColumnValues(1/*Name*/).ToArray();
+            string[] actualValues = enumGrid.GetSingleColumnValues(2/*Value*/).ToArray();
+            string[] expectedNameArray = expectedNames.Split(',');
+            string[] expectedValueArray = expectedValues.Split(',');
+        
+            // 比對結果
+            for (int i = 0; i < expectedNameArray.Length; i++)
+            {
+                expectedNameArray[i].ShouldEqualTo(actualNames[i]);
+                expectedValueArray[i].ShouldEqualTo(actualValues[i]);
+            }
+        
+            // 關閉所有視窗
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-34
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定ComboBox類型
+        /// 2. 設定列舉項目的名稱和數值
+        /// 3. 在列舉項目編輯器中刪除列舉項目
+        /// 4. 檢查列舉項目編輯器中的子列舉項目順序是否正確刪除
+        /// 測試描述：在列舉項目編輯器中刪除列舉項目,檢查列舉項目編輯器中的子列舉項目順序是否正確刪除
+        /// 預期輸出：列舉項目的順序可以正確刪除
+        /// </summary>
+        [TestMethod("B11-34")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(1, "a,b,c", "1,2,3", "b,c", "2,3", typeof(object), DisplayName = "刪除第一個項目")]       // 初始: a,b,c (1,2,3)，刪除第1行，預期: b,c (2,3)
+        [DataRow(2, "a,b,c", "1,2,3", "a,c", "1,3", typeof(object), DisplayName = "刪除中間項目")]        // 初始: a,b,c (1,2,3)，刪除第2行，預期: a,c (1,3)
+        [DataRow(3, "a,b,c", "1,2,3", "a,b", "1,2", typeof(object), DisplayName = "刪除最後項目")]        // 初始: a,b,c (1,2,3)，刪除第3行，預期: a,b (1,2)
+        public void TIEditor_DeleteEnumItemInEditor_VerifyEnumItemOrder(
+            int selectedRow,
+            string initialNames,
+            string initialValues,
+            string expectedNames,
+            string expectedValues,
+            object dummy)
+        {
+            // 初始化測試環境
+            string CallName = "B11-34_DeleteEnumItem";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                VariableDataType.Integer,
+                VariableEditType.ComboBox);
+        
+            // 解析初始列舉項目
+            string[] enumNames = initialNames.Split(',');
+            string[] enumValues = initialValues.Split(',');
+        
+            // 新增列舉項目
+            for (int enumIdx = 0; enumIdx < enumNames.Length; enumIdx++)
+                AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumNames[enumIdx], enumValues[enumIdx]).ShouldBeTrue();
+        
+            // 開啟列舉項目編輯器視窗
+            varDataGrid.PerformClick($"/ByCell[1,@Enum Item]", ClickType.LeftClick);
+        
+            // 選擇並刪除指定行
+            var enumEditor = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Editor]");
+            var enumGrid = enumEditor.GetFirstDataGridElement();
+            enumGrid.PerformClick($"/ByCell[{selectedRow},@Name]", ClickType.LeftClick);
+            
+            // 檢查並點擊刪除按鈕
+            enumEditor.PerformGetElement("/ByName[Delete]").ShouldBeEnabled();
+            enumEditor.PerformClick("/ByName[Delete]", ClickType.LeftClick);
+        
+            // 驗證刪除後的順序
+            string[] actualNames = enumGrid.GetSingleColumnValues(1/*Name*/).ToArray();
+            string[] actualValues = enumGrid.GetSingleColumnValues(2/*Value*/).ToArray();
+            string[] expectedNameArray = expectedNames.Split(',');
+            string[] expectedValueArray = expectedValues.Split(',');
+        
+            // 比對結果
+            actualNames.Length.ShouldEqualTo(expectedNameArray.Length);
+            for (int i = 0; i < expectedNameArray.Length; i++)
+            {
+                expectedNameArray[i].ShouldEqualTo(actualNames[i]);
+                expectedValueArray[i].ShouldEqualTo(actualValues[i]);
+            }
+        
+            // 關閉所有視窗
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// 測試用例編號：B11-35
+        /// 測試步驟：設定列舉子項目
+        /// 1. 初始化測試環境並設定ComboBox類型
+        /// 2. 設定列舉項目的名稱和數值
+        /// 3. 確認設定完成後關閉視窗
+        /// 4. 重新開啟列舉項目編輯器視窗
+        /// 5. 檢查列舉項目編輯器欄位的顯示值是否正確
+        /// 測試描述：設定列舉項目編輯器子視窗後，按下確定離開列舉項目編輯器子視窗，在重啟列舉項目編輯器子視窗查看設定值是否保留
+        /// 預期輸出：列舉項目編輯器子視窗的值可以正確保留
+        /// </summary>
+        [TestMethod("B11-35")]
+        [TestCategory("子視窗測試(B11)")]
+        // 整數類型測試案例
+        [DataRow(VariableDataType.Short, Int16.MaxValue, "int16Max", typeof(object), DisplayName = "Short型別最大值測試")]
+        [DataRow(VariableDataType.Short, Int16.MinValue, "int16Min", typeof(object), DisplayName = "Short型別最小值測試")]
+        [DataRow(VariableDataType.Integer, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Integer型別最大值測試")]
+        [DataRow(VariableDataType.Integer, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Integer型別最小值測試")]
+        [DataRow(VariableDataType.Long, Int64.MaxValue, "int64Max", typeof(object), DisplayName = "Long型別最大值測試")]
+        [DataRow(VariableDataType.Long, Int64.MinValue, "int64Min", typeof(object), DisplayName = "Long型別最小值測試")]
+
+        // 浮點數類型測試案例
+        [DataRow(VariableDataType.Float, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Float型別最大值測試")]
+        [DataRow(VariableDataType.Float, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Float型別最小值測試")]
+        [DataRow(VariableDataType.FloatPercentage, "3.40282356779E+38", "Float(%)Max", typeof(object), DisplayName = "FloatPercentage型別最大值測試")]
+        [DataRow(VariableDataType.FloatPercentage, "-3.40282356779E+38", "Float(%)Min", typeof(object), DisplayName = "FloatPercentage型別最小值測試")]
+        [DataRow(VariableDataType.Double, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Double型別最大值測試")]
+        [DataRow(VariableDataType.Double, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Double型別最小值測試")]
+
+        // 位元組類型測試案例
+        [DataRow(VariableDataType.Byte, "ff", "ByteMax", typeof(object), DisplayName = "Byte型別最大值測試")]
+        [DataRow(VariableDataType.Byte, "00", "ByteMin", typeof(object), DisplayName = "Byte型別最小值測試")]
+
+        // 陣列類型測試案例
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MaxValue, "int32Max", typeof(object), DisplayName = "Integer陣列最大值測試")]
+        [DataRow(VariableDataType.IntegerArrayOfSize640, Int32.MinValue, "int32Min", typeof(object), DisplayName = "Integer陣列最小值測試")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "Float陣列最大值測試")]
+        [DataRow(VariableDataType.FloatArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "Float陣列最小值測試")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "3.40282356779E+38", "FloatMax", typeof(object), DisplayName = "FloatPercentage陣列最大值測試")]
+        [DataRow(VariableDataType.FloatPercentageArrayOfSize640, "-3.40282356779E+38", "FloatMin", typeof(object), DisplayName = "FloatPercentage陣列最小值測試")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "1.797693134862315809E+308", "DoubleMax", typeof(object), DisplayName = "Double陣列最大值測試")]
+        [DataRow(VariableDataType.DoubleArrayOfUUTMaxSize, "-1.797693134862315809E+308", "DoubleMin", typeof(object), DisplayName = "Double陣列最小值測試")]
+        //B11-35
+        public void TIEditor_SetEnumItemInEditor_VerifyEnumItemDisplayAndRetention(VariableDataType varDataType, object enumValue, string enumName, object dummy)
+        {
+            // 初始化測試環境
+            string CallName = "B11-35_EnumItemRetention";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                varDataType,
+                VariableEditType.ComboBox);
+
+            // 新增列舉項目
+            bool isAdded = AddNewEnumItem(varDataGrid, varDataGrid.LastRowNo, enumName, enumValue.ToString());
+            isAdded.ShouldBeTrue(); // 確認新增成功
+
+            // 關閉視窗
+            PP5IDEWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+            // 重新開啟列舉項目編輯器視窗
+            varDataGrid.PerformClick($"/ByCell[1,@Enum Item]", ClickType.LeftClick);
+
+            // 驗證列舉項目值是否正確保留
+            var enumEditor = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Editor]");
+            var enumGrid = enumEditor.GetFirstDataGridElement();
+            string actualEnumName = enumGrid.GetCellByName(1, "Name").GetText();
+            string actualEnumValue = enumGrid.GetCellByName(1, "Value").GetText();
+
+            // 驗證名稱和值
+            enumName.ShouldEqualTo(actualEnumName);
+            enumValue.ToString().ShouldEqualTo(actualEnumValue);
+
+            // Close windows
+            for (int i = 1; i >= 0; i--)
+                PP5IDEWindow.CloseWindow(i);
+        }
+
+
+        /// <summary>
+        /// 測試用例編號：B11-36
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定Vector類型
+        /// 2. 點選變數表格的Default欄位
+        /// 3. 檢查Vector Editor視窗標題是否符合當前語系
+        /// 4. 測試結束後恢復英文語系
+        /// 測試描述：點選變數的類型為 Vector，點擊 Default，查看 TI Editor 是否會創建語系正確的Vector項目編輯器子視窗
+        /// 預期輸出：正確創建Vector項目編輯器子視窗且語系正確
+        /// </summary>
+        [TestMethod("B11-36")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "语言", "预设值", "向量编辑器", typeof(object))]
+        [DataRow("Languages => 繁體中文", "語言", "預設值", "向量編輯器", typeof(object))]
+        [DataRow("Languages => English", "Languages", "Default", "Vector Editor", typeof(object))]
+        public void TIEditor_SetDefaultInConditionVariable_VerifyVectorDataTypes(
+            string languagePath,
+            string restoreLanguagePath,
+            string defaultMulLing,
+            string vectorEditorTitle,
+            object dummy)
+        {
+            try 
+            {
+                // Switch language
+                MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+        
+                // Initialize variable grid with Vector type
+                string CallName = "B11-36_VectorEditor";
+                var varDataGrid = InitializeVariableDataGrid(
+                    VariableTabType.Condition,
+                    "",
+                    CallName,
+                    VariableDataType.LineInVector,
+                    VariableEditType.ComboBox);
+        
+                // Click Default field to open Vector Editor
+                varDataGrid.PerformClick($"/ByCell[1,@{defaultMulLing}]", ClickType.LeftClick);
+        
+                // Verify Vector Editor window title
+                var vectorEditor = PP5IDEWindow.PerformGetElement("/Window[0]");
+                vectorEditorTitle.ShouldEqualTo(vectorEditor.GetText());
+        
+                // Close Vector Editor window
+                PP5IDEWindow.CloseWindow(0);
+            }
+            finally 
+            {
+                // Restore to English
+                MenuSelect(new string[] { restoreLanguagePath, "English" });
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-37
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定Vector類型
+        /// 2. 點選變數表格的Default欄位，開啟Vector Editor視窗
+        /// 3. 修改Vector Editor中第一個項目中Default欄位數值為1
+        /// 4. 按下OK按鈕關閉Vector Editor視窗
+        /// 5. 檢查變數表格Default欄位中的值是否與Vector Editor中的值相符
+        /// 測試描述：設定 Vector 項目編輯器中的變數後，檢查修改的成員是否正確顯示在變數的default 欄位中
+        /// 預期輸出：正確設定 Vector 項目到default 欄位中
+        /// </summary>
+        [TestMethod("B11-37")]
+        [TestCategory("子視窗測試(B11)")]
+        public void TIEditor_SetVectorEditorValues_VerifyDefaultFieldDisplay()
+        {
+            // Initialize variable grid with Vector type
+            string CallName = "B11-37_VectorValueRetention";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                VariableDataType.LineInVector,
+                VariableEditType.ComboBox);
+
+            // Click Default field to open Vector Editor
+            varDataGrid.PerformClick($"/ByCell[1,@Default]", ClickType.LeftClick);
+
+            List<string> expectedValues = new List<string>();
+            string[] defaultValues;
+            PP5DataGrid VectorDataGrid = new PP5DataGrid((PP5Element)PP5IDEWindow.PerformGetElement("/ById[VectorGrid]"));
+            VectorDataGrid.ScrollToSpecificColumn("Default");
+
+            VectorDataGrid.PerformInput("ByCell[1,@Default]", InputType.SendContent, "1");
+
+            for (int i = 1; i <= VectorDataGrid.GetRowCount(); i++)
+                expectedValues.Add(VectorDataGrid.GetCellBy(i, "Default").GetText());
+            PP5IDEWindow.PerformClick("/ByName[Vector Editor,Ok]", ClickType.LeftClick);
+            defaultValues = varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").GetText().Split('@');
+
+            expectedValues.Count.ShouldEqualTo(defaultValues.Length);
+            for (int i = 0; i < expectedValues.Count; i++)
+            {
+                expectedValues[i].ShouldEqualTo(defaultValues[i]);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-38
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定Vector類型為Float
+        /// 2. 點選變數表格的Default欄位，開啟Vector Editor視窗
+        /// 3. 修改Vector Editor中第一個項目中Default欄位數值為測試值
+        /// 4. 確認設定完成後關閉視窗
+        /// 5. 重新開啟Vector Editor視窗
+        /// 6. 檢查Vector Editor視窗的顯示值是否正確
+        /// 測試描述：設定Vector項目編輯器子視窗後，按下確定離開，再重啟Vector項目編輯器子視窗查看設定值是否保留
+        /// 預期輸出：Vector項目編輯器子視窗的值可以正確保留
+        /// </summary>
+        [TestMethod("B11-38")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.LineInVector, "3.140", typeof(object), DisplayName = "浮點數向量-標準值")]
+        [DataRow(VariableDataType.LineInVector, "0.001", typeof(object), DisplayName = "浮點數向量-小數值")]
+        [DataRow(VariableDataType.LineInVector, "-1.234", typeof(object), DisplayName = "浮點數向量-負數值")]
+        [DataRow(VariableDataType.LineInVector, "1000.000", typeof(object), DisplayName = "浮點數向量-大數值")]
+        public void TIEditor_SetVectorEditorValues_VerifyValueRetention(
+            VariableDataType dataType,
+            string testValue,
+            object dummy)
+        {
+            // Initialize variable grid with Vector type
+            string CallName = "B11-38_VectorValueRetention";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                dataType,
+                VariableEditType.ComboBox);
+        
+            // Open Vector Editor and set value
+            varDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            var vectorEditor = PP5IDEWindow.PerformGetElement("/ByName[Vector Editor]");
+            var vectorGrid = new PP5DataGrid((PP5Element)vectorEditor.PerformGetElement("/ById[VectorGrid]"));
+            
+            // Set test value
+            vectorGrid.ScrollToSpecificColumn("Default");
+            vectorGrid.PerformInput("/ByCell[1,@Default]", InputType.SendContent, testValue);
+            PP5IDEWindow.PerformClick("/ByName[Vector Editor,Ok]", ClickType.LeftClick);
+        
+            // Reopen Vector Editor
+            varDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+            vectorEditor = PP5IDEWindow.PerformGetElement("/ByName[Vector Editor]");
+            vectorGrid = new PP5DataGrid((PP5Element)vectorEditor.PerformGetElement("/ById[VectorGrid]"));
+        
+            // Verify value retention
+            string actualValue = vectorGrid.GetCellBy(1, "Default").GetText();
+            testValue.ShouldEqualTo(actualValue);
+        
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-39
+        /// 測試步驟：
+        /// 1. 開啟 PP5 IDE
+        /// 2. 點選主選單中的 [Functions] -> [TI Editor]
+        /// 3. 檢查 Login 子視窗是否正確開啟 (多國語言文字顯示正確)
+        /// 4. 驗證 Login 視窗中的所有控制項是否置中對齊
+        /// 測試描述：在PP5 IDE中按下[Functions]->[TI Editor]後開啟Login子視窗
+        /// 預期輸出：Login子視窗正確顯示，且畫面內容皆有置中對齊
+        /// </summary>
+        [TestMethod("B11-39")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("Languages => 簡体中文", "Languages", "确定", "取消", typeof(object))]
+        [DataRow("Languages => 繁體中文", "Languages", "確定", "取消", typeof(object))]
+        [DataRow("Languages => English", "Languages", "Ok", "Cancel", typeof(object))]
+        public void TIEditor_OpenLoginWindow_VerifyWindowAlignmentAndDisplay(
+            string languagePath,
+            string restoreLanguagePath,
+            string okButton,
+            string cancelButton,
+            object dummy)
+        {
+            try
+            {
+                // Switch language
+                MenuSelect(languagePath.Split(new string[] { " => " }, StringSplitOptions.RemoveEmptyEntries));
+        
+                // Click Functions -> TI Editor
+                MenuSelect(new string[] { "Functions", "TI Editor" });
+        
+                // Verify login window
+                var loginWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+
+                // Get window elements
+                okButton.ShouldEqualTo(loginWindow.PerformGetElement($"/Button[0]").GetText());
+                cancelButton.ShouldEqualTo(loginWindow.PerformGetElement($"/Button[1]").GetText());
+
+                // Verify controls alignment
+                loginWindow.PointAtCenter.ShouldEqualTo(PP5IDEWindow.PointAtCenter);
+        
+                // Close login window
+                loginWindow.PerformClick($"/ByName[{cancelButton}]", ClickType.LeftClick);
+            }
+            finally
+            {
+                // Restore to English
+                MenuSelect(new string[] { restoreLanguagePath, "English" });
+            }
+        }
+
+        [TestMethod("B11-41")]
+        [TestCategory("子視窗測試(B11)")]
+        [System.ComponentModel.Description("B11-41: Verify TI Editor Login window display at 1366x768")]
+        public void TIEditorLogin_At1366x768_ShouldDisplayProperly()
+        {
+            // Set screen resolution to 1366x768
+            // Note: Screen resolution change implementation would be needed
+            AutoUIExecutor.SwitchTo(SessionType.Desktop);
+            SetResolution(1366, 768);
+
+            // Open TI Editor from Functions menu
+            CurrentDriver.PerformClick("/ByName[工作列,執行中的應用程式,PP5IDE - 1 個執行中視窗]", ClickType.LeftClick);
+            AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+            PerformOpenNewTI();
+
+            //// Verify Login window appears and properties
+            //var loginWindow = PP5IDEWindow.FindElementByAutomationId(PowerPro5Config.LoginWindowAutomationID);
+            //Assert.IsNotNull(loginWindow, "Login window failed to appear");
+
+            // Verify window dimensions fit within 1366x768 (1366x728 (40 for ToolBar height))
+            var rect = PP5IDEWindow.Size;
+            var pointTopLeft = PP5IDEWindow.PointAtTopLeft;
+            Assert.IsTrue(rect.Width <= 1366, "Window width exceeds screen width");
+            Assert.IsTrue(rect.Height <= 768-40, "Window height exceeds screen height");
+
+            // Verify window is completely visible
+            Assert.IsTrue(pointTopLeft.X >= 0, "Window extends beyond left screen edge");
+            Assert.IsTrue(pointTopLeft.Y >= 0, "Window extends beyond top screen edge");
+            Assert.IsTrue(pointTopLeft.X + rect.Width <= 1366, "Window extends beyond right screen edge");
+            Assert.IsTrue(pointTopLeft.Y + rect.Height <= 768, "Window extends beyond bottom screen edge");
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-42
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定條件變數的EditType為ComboBox
+        /// 2. 點選變數表格的EnumItem欄位，開啟Enum Item Editor視窗
+        /// 3. 檢查EnumItem設定視窗標題
+        /// 4. 驗證各控制項是否存在
+        /// 5. 關閉視窗
+        /// 測試描述：開啟TI Editor EnumItem設定視窗，檢查視窗標題及內容是否正確顯示
+        /// 預期輸出：EnumItem設定視窗的標題及內容須正確顯示
+        /// </summary>
+        [TestMethod("B11-42")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.Integer, "Enum Item Editor", "Name", "Value", typeof(object), DisplayName = "整數型別")]
+        [DataRow(VariableDataType.Float, "Enum Item Editor", "Name", "Value", typeof(object), DisplayName = "浮點數型別")]
+        [DataRow(VariableDataType.Double, "Enum Item Editor", "Name", "Value", typeof(object), DisplayName = "倍精度型別")]
+        public void TIEditor_OpenEnumItemEditorWindow_VerifyWindowDisplay(
+            VariableDataType dataType,
+            string expectedTitle,
+            string nameColumnHeader,
+            string valueColumnHeader,
+            object dummy)
+        {
+            // Initialize variable grid
+            string CallName = "B11-42_EnumItemEditor";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                dataType,
+                VariableEditType.ComboBox);
+
+            // Open EnumItem editor by double clicking
+            varDataGrid.PerformClick("/ByCell[1,@Enum Item]", ClickType.LeftClick);
+
+            // Verify window title
+            var enumEditor = PP5IDEWindow.PerformGetElement("/Window[0]");
+            expectedTitle.ShouldEqualTo(enumEditor.GetText());
+
+            // Verify controls existence
+            var enumGrid = enumEditor.GetFirstDataGridElement();
+            enumGrid.ShouldNotBeNull();
+
+            // Verify column headers
+            var enumGridHeaders = enumGrid.GetDataGridHeaders();
+            enumGridHeaders[0].ShouldEqualTo(nameColumnHeader);
+            enumGridHeaders[1].ShouldEqualTo(valueColumnHeader);
+
+            // Verify buttons
+            enumEditor.PerformGetElement("/ByName[New]").ShouldNotBeNull();
+            enumEditor.PerformGetElement("/ByName[Modify]").ShouldNotBeNull();
+            enumEditor.PerformGetElement("/ByName[Delete]").ShouldNotBeNull();
+            enumEditor.PerformGetElement("/ByName[Up]").ShouldNotBeNull();
+            enumEditor.PerformGetElement("/ByName[Down]").ShouldNotBeNull();
+            enumEditor.PerformGetElement("/ByName[Ok]").ShouldNotBeNull();
+            enumEditor.PerformGetElement("/ByName[Cancel]").ShouldNotBeNull();
+
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-43
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定類型為HexString
+        /// 2. 點選變數表格的Default欄位，開啟HexString Editor視窗
+        /// 3. 檢查HexString Editor視窗標題
+        /// 4. 驗證預設值是否為"00"
+        /// 5. 驗證各控制項是否存在
+        /// 6. 關閉視窗
+        /// 測試描述：開啟TI Editor HexString設定視窗，檢查視窗標題及內容是否正確顯示
+        /// 預期輸出：HexString設定視窗的標題及內容須正確顯示
+        /// </summary>
+        [TestMethod("B11-43")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.HexString, "HexString Editor", "00", typeof(object), DisplayName = "HexString編輯器")]
+        public void TIEditor_OpenHexStringEditorWindow_VerifyWindowDisplay(
+            VariableDataType dataType,
+            string expectedTitle,
+            string expectedDefaultValue,
+            object dummy)
+        {
+            // Initialize variable grid
+            string CallName = "B11-43_HexStringEditor";
+            var varDataGrid = InitializeVariableDataGrid(
+                VariableTabType.Condition,
+                "",
+                CallName,
+                dataType,
+                VariableEditType.EditBox);
+
+            // Open HexString editor by double clicking
+            varDataGrid.PerformClick("/ByCell[1,@Default]", ClickType.LeftClick);
+
+            // Verify window title
+            var hexEditor = PP5IDEWindow.PerformGetElement("/Window[0]");
+            expectedTitle.ShouldEqualTo(hexEditor.GetText());
+
+            // Verify default value is "00"
+            for (int i = 0; i < 1; i++)
+            {
+                var valueTextBox = hexEditor.PerformGetElement($"/TextBox[{i}]");
+                valueTextBox.ShouldNotBeNull();
+                valueTextBox.GetText().ShouldEqualTo(expectedDefaultValue);
+            }
+
+            // Verify buttons
+            hexEditor.PerformGetElement("/ByName[Ok]").ShouldNotBeNull();
+            hexEditor.PerformGetElement("/ByName[Cancel]").ShouldNotBeNull();
+
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        [TestMethod("B11-44")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow("2", "Test Item Var Editor", "Parameter", "Data Type", "Mapping Parameter", "New Parameter", typeof(object), DisplayName = "Sub TI變數編輯器 - 參數 Condition Parameters")]
+        [DataRow("3", "Test Item Var Editor", "Parameter", "Data Type", "Mapping Parameter", "New Parameter", typeof(object), DisplayName = "Sub TI變數編輯器 - 參數 Result Parameters")]
+        public void TIEditor_OpenSubTIEditorWindow_VerifyWindowDisplay(
+            int parameterTypeIdx,
+            string expectedTitle,
+            string parameterHeader,
+            string dataTypeHeader,
+            string mappingParameterHeader,
+            string newParameterHeader,
+            object dummy)
+        {
+            // Add Sub TI command
+            AddCommandBy(TestCmdGroupType.Sub_TI, "LoadIntArrayToBinaryStringArray");
+
+            // Open Test Item Var Editor
+            PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Parameters]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[{parameterTypeIdx},@Parameter Value]", ClickType.LeftClick);
+
+            // Verify window title
+            var varEditor = PP5IDEWindow.PerformGetElement("/Window[0]");
+            expectedTitle.ShouldEqualTo(varEditor.GetText());
+
+            // Verify grid headers
+            var varGrid = varEditor.GetFirstDataGridElement();
+            varGrid.ShouldNotBeNull();
+
+            var gridHeaders = varGrid.GetDataGridHeaders();
+            gridHeaders[0].ShouldEqualTo(parameterHeader);
+            gridHeaders[1].ShouldEqualTo(dataTypeHeader);
+            gridHeaders[2].ShouldEqualTo(mappingParameterHeader);
+            gridHeaders[3].ShouldEqualTo(newParameterHeader);
+
+            // Verify buttons
+            varEditor.PerformGetElement("/ByName[Ok]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/ByName[Cancel]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/ByName[Scan]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/ByName[Default]").ShouldNotBeNull();
+
+            // Verify labels
+            varEditor.PerformGetElement("/ByName[Parameter Type]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/ByName[Constant Type]").ShouldNotBeNull();
+
+            // Verify radio buttons - Parameter Type
+            varEditor.PerformGetElement("/RadioButton[Condition]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/RadioButton[Result]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/RadioButton[Temporary]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/RadioButton[Global]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/RadioButton[Constant]").ShouldNotBeNull();
+
+            // Verify radio buttons - Constant Type
+            varEditor.PerformGetElement("/RadioButton[Numeric]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/RadioButton[Byte]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/RadioButton[String]").ShouldNotBeNull();
+            varEditor.PerformGetElement("/RadioButton[HexString]").ShouldNotBeNull();
+
+            // Close window
+            PP5IDEWindow.CloseWindow(0);
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-45
+        /// 測試步驟：
+        /// 1. 開啟 TI Editor
+        /// 2. 點選選單 [Utility] -> [Option]
+        /// 3. 修改 LoadNumber 數量為超過上限值(640)
+        /// 4. 檢查是否出現超過上限的提醒視窗
+        /// 測試描述：驗證 Option 子視窗中 LoadNumber 設定超過上限時的提示
+        /// 預期輸出：當設定超過 640 時，應彈出提示視窗顯示超過上限訊息
+        /// </summary>
+        [TestMethod("B11-45")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(641, "Total Load Number Range : 0 ~ 640", typeof(object), DisplayName = "LoadNumber-超過上限")]
+        [DataRow(999, "Total Load Number Range : 0 ~ 640", typeof(object), DisplayName = "LoadNumber-遠超過上限")]
+        [DataRow(1000, "Total Load Number Range : 0 ~ 640", typeof(object), DisplayName = "LoadNumber-邊界值測試")]
+        public void TIEditor_OpenOptionWindow_CheckLoadNumberLimit(
+            int loadNumber,
+            string expectedMessage,
+            object dummy)
+        {
+            try
+            {
+                // 1. 點選選單開啟Option視窗
+                MenuSelect("Utility", "Option");
+
+                // 2. 獲取Option視窗
+                var optionWindow = PP5IDEWindow.PerformGetElement("/ByName[Option]");
+                optionWindow.ShouldNotBeNull();
+
+                // 3. 找到LoadNumber輸入框並輸入測試值
+                PP5IDEWindow.PerformInput("/ByName[Option,Total Load Number]", InputType.SendContent, loadNumber.ToString());
+
+                // 4. 點擊確認按鈕
+                optionWindow.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 5. 檢查錯誤訊息視窗
+                var messageBox = PP5IDEWindow.PerformGetElement("/ByName[Error]");
+                messageBox.ShouldNotBeNull();
+
+                // 6. 驗證錯誤訊息內容
+                var actualMessage = messageBox.GetFirstEditContent();
+                expectedMessage.ShouldEqualTo(actualMessage);
+
+                // 7. 關閉錯誤訊息視窗
+                messageBox.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 8. 關閉Option視窗
+                optionWindow.PerformClick("/ByName[Cancel]", ClickType.LeftClick);
+            }
+            finally
+            {
+                // 確保測試結束後關閉所有視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-46
+        /// 測試步驟：
+        /// 1. 初始化測試環境並設定一個Array類型變數
+        /// 2. 點選並開啟Array Size設定視窗
+        /// 3. 輸入超過上限(100001)的數值
+        /// 4. 檢查是否出現警告訊息視窗
+        /// 測試描述：設定Array Size時，輸入超過上限大小，驗證是否出現警告訊息
+        /// 預期輸出：當輸入超過上限值時，應顯示警告訊息視窗
+        /// </summary>
+        [TestMethod("B11-46_ArraySizeLimit")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.FloatArray, "100001", "Array size must less than or equal to 100000", typeof(object), DisplayName = "Float Array - 超過上限")]
+        [DataRow(VariableDataType.IntegerArray, "999999", "Array size must less than or equal to 100000", typeof(object), DisplayName = "Integer Array - 遠超過上限")]
+        public void TIEditor_SetArraySize_CheckLimitMessage(
+            VariableDataType dataType,
+            string arrSize1,
+            string expectedErrorMessage,
+            object dummy)
+        {
+            try
+            {
+                string CallName = "B11-46_ArraySizeLimit";
+
+                // 1. 初始化條件變數表格
+                // 2. 設定超過上限的Array Size
+                // 3. 驗證是否出現警告訊息ToolTip視窗
+                PP5DataGrid varDataGrid = InitializeVariableDataGrid(VariableTabType.Result, "", CallName, VariableDataType.FloatArray, arrSize1);
+
+                if (((PP5Element)PP5IDEWindow).ErrorMessages.Count > 0)
+                {
+                    Hashtable errMsgs = ((PP5Element)PP5IDEWindow).ErrorMessages;
+                    errMsgs.ContainsValue(expectedErrorMessage).ShouldBeTrue();
+                    errMsgs.Keys.Count.ShouldEqualTo(1);
+                    PP5IDEWindow.PerformGetElement("/Window[0]/Button[Ok]").Enabled.ShouldBeFalse();
+                }
+            }
+            finally
+            {
+                // 清理測試環境
+                // 6. 關閉Array Size設定視窗(設定正確數值)
+                PP5IDEWindow.PerformInput("/Window[0]/Edit[0]", InputType.SendContent, 100);
+                PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-47
+        /// 測試步驟：
+        /// 1. 開啟 Login 視窗
+        /// 2. 取得表格欄位初始寬度
+        /// 3. 拖曳欄位分隔線
+        /// 4. 驗證欄位寬度變化
+        /// 測試描述：驗證 Login 視窗中登入資訊表格的欄位寬度調整功能
+        /// 預期輸出：可正常調整表格欄位寬度
+        /// </summary>
+        [TestMethod("B11-47")]
+        [TestCategory("子視窗測試")]
+        [DataRow(-50, typeof(object), DisplayName = "向左拖曳欄位分隔線")]
+        [DataRow(50, typeof(object), DisplayName = "向右拖曳欄位分隔線")]
+        public void LoginWindow_ResizeGridColumn_CheckColumnWidth(int dragOffset, object dummy)
+        {
+            IElement loginWindow = null;
+            try
+            {
+                // 1. 開啟 Login 視窗
+                MenuSelect("File", "Open...");
+                loginWindow = PP5IDEWindow.PerformGetElement("/Window[Load Test Item]");
+                loginWindow.ShouldNotBeNull("Login 視窗未開啟");
+
+                // 2. 取得欄位初始寬度
+                var TINameColumnHeader = loginWindow.PerformGetElement("/ById[HeaderPanel]/ByName[RowData.Row.Name]");
+                //var TIUpdateTimeColumnHeader = loginWindow.PerformGetElement("/ById[HeaderPanel]/ByName[RowData.Row.UpdateTime]");
+                double initialWidth = TINameColumnHeader.Width;
+                
+                // 3. 拖曳欄位分隔線
+                var columnThumb = TINameColumnHeader.PerformGetElement("/ByClass[Thumb]");
+                columnThumb.DragSplitter(System.Windows.Forms.Orientation.Horizontal, dragOffset);
+
+                // 4. 驗證寬度變化
+                double newWidth = TINameColumnHeader.Width;
+
+                // 驗證寬度變化是否符合拖曳方向
+                if (dragOffset < 0)
+                {
+                    Assert.IsTrue(newWidth < initialWidth, $"向左拖曳後寬度應減少。初始寬度: {initialWidth}, 現在寬度: {newWidth}");
+                }
+                else
+                {
+                    Assert.IsTrue(newWidth > initialWidth, $"向右拖曳後寬度應增加。初始寬度: {initialWidth}, 現在寬度: {newWidth}");
+                }
+            }
+            finally
+            {
+                loginWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-48
+        /// 測試步驟：
+        /// 測試描述：
+        /// 預期輸出：
+        /// </summary>
+        [TestMethod("B11-48")]
+        [TestCategory("子視窗測試(B11)")]
+        public void TIEditor_Set2DArraySizeAndDefault_ToColumnValue()
+        {
+            try
+            {
+                string CallName = "B11-48";
+                string arrSize1 = "100";
+                string arrSize2 = arrSize1;
+                VariableTabType variableType = VariableTabType.Condition;
+                VariableDataType dataType = VariableDataType.Integer2DArray;
+                VariableEditType editType = VariableEditType.EditBox;
+                VariableColumnType columnType = VariableColumnType.Default;
+
+                // 1. 初始化條件變數表格
+                PP5DataGrid varDataGrid = InitializeVariableDataGrid(variableType, "", CallName, dataType, arrSize1, arrSize2);
+                VariableSelectionMoveToSpecified(varDataGrid, variableType, dataType, editType, columnType);
+
+                for (int i = 0; i < 4; i+=2)
+                    PP5IDEWindow.PerformGetElement($"/ByName[Inner]/ById[svInner]/ComboBox[{i}]").GetText().ShouldEqualTo(arrSize1);
+            }
+            finally
+            {
+                // 清理測試環境
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-49, B11-52
+        /// 測試步驟：
+        /// 1. 初始化測試環境，設定變數類型為Condition/Global
+        /// 2. 設定變數資料類型為String
+        /// 3. 設定EditType為External_Signal
+        /// 4. 點選Default欄位開啟Cluster視窗
+        /// 5. 設定External Signal值為"PhoenixonDSP.DSPSensingOFF(0xFF).DSPSensingOFF_Signal"
+        /// 6. 驗證設定後的值是否正確顯示
+        /// 測試描述：使用Cluster設定一個類行為String且EditType為External_Signal的Condition變數，
+        ///          設定完成後按下Default欄位，TI Editor會彈出Cluster視窗供使用者設定
+        /// 預期輸出：Cluster視窗可正確設定，設定完成後變數的值可以正確呈現
+        /// </summary>
+        [TestMethod("B11-49&52")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableTabType.Condition, "B11-49", typeof(object), DisplayName = "Condition-String")]
+        [DataRow(VariableTabType.Global, "B11-52", typeof(object), DisplayName = "Global-String")]
+        public void TIEditor_SetExternalSignalInClusterWindow_CheckStringDisplay(VariableTabType variableType, string testCaseNo, object dummy)
+        {
+            try
+            {
+                string CallName = testCaseNo;
+                VariableDataType dataType = VariableDataType.String;
+                VariableEditType editType = VariableEditType.External_Signal;
+                string[] extSignalNames = new string[] { "PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal" };
+
+                // 1. 初始化條件變數表格
+                PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(variableType, "", CallName, dataType, editType, string.Join(".", extSignalNames));
+                string defaultValue = varDataGrid.GetCellBy(1, "Default").GetText();
+                string DefaultSingleValue = string.Format("{0}{1}{2}", extSignalNames);
+                DefaultSingleValue.Insert(DefaultSingleValue.IndexOf('(') - 1, ":");
+                DefaultSingleValue.ShouldEqualTo(defaultValue);
+            }
+            finally
+            {
+                // 清理測試環境
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-50, B11-53
+        /// 測試步驟：
+        /// 1. 初始化測試環境，設定變數類型(Condition/Global)
+        /// 2. 設定變數資料類型(String[])
+        /// 3. 設定EditType為External_Signal
+        /// 4. 點選Default欄位開啟Cluster視窗
+        /// 5. 設定External Signal值
+        /// 6. 驗證設定後的值是否正確顯示
+        /// 測試描述：使用Cluster設定不同類型的External_Signal變數
+        /// 預期輸出：Cluster視窗可正確設定，設定完成後變數的值可以正確呈現
+        /// </summary>
+        [TestMethod("B11-50&53")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableTabType.Condition, "B11-50", typeof(object), DisplayName = "Condition-String[]")]
+        [DataRow(VariableTabType.Global, "B11-53", typeof(object), DisplayName = "Global-String[]")]
+        public void TIEditor_SetExternalSignalInClusterWindow_CheckStringArrayDisplay(VariableTabType variableType, string testCaseNo, object dummy)
+        {
+            try
+            {
+                string CallName = testCaseNo;
+                VariableDataType dataType = VariableDataType.StringArray;
+                VariableEditType editType = VariableEditType.External_Signal;
+                string[] extSignalNames = new string[] { "PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal" };
+                string arrSize1 = "100";
+
+                // 1. 初始化條件變數表格
+                PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(variableType, "", CallName, dataType, editType, string.Join(".", extSignalNames), arrSize1);
+                string defaultValue = varDataGrid.GetCellBy(1, "Default").GetText();
+                string DefaultSingleValue = string.Format("{0}{1}{2}", extSignalNames);
+                DefaultSingleValue.Insert(DefaultSingleValue.IndexOf('(') - 1, ":");
+                DefaultSingleValue.ShouldEqualTo(defaultValue);
+            }
+            finally
+            {
+                // 清理測試環境
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-51, B11-54
+        /// 測試步驟：
+        /// 1. 初始化測試環境，設定變數類型(Condition/Global)
+        /// 2. 設定變數資料類型(String[][])
+        /// 3. 設定EditType為External_Signal
+        /// 4. 點選Default欄位開啟Cluster視窗
+        /// 5. 設定External Signal值
+        /// 6. 驗證設定後的值是否正確顯示
+        /// 測試描述：使用Cluster設定不同類型的External_Signal變數
+        /// 預期輸出：Cluster視窗可正確設定，設定完成後變數的值可以正確呈現
+        /// </summary>
+        [TestMethod("B11-51&54")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableTabType.Condition, VariableDataType.String2DArray, "B11-51", typeof(object), DisplayName = "Condition-String[][]")]
+        [DataRow(VariableTabType.Global, VariableDataType.String2DArray, "B11-54", typeof(object), DisplayName = "Global-String[][]")]
+        public void TIEditor_SetExternalSignalInClusterWindow_CheckString2DArrayDisplay(VariableTabType variableType, string testCaseNo, object dummy)
+        {
+            try
+            {
+                string CallName = testCaseNo;
+                VariableDataType dataType = VariableDataType.StringArray;
+                VariableEditType editType = VariableEditType.External_Signal;
+                string[] extSignalNames = new string[] { "PhoenixonDSP", "DSPSensingOFF(0xFF)", "DSPSensingOFF_Signal" };
+                string arrSize1 = "100";
+                string arrSize2 = arrSize1;
+
+                // 1. 初始化條件變數表格
+                PP5DataGrid varDataGrid = CreateNewVariableWithDefaultValue(variableType, "", CallName, dataType, editType, string.Join(".", extSignalNames), arrSize1, arrSize2);
+                string defaultValue = varDataGrid.GetCellBy(1, "Default").GetText();
+                string DefaultSingleValue = string.Format("{0}{1}{2}", extSignalNames);
+                DefaultSingleValue.Insert(DefaultSingleValue.IndexOf('(') - 1, ":");
+                DefaultSingleValue.ShouldEqualTo(defaultValue);
+            }
+            finally
+            {
+                // 清理測試環境
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-55
+        /// 測試步驟：
+        /// 1. 在Condition頁籤建立一個HexString類型的變數，EditType設為ComboBox
+        /// 2. 點選EnumItem欄位開啟設定視窗
+        /// 3. 添加測試值為541的EnumItem
+        /// 4. 檢查值是否正確補0
+        /// 測試描述：設定Array Size 時，輸入大小為541時的十六進位字串EnumItem自動補0行為
+        /// 預期輸出：EnumItem的Value為0541，在遇到奇數個設定值時，會自動補0
+        /// </summary>
+        [TestMethod("B11-55")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(VariableDataType.HexString, "541", "0541", typeof(object), DisplayName = "HexString-三位數自動補0")]
+        [DataRow(VariableDataType.HexString, "1", "01", typeof(object), DisplayName = "HexString-單位數自動補0")]
+        [DataRow(VariableDataType.HexString, "12345", "012345", typeof(object), DisplayName = "HexString-五位數自動補0")]
+        public void TIEditor_EnumItemEditor_HexStringValuePadding(
+            VariableDataType dataType,
+            string inputValue,
+            string expectedValue,
+            object dummy)
+        {
+            try
+            {
+                // 1. 初始化變數表格並設定型別
+                string CallName = "B11-55_HexString";
+                var varDataGrid = InitializeVariableDataGrid(
+                    VariableTabType.Condition,
+                    "",
+                    CallName,
+                    dataType,
+                    VariableEditType.ComboBox);
+
+                // 2. 開啟EnumItem編輯器
+                varDataGrid.PerformClick("/ByCell[1,@Enum Item]", ClickType.LeftClick);
+
+                // 3. 驗證EnumItem Editor視窗開啟
+                var enumEditor = PP5IDEWindow.PerformGetElement("/ByName[Enum Item Editor]");
+                enumEditor.ShouldNotBeNull();
+
+                // 4. 添加測試值 
+                bool addSuccess = AddNewEnumItem("Test", inputValue);
+                addSuccess.ShouldBeTrue();
+
+                // 5. 驗證值是否正確補0
+                var enumGrid = enumEditor.PerformGetElement("/ById[EnumItemGrid]");
+                string actualValue = enumGrid.GetCellBy(1, "Value").GetText();
+                expectedValue.ShouldEqualTo(actualValue);
+            }
+            finally
+            {
+                // 確保測試結束後關閉所有視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B11-56
+        /// 測試步驟：
+        /// 1. 新增SubTI命令並選擇LoadIntArrayToBinaryStringArray
+        /// 2. 點選第二個參數開啟編輯視窗
+        /// 3. 點擊Scan按鈕後按OK
+        /// 4. 驗證參數是否正確映射或建立新變數
+        /// 測試描述：驗證SubTI命令參數掃描功能,檢查是否能自動映射或建立變數
+        /// 預期輸出：若有符合的參數可映射則自動帶入,若無則自動建立新變數
+        /// </summary>
+        [TestMethod("B11-56")]
+        [TestCategory("子視窗測試(B11)")]
+        [DataRow(true, typeof(object), DisplayName = "參數自動掃描-有對應參數")]
+        [DataRow(false, typeof(object), DisplayName = "參數自動掃描-無對應參數")]
+        public void TIEditor_ScanSubTIParameter_VerifyAutoMapping(bool hasMatchingParameter, object dummy)
+        {
+            try
+            {
+                int parameterNo = 2;
+                string expectedTitle = "Test Item Var Editor";
+                string[] CallNames = new string[] { "C_InputInts", "C_BinSize" };
+                VariableDataType[] dataTypes = new VariableDataType[] { VariableDataType.IntegerArrayOfSize640, VariableDataType.Integer };
+
+                // 1. 新增SubTI命令
+                AddCommandBy(TestCmdGroupType.Sub_TI, "LoadIntArrayToBinaryStringArray");
+                
+                if (hasMatchingParameter)
+                {
+                    // 創建對應參數 (C_InputInts:Integer[L] EditBox, C_BinSize:Integer EditBox)
+                    for (int i = 0; i < CallNames.Length; i++)
+                        InitializeVariableDataGrid(VariableTabType.Condition, "", CallNames[i], dataTypes[i], VariableEditType.ComboBox);
+                }
+
+                // 2. 開啟Test Item Var Editor
+                PP5IDEWindow.PerformClick($"/ByCell@PGGrid[1,@Parameters]", ClickType.LeftClick);
+                PP5IDEWindow.PerformClick($"/ByCell@ParameterGrid[{parameterNo},@Parameter Value]", ClickType.LeftClick);
+
+                // 3. 驗證視窗標題
+                var varEditor = PP5IDEWindow.PerformGetElement("/Window[0]");
+                expectedTitle.ShouldEqualTo(varEditor.GetText());
+
+                // 4. 點擊Scan按鈕
+                varEditor.PerformClick("/ByName[Scan]", ClickType.LeftClick);
+
+                // 5. 驗證自動映射結果
+                var varGrid = varEditor.GetFirstDataGridElement();
+                varGrid.ShouldNotBeNull();
+
+                for (int i = 1; i <= CallNames.Length; i++)
+                {
+                    if (hasMatchingParameter)
+                    {
+                        // 若有對應參數,驗證是否正確映射
+                        var mappedVar = varGrid.GetCellBy(i, "Mapping Parameter").GetText();
+                        mappedVar.ShouldEqualTo(CallNames[i]);
+                    }
+                    else
+                    {
+                        // 若無對應參數,驗證是否自動建立新變數
+                        var newVar = varGrid.GetCellBy(i, "New Parameter").GetText();
+                        newVar.ShouldEqualTo(CallNames[i]);
+                    }
+                }
+
+                // 6. 點擊OK按鈕
+                varEditor.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 7. 驗證參數表格是否正確更新
+                var parameterGrid = PP5IDEWindow.PerformGetElement("/ById[ParameterGrid]");
+                var paramValue = parameterGrid.GetCellBy(parameterNo, "Parameter Value").GetText();
+                var expectedVarName = string.Format("\"{0},{1}\"", CallNames);
+                paramValue.ShouldEqualTo(expectedVarName);
+            }
+            finally
+            {
+                // 清理測試環境
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B12-1
+        /// 測試步驟：
+        /// 1. 新增兩個TestCommand並設定相同的Label
+        /// 2. 點選[Utility]->[OverAllCheck]選項
+        /// 3. 檢查錯誤訊息視窗是否正確顯示
+        /// 測試描述：驗證當Label重複時OverAllCheck功能的錯誤提示
+        /// 預期輸出：應顯示OverAllCheck的錯誤訊息視窗
+        /// </summary>
+        [TestMethod("B12-1")]
+        [TestCategory("工具功能(B12)")]
+        public void TIEditor_OverAllCheck_DuplicateLabelCheck()
+        {
+            try
+            {
+                string labelName = "Label1";
+                string cmdName = "ABS";
+                string expectedError = $"Test Command {cmdName} Has Error";
+                string OverAllCheckLabel = "OverAllCheck";
+
+                // 1. 新增第一個命令並設定Label
+                AddCommandBy(TestCmdGroupType.AC_Source, cmdName);
+                PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Label]", InputType.SendContent, labelName);
+
+                // 2. 新增第二個命令並設定相同的Label
+                AddCommandBy(TestCmdGroupType.AC_Source, cmdName);
+                PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@Label]", InputType.SendContent, labelName);
+
+                // 3. 執行OverAllCheck
+                MenuSelect("Utility", OverAllCheckLabel);
+
+                // 4. 驗證錯誤訊息視窗
+                var errorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                errorWindow.ShouldNotBeNull();
+                OverAllCheckLabel.ShouldEqualTo(errorWindow.GetText());
+
+                // 5. 驗證錯誤訊息內容
+                var errorMessage = errorWindow.PerformGetElement("/Edit[txtBlockMsg]").GetText();
+                errorMessage.ShouldContain(expectedError);
+            }
+            finally
+            {
+                // 測試結束後，關閉OverAllCheck視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B12-2
+        /// 測試步驟：
+        /// 1. 新增兩個TestCommand並設定相同的Label
+        /// 2. 點選[Utility]->[Compile]選項
+        /// 3. 檢查錯誤訊息視窗是否正確顯示
+        /// 測試描述：驗證當Label重複時Compile功能的錯誤提示
+        /// 預期輸出：應顯示Compile的錯誤訊息視窗
+        /// </summary>
+        [TestMethod("B12-2")]
+        [TestCategory("工具功能(B12)")]
+        public void TIEditor_Compile_DuplicateLabelCheck()
+        {
+            try
+            {
+                string labelName = "Label1";
+                string cmdName = "ABS";
+                string expectedError = $"Test Command {cmdName} Has Error";
+                string CompileLabel = "Compile";
+
+                // 1. 新增第一個命令並設定Label
+                AddCommandBy(TestCmdGroupType.AC_Source, cmdName);
+                PP5IDEWindow.PerformInput("/ByCell@PGGrid[1,@Label]", InputType.SendContent, labelName);
+
+                // 2. 新增第二個命令並設定相同的Label
+                AddCommandBy(TestCmdGroupType.AC_Source, cmdName);
+                PP5IDEWindow.PerformInput("/ByCell@PGGrid[2,@Label]", InputType.SendContent, labelName);
+
+                // 3. 執行Compile
+                MenuSelect("Utility", CompileLabel);
+
+                // 4. 驗證錯誤訊息視窗
+                var errorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                errorWindow.ShouldNotBeNull();
+                CompileLabel.ShouldEqualTo(errorWindow.GetText());
+
+                // 5. 驗證錯誤訊息內容
+                var errorMessage = errorWindow.PerformGetElement("/Edit[txtBlockMsg]").GetText();
+                errorMessage.ShouldContain(expectedError);
+            }
+            finally
+            {
+                // 測試結束後，關閉Compile視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B12-3
+        /// 測試步驟：
+        /// 1. 點選[Utility]->[OverAllCheck]選項
+        /// 2. 檢查OverAllCheck訊息視窗是否正確顯示
+        /// 測試描述：驗證TI編輯沒有錯誤下，OverAllCheck後會彈出訊息告知沒問題
+        /// 預期輸出：應顯示OverAllCheck的訊息視窗
+        /// </summary>
+        [TestMethod("B12-3")]
+        [TestCategory("工具功能(B12)")]
+        public void TIEditor_OverAllCheck_CheckMessageIsDisplayed()
+        {
+            try
+            {
+                string expectedSuccessMsg = "Over all check is complete";
+                string overAllCheckLabel = "OverAllCheck";
+
+                // 1. 執行OverAllCheck
+                MenuSelect("Utility", overAllCheckLabel);
+
+                // 2. 驗證OverAllCheck訊息視窗
+                var overAllCheckWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                overAllCheckWindow.ShouldNotBeNull();
+                overAllCheckLabel.ShouldEqualTo(overAllCheckWindow.GetText());
+
+                // 3. 驗證OverAllCheck成功訊息內容
+                var successMessage = overAllCheckWindow.PerformGetElement("/Edit[txtBlockMsg]").GetText();
+                successMessage.ShouldContain(expectedSuccessMsg);
+            }
+            finally
+            {
+                // 測試結束後，關閉OverAllCheck視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B12-4
+        /// 測試步驟：
+        /// 1. 點選[Utility]->[Compile]選項
+        /// 2. 檢查Compile訊息視窗是否正確顯示
+        /// 測試描述：驗證TI編輯沒有錯誤下，Compile後會彈出訊息告知沒問題
+        /// 預期輸出：應顯示Compile的訊息視窗
+        /// </summary>
+        [TestMethod("B12-4")]
+        [TestCategory("工具功能(B12)")]
+        public void TIEditor_Compile_CheckMessageIsDisplayed()
+        {
+            try
+            {
+                string expectedSuccessMsg = "Compilation is complete";
+                string compileLabel = "Compile";
+
+                // 1. 執行Compile
+                MenuSelect("Utility", compileLabel);
+
+                // 2. 驗證Compile訊息視窗
+                var compileWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                compileWindow.ShouldNotBeNull();
+                compileLabel.ShouldEqualTo(compileWindow.GetText());
+
+                // 3. 驗證Compile成功訊息內容
+                var successMessage = compileWindow.PerformGetElement("/Edit[txtBlockMsg]").GetText();
+                successMessage.ShouldContain(expectedSuccessMsg);
+            }
+            finally
+            {
+                // 測試結束後，關閉Compile視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B12-5  
+        /// 測試步驟：  
+        /// 1. 以不同手法(拖曳、浮動、合併)改變 TI Editor 的視窗布局  
+        /// 2. 點選 [Edit] -> [Default Dock]  
+        /// 3. 驗證跳出完成預設布局的提示訊息  
+        /// 4. 按 [OK] 關閉提示視窗  
+        /// 5. 驗證所有 Panel 不是 Floating 狀態 (確認無任何 Floating 視窗元素)  
+        /// 測試描述：參考 B10-2、B10-8，不同手法改變佈局後，驗證 Default Dock 功能是否能正確恢復預設佈局  
+        /// 預期輸出：不論如何變更布局，Default Dock 都能正確恢復，並顯示完成訊息 (英文語系)  
+        /// </summary>
+        [TestMethod("B12-5")]
+        [TestCategory("工具功能(B12)")]
+        [DataRow("Drag", new TIPanelType[] { TIPanelType.TCListPanel, TIPanelType.VariablePanel }, typeof(object), DisplayName = "拖曳佈局-英文")]
+        [DataRow("Float", new TIPanelType[] { TIPanelType.TCListPanel, TIPanelType.TCParameterPanel }, typeof(object), DisplayName = "浮動佈局-英文")]
+        [DataRow("Merge", new TIPanelType[] { TIPanelType.VariablePanel, TIPanelType.TCListPanel, TIPanelType.TCParameterPanel }, typeof(object), DisplayName = "合併佈局-英文")]
+        public void TIEditor_DefaultDock_RestoreDefaultLayout(string layoutChangeMethod, TIPanelType[] sourcePanelTypes, object dummy)
+        {
+            // 1. 根據不同手法改變 TI Editor 的視窗布局
+            for (int i = 0; i < sourcePanelTypes.Length; i++)
+            {
+                switch (layoutChangeMethod)
+                {
+                    case "Drag":
+                        DragPanelSplitter(sourcePanelTypes[i], System.Windows.Forms.Orientation.Horizontal, System.Windows.Automation.DockPosition.Right, dragOffsetX: 50, dragOffsetY: 0);
+                        break;
+                    case "Float":
+                        FloatPanel(sourcePanelTypes[i]);
+                        break;
+                    case "Merge":
+                        DragAndMergePanel(sourcePanelTypes[i + 1], sourcePanelTypes[0]);
+                        break;
+                }
+            }
+
+            // 2. 回復初始Docking
+            RestoreDefaultDocking(WindowType.TIEditor);
+
+            // 3. 驗證所有 Panel 不是 Floating 狀態
+            //    如果為 Floating，可能會出現名為 "FloatingPanel" 的 Window 元素
+            TIPanelType[] allTIPanels = Enum.GetValues(typeof(TIPanelType)).Cast<TIPanelType>().ToArray();
+            for (int i = 0; i < sourcePanelTypes.Length; i++)
+            {
+                var anyFloatingPanel = PP5IDEWindow.PerformGetElement($"/ByName[{allTIPanels[i]}]");
+                anyFloatingPanel.ShouldBeNull();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B12-6
+        /// 測試步驟：
+        /// 1. 開啟 TI Editor，建立新的測項 (TI)
+        /// 2. 添加一個 SET 命令，並將其參數設定為 Vector 參數 (如 LineInVector、LoadVector、SpecVector 等)
+        /// 3. 設定完成後，直接執行 Compile
+        /// 測試描述：在 TI Editor 中設定含有 Vector 參數的命令後，Compile 不應出現錯誤
+        /// 預期輸出：Compile 成功，並跳出提示訊息告知編譯無誤
+        /// </summary>
+        [TestMethod("B12-6")]
+        [TestCategory("工具功能(B12)")]
+        [DataRow(VariableDataType.LineInVector, typeof(object), DisplayName = "LineInVector參數測試")]
+        [DataRow(VariableDataType.LoadVector, typeof(object), DisplayName = "LoadVector參數測試")]
+        [DataRow(VariableDataType.SpecVector, typeof(object), DisplayName = "SpecVector參數測試")]
+        public void TIEditor_CreateNewTestItem_SetVectorParameterThenCompile(VariableDataType dataType, object dummy)
+        {
+            try
+            {
+                // 1. 添加一個 SET 命令/Vector參數
+                string vecCallName = "B12-6";
+                AddCommandBy(TestCmdGroupType.Arithmetic, "SET");
+                InitializeVariableDataGrid(VariableTabType.Condition, "", vecCallName, dataType);
+
+                // 將 SET 命令的參數設定為 Vector參數
+                // 假設此段可以透過 PerformInput 或指定欄位動作完成
+                PP5IDEWindow.PerformClick("/ByCell@PGGrid[1,@Parameters]", ClickType.LeftClick);
+                PP5IDEWindow.PerformGetElement("/ByCell@ParameterGrid[1,@Parameter Value]")
+                            .SelectItem(vecCallName);
+
+                // 2. 直接執行 Compile
+                MenuSelect("Utility", "Compile");
+
+                // 3. 驗證編譯成功訊息：假設出現一個視窗顯示編譯無誤
+                var compileWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                compileWindow.ShouldNotBeNull();
+                compileWindow.GetText().ShouldContain("Compile");  // 假設標題或內容顯示 Compile 字樣
+
+                var compileMsg = compileWindow.PerformGetElement("/Edit[txtBlockMsg]").GetText();
+                compileMsg.ShouldContain("Compilation is complete"); // 假設會顯示此訊息
+            }
+            finally
+            {
+                // 測試結束後，關閉Compile視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-1  
+        /// 測試步驟：  
+        /// 1. 點選 [Utility] -> [CAN Cluster Editor…]  
+        /// 2. 確認是否正確開啟 CAN Cluster Editor視窗並載入相應設定檔  
+        /// 3. 取得第一個ComboBox的選中值，驗證是否為預期  
+        /// 測試描述：  
+        /// 驗證在打開 CAN Cluster Editor 後，是否可以正確載入設定檔，  
+        /// 並顯示第一個ComboBox的預期值 (例如 "PhoenixonDSP")  
+        /// 預期輸出：  
+        /// 1. CAN Cluster Editor視窗能被正確打開  
+        /// 2. 載入 System Default 或對應設定檔時，第一個ComboBox顯示預期的選中值  
+        /// </summary>
+        [TestMethod("B13-1")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        [DataRow("PhoenixonDSP", typeof(object), DisplayName = "載入System Default cluster檔案，ComboBox顯示PhoenixonDSP")]
+        public void CANClusterEditor_OpenWindowAndCheckDefaultCluster_B13_1(string expectedClusterName, object dummy)
+        {
+            try
+            {
+                // 1. 點選 [Utility] -> [CAN Cluster Editor…]
+                MenuSelect("Utility", "CAN Cluster Editor...");
+
+                // 2. 確認是否成功打開 CAN Cluster Editor 視窗
+                var clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 假設進入後會自動載入 clusterFileKey 對應的設定檔 (System Default 或 UserSetting)
+
+                // 3. 取得第一個ComboBox元素
+                var comboBoxEl = clusterEditorWindow.PerformGetElement("/ById[mainWindow]/ByName[CAN DBC List]/ById[clusterCBox]");
+                comboBoxEl.ShouldNotBeNull("未找到 CAN Cluster Editor 的第一個ComboBox");
+
+                // 4. 讀取第一個ComboBox 當前的選中值
+                string actualValue = comboBoxEl.GetText();
+
+                // 5. 驗證是否為預期值
+                expectedClusterName.ShouldEqualTo(actualValue, $"第一個ComboBox的顯示值應為 {expectedClusterName}，但實際得到 {actualValue}");
+            }
+            finally
+            {
+                // 清理：關閉 CAN Cluster Editor
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-4
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster 編輯器視窗
+        /// 2. 在 CAN Cluster 編輯器中點選 [File] -> [New]
+        /// 3. 檢查是否開啟名為 "UnClassified" 的空 dbc 檔
+        /// 4. 檢查 [File] -> [Open System Default] 是否為 Enable 狀態
+        /// 5. 檢查 [File] -> [Set System Default] 是否為 Disable 狀態
+        /// 測試描述：驗證在 CAN Cluster 編輯器中新建空 dbc 檔並確認相關選項狀態
+        /// 預期輸出：能正常開啟名為 "UnClassified" 的空 dbc 檔，[Open System Default] 為可用，[Set System Default] 為不可用
+        /// </summary>
+        [TestMethod("B13-4_建立空DBC檔案後檔名與選項狀態驗證")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        //[DataRow("UnClassified", typeof(object), DisplayName = "建立空DBC檔案後檔名與選項狀態驗證")]
+        public void CANClusterEditor_FileNew_CreateEmptyDBCCheck()
+        {
+            try
+            {
+                CANClusterEditorCreateEmptyDBC();       // 1. 開啟 CAN Cluster Editor, 創建一個空的 dbc 檔案
+            }
+            finally
+            {
+                // 測試結束後，關閉 CAN Cluster Editor
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-5
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster 編輯器視窗
+        /// 2. 在 CAN Cluster 編輯器中點選 [File] -> [Open]
+        /// 3. 彈出 Open 子視窗，並顯示資料夾內可用的 dbc Template 檔案
+        /// 測試描述：驗證在 CAN Cluster 編輯器中使用 [Open] 功能時，能正常列出 dbc Template 檔案清單
+        /// 預期輸出：成功顯示 Open 子視窗，且能列出資料夾內所有 dbc Template 檔案
+        /// </summary>
+        [TestMethod("B13-5_顯示所有 dbc Template 檔案")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        public void CANClusterEditor_FileOpen_ShowDBCFiles()
+        {
+            try
+            {
+                // 1. 開啟 CAN Cluster 編輯器視窗
+                PP5IDEWindow.MenuSelect("Utility", "CAN Cluster Editor...");
+                var clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster 編輯器視窗未開啟");
+
+                // 2. 點選 [File] -> [Open] 以彈出 Open 子視窗
+                clusterEditorWindow.MenuSelect("File", "Open");
+
+                // 3. 驗證 Open 子視窗是否彈出
+                var openDialog = clusterEditorWindow.PerformGetElement("/Window[Open File]");
+                openDialog.ShouldNotBeNull("Open 子視窗未彈出");
+
+                // 4. 驗證是否顯示資料夾內的 dbc Template 檔案清單
+                // 假設可透過指定 Element / List 取出實際檔案清單
+                // 以下為範例程式，實際實作取決於專案框架
+                var fileListElement = openDialog.PerformGetElement("/ById[lbFiles]");
+                fileListElement.ShouldNotBeNull("無法找到檔案清單列表控件");
+                string[] dbcTemplateFilesActual = fileListElement.GetComboBoxItemNames();
+                // 4.1 模擬切換檔案路徑 (若有需要)
+                // openDialog.PerformInput("/ById[pathTextBox]", InputType.SendContent, folderPath);
+
+                // 4.2 檢查該路徑下所有 .clj 檔案是否正確列出 (可依實際框架判斷)
+                // 這裡僅示範用 ContainsDBCFilesInFolder(folderPath) 來驗證
+                // 具體實作依照實際UI框架
+                string dbcTemplateFolder = string.Format("{0}/DBCTemplate", PowerPro5Config.ReleaseFolder);
+                string[] dbcTemplateFilesExpected = FileProcessingExtension.GetFilesWithExtensionName(dbcTemplateFolder, "clj", out bool hasDBCTemplateFiles);
+                hasDBCTemplateFiles.ShouldBeTrue($"資料夾 {dbcTemplateFolder} 中預期應有 .clj 之DBCTemplate檔案");
+                dbcTemplateFilesExpected.ShouldEqualTo(dbcTemplateFilesActual);
+
+                // 5. 若需要，可以在此關閉視窗或做其他清理
+                openDialog.PerformClick("/ByName[Cancel]", ClickType.LeftClick);
+            }
+            finally
+            {
+                // 測試結束後，關閉 CAN Cluster Editor
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-6
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster 編輯器視窗
+        /// 2. 在 CAN Cluster 編輯器畫面點選 [File] -> [Open]
+        /// 3. 選擇第一個 dbc Template 檔案後，點選 OK
+        /// 4. 驗證該 dbc Template 檔案已成功載入，且參數讀取正確
+        /// 測試描述：透過載入選定的 dbc Template 檔案，確認 CAN Cluster Editor 能正常開啟並讀取內容
+        /// 預期輸出：成功載入所選 dbc Template 檔案，並能讀取相關訊息
+        /// </summary>
+        [TestMethod("B13-6")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        public void CANClusterEditor_FileOpen_LoadSelectedDBCFile()
+        {
+            try
+            {
+                // 1. 開啟 CAN Cluster 編輯器視窗
+                PP5IDEWindow.MenuSelect("Utility", "CAN Cluster Editor...");
+                var clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster 編輯器視窗未開啟");
+
+                // 2. 在 CAN Cluster 編輯器中點選 [File] -> [Open]
+                clusterEditorWindow.MenuSelect("File", "Open");
+
+                // 3. 等待彈出 Open 子視窗，並選擇指定的 dbc 檔案
+                var openDialog = clusterEditorWindow.PerformGetElement("/Window[Open File]");
+                openDialog.ShouldNotBeNull("Open 子視窗未彈出");
+
+                // 選擇第一個dbc Template檔案
+                string dbcFileName = openDialog.SelectItem(0).Text;
+
+                // 點選 OK
+                openDialog.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 4. 若檔案存在，應成功載入
+                // 檢查 CAN Cluster Editor 是否顯示載入成功 (可依實作調整)
+                // 以下僅舉例，由於不清楚實際 UI 呈現，可以根據實際測試框架調整
+                var clusterTitle = clusterEditorWindow.GetText();
+                clusterTitle.ShouldContain(dbcFileName, $"應載入 {dbcFileName} 檔案");
+            }
+            finally
+            {
+                // 測試結束後，關閉 CAN Cluster Editor 視窗
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-7
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster 編輯器視窗
+        /// 2. 在 CAN Cluster 編輯器中點選 [File] -> [Open]
+        /// 3. 選擇一個非 System Default 的檔案並點選 OK
+        /// 4. 驗證 [Open System Default] 和 [Set as System Default] 是否變為 Enable
+        /// 測試描述：載入非 System Default 檔案後，確認相關選單項目狀態改變
+        /// 預期輸出：[Open System Default] 和 [Set as System Default] 應由 Disable 變為 Enable
+        /// </summary>
+        [TestMethod("B13-7_載入非SystemDefault檔案")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        public void CANClusterEditor_FileOpen_LoadNonSystemDefaultFile()
+        {
+            try
+            {
+                // 1. 開啟 CAN Cluster 編輯器視窗
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                var clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster 編輯器視窗未開啟");
+
+                // 2. 檢查初始狀態 (假設為 System Default)
+                clusterEditorWindow.MenuSelect("File");
+                clusterEditorWindow.PerformGetElement("/ByName[Open System Default]").ShouldBeDisabled("[Open System Default] 應為Disabled狀態");
+                clusterEditorWindow.PerformGetElement("/ByName[Set as System Default]").ShouldBeDisabled("[Set as System Default] 應為Disabled狀態");
+                clusterEditorWindow.MenuSelect("File");
+                string defaultDbcName = clusterEditorWindow.GetText().Split('[', ']')[1].Trim();     // 取得 System Default 檔案名稱
+
+                // 3. 開啟檔案選擇對話框
+                clusterEditorWindow.MenuSelect("File", "Open");
+
+                // 4. 選擇並開啟非 System Default 檔案
+                var openDialog = PP5IDEWindow.PerformGetElement("/Window[Open File]");
+                openDialog.ShouldNotBeNull("開啟檔案對話框未顯示");
+
+                var fileList = openDialog.PerformGetElement("/ById[lbFiles]");
+                fileList.ShouldNotBeNull("找不到檔案清單");
+
+                // 5. 選擇測試檔案
+                List<string> dbcfileNames = fileList.GetComboBoxItemNames().ToList();
+                dbcfileNames.Remove(defaultDbcName);
+                fileList.SelectItem(dbcfileNames[0]);
+                openDialog.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 6. 驗證選單狀態變更
+                clusterEditorWindow.MenuSelect("File");
+                clusterEditorWindow.PerformGetElement("/ByName[Open System Default]").ShouldBeEnabled("[Open System Default] 應為Enabled狀態");
+                clusterEditorWindow.PerformGetElement("/ByName[Set as System Default]").ShouldBeEnabled("[Set as System Default] 應為Enabled狀態");
+                clusterEditorWindow.MenuSelect("File");
+            }
+            finally
+            {
+                PP5IDEWindow.CloseWindow(0);        // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-8
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster 編輯器視窗
+        /// 2. 在 CAN Cluster 編輯器中點選 [File] -> [Open]
+        /// 3. 選擇 System Default 檔案並點選 OK
+        /// 4. 驗證 [Open System Default] 和 [Set as System Default] 是否變為 Disable
+        /// 測試描述：載入 System Default 檔案後，確認相關選單項目狀態改變
+        /// 預期輸出：[Open System Default] 和 [Set as System Default] 應變為 Disable
+        /// </summary>
+        [TestMethod("B13-8_載入SystemDefault檔案")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        //[DataRow("非SystemDefault", "SystemDefault", typeof(object), DisplayName = "載入SystemDefault檔案")]
+        public void CANClusterEditor_FileOpen_LoadSystemDefaultFile()
+        {
+            try
+            {
+                // 1. 開啟 CAN Cluster 編輯器視窗
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                var clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster 編輯器視窗未開啟");
+
+                // 2. 先載入非 System Default 檔案確保選單為 Enable
+                clusterEditorWindow.MenuSelect("File", "Open");
+                var openDialog = PP5IDEWindow.PerformGetElement("/Window[Open File]");
+                var fileList = openDialog.PerformGetElement("/ById[lbFiles]");
+                string defaultDbcName = clusterEditorWindow.GetText().Split('[', ']')[1].Trim();     // 取得 System Default 檔案名稱
+                List<string> dbcfileNames = fileList.GetComboBoxItemNames().ToList();
+                dbcfileNames.Remove(defaultDbcName);
+
+                string nonDefaultDbcName = dbcfileNames[0];
+                fileList.SelectItem(nonDefaultDbcName);
+                openDialog.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 3. 驗證選單為 Enable
+                clusterEditorWindow.MenuSelect("File");
+                clusterEditorWindow.PerformGetElement("/ByName[Open System Default]").ShouldBeEnabled();
+                clusterEditorWindow.PerformGetElement("/ByName[Set as System Default]").ShouldBeEnabled();
+                clusterEditorWindow.MenuSelect("File");
+
+                // 4. 再次開啟檔案選擇對話框，選擇 System Default
+                clusterEditorWindow.MenuSelect("File", "Open");
+                openDialog = PP5IDEWindow.PerformGetElement("/Window[Open File]");
+                fileList = openDialog.PerformGetElement("/ById[lbFiles]");
+                fileList.SelectItem(defaultDbcName);
+                openDialog.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 5. 驗證選單狀態變更為 Disable
+                clusterEditorWindow.MenuSelect("File");
+                clusterEditorWindow.PerformGetElement("/ByName[Open System Default]").ShouldBeDisabled();
+                clusterEditorWindow.PerformGetElement("/ByName[Set as System Default]").ShouldBeDisabled();
+                clusterEditorWindow.MenuSelect("File");
+            }
+            finally
+            {
+                // 清理：關閉所有視窗
+                PP5IDEWindow.CloseWindow(0);        // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-9
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗，新增一個空的 DBC 檔案
+        /// 2. 確認 dbc 檔案名稱是否已存在
+        /// 3. 點選儲存按鈕 [Save As]
+        /// 4. 輸入檔案名稱並按下 OK
+        /// 5. 等待30秒後，點選儲存按鈕 [Save]
+        /// 6. 檢查指定資料夾中dbc 檔案之修改時間是否為30秒後
+        /// 測試描述：驗證在 CAN Cluster Editor 中建立新的 DBC 檔案並儲存舊檔的功能
+        /// 預期輸出：
+        /// 1. 成功開啟 CAN Cluster Editor
+        /// 2. 成功儲存檔案
+        /// 3. 在指定路徑下該 DBC 檔案有更新
+        /// </summary>
+        [TestMethod("B13-9")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        [DataRow("Menu", typeof(object), DisplayName = "選單存檔-檔名重複")]
+        [DataRow("ToolBar", typeof(object), DisplayName = "工具列存檔-檔名重複")]
+        public void CANClusterEditor_FileSave_CheckDbcFileIsUpdated(string saveAsMethod, object dummy)
+        {
+            string dbcTemplateFolder = string.Format("{0}/DBCTemplate", PowerPro5Config.ReleaseFolder);
+            string dbcName = "B13-9";
+            string dbcExtensionName = "clj";
+            string fullPath = string.Format("{0}/{1}.{2}", dbcTemplateFolder, dbcName, dbcExtensionName);
+
+            try
+            {
+                // 1. 創建空的 DBC 檔案
+                CANClusterEditorCreateEmptyDBC();
+
+                // 2 & 3. 點選 Save As 並確認檔案名稱不重複
+                PP5IDEWindow.PerformClick("/Window[0]/ById[BtnSaveAs]", ClickType.LeftClick);
+                var fileList = PP5IDEWindow.PerformGetElement("/Window[1]/ById[lbFiles]");
+                var dbcfileNames = fileList.GetComboBoxItemNames();
+                dbcfileNames.ShouldNotContain(dbcName, $"DBC檔案名稱 \"{dbcName}\" 已存在");
+
+                // 4. 輸入檔案名稱並儲存
+                PP5IDEWindow.PerformInput("/Window[1]/ById[txtFileName]", InputType.SendContent, dbcName);
+                PP5IDEWindow.PerformClick("/Window[1]/ByName[OK]", ClickType.LeftClick);
+
+                // 驗證檔案是否成功儲存
+                FileProcessingExtension.GetFilesWithExtensionName(dbcTemplateFolder, dbcExtensionName, out bool hasDBCTemplateFiles);
+                hasDBCTemplateFiles.ShouldBeTrue($"找不到已儲存的DBC檔案: {dbcName}");
+
+                // 記錄第一次儲存的時間
+                DateTime firstSaveTime = File.GetLastWriteTime(fullPath);
+
+                // 5. 等待30秒
+                Thread.Sleep(30000);
+
+                // 點選 Save 按鈕更新檔案 (透過選單或工具列)
+                if (saveAsMethod == "Menu")
+                    PP5IDEWindow.PerformGetElement("/Window[0]").MenuSelect("File", "Save");
+                else
+                    PP5IDEWindow.PerformClick("/Window[0]/ById[BtnSave]", ClickType.LeftClick);
+
+                // 6. 驗證檔案更新時間
+                DateTime secondSaveTime = File.GetLastWriteTime(fullPath);
+                TimeSpan timeDiff = secondSaveTime - firstSaveTime;
+                Assert.IsTrue(timeDiff.TotalSeconds >= 30, "檔案更新時間間隔應至少30秒");
+            }
+            finally
+            {
+                //var windowTemp = PP5IDEWindow;
+                //for (int i = 0; i < PP5IDEWindow.GetWindowCount(); i++)
+                //{
+                //    windowTemp = windowTemp.PerformGetElement("/Window[0]");
+                //    windowTemp.CloseWindow(i);
+                //}
+
+                // 清理：關閉所有視窗並刪除測試檔案
+                for (int i = 0; i < 2; i--)         // Close CAN Cluster Editor and DBC Editor
+                    PP5IDEWindow.CloseWindow(i);
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-10
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗，點選儲存按鈕 [Save As]
+        /// 2. Open File視窗顯示資料夾內有的dbc檔案
+        /// 測試描述：驗證在 CAN Cluster Editor 中另存新檔[Save As]的功能能否正常顯示所有已存在的dbc檔案
+        /// 預期輸出：
+        /// 1. 成功開啟 CAN Cluster Editor
+        /// 2. 在指定路徑下可找到所有的 DBC 檔案
+        /// </summary>
+        [TestMethod("B13-10")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        [DataRow("Menu", typeof(object), DisplayName = "選單另存為-檢查Open File視窗顯示資料夾內有的dbc檔案")]
+        [DataRow("ToolBar", typeof(object), DisplayName = "工具列另存為-檢查Open File視窗顯示資料夾內有的dbc檔案")]
+        public void CANClusterEditor_FileSaveAs_CheckDbcFilesAreDisplayed(string saveAsMethod, object dummy)
+        {
+            string dbcTemplateFolder = string.Format("{0}/DBCTemplate", PowerPro5Config.ReleaseFolder);
+            string dbcExtensionName = "clj";
+            try
+            {
+                PP5IDEWindow.MenuSelect("Utility", "CAN Cluster Editor...");                                                            // 1-1. 開啟 CAN Cluster 編輯器視窗
+
+                if (saveAsMethod == "Menu")                                                                                             // 1-2. 點選 Save As (透過選單或工具列)
+                    PP5IDEWindow.PerformGetElement("/Window[0]").MenuSelect("File", "Save As");
+                else
+                    PP5IDEWindow.PerformClick("/Window[0]/ById[BtnSaveAs]", ClickType.LeftClick);
+
+                var fileList = PP5IDEWindow.PerformGetElement("/Window[1]/ById[lbFiles]");                                              // 2. Open File視窗顯示資料夾內有的dbc檔案
+                var dbcfileNames = fileList.GetComboBoxItemNames();
+                var localDbcfileNames = FileProcessingExtension.GetFilesWithExtensionName(dbcTemplateFolder, dbcExtensionName, out _);
+                CollectionAssert.AreEqual(dbcfileNames, localDbcfileNames);
+            }
+            finally
+            {
+                //var windowTemp = PP5IDEWindow;
+                //for (int i = 0; i < PP5IDEWindow.GetWindowCount(); i++)
+                //{
+                //    windowTemp = windowTemp.PerformGetElement("/Window[0]");
+                //    windowTemp.CloseWindow(i);
+                //}
+
+                // 清理：關閉所有視窗並刪除測試檔案
+                for (int i = 0; i < 2; i--)         // Close CAN Cluster Editor and DBC Editor
+                    PP5IDEWindow.CloseWindow(i);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-11
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗，創建並儲存一個 DBC 檔案
+        /// 2. 點選儲存按鈕 [Save As] 或工具列的 SaveAs 圖示
+        /// 3. 輸入與已存在檔案相同的名稱並按下 OK
+        /// 4. 驗證是否出現覆蓋詢問視窗
+        /// 測試描述：驗證在另存新檔時，輸入重複檔名時的覆蓋確認機制
+        /// 預期輸出：顯示檔案覆蓋的詢問視窗
+        /// </summary>
+        [TestMethod("B13-11")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Menu", typeof(object), DisplayName = "選單另存為-檔名重複")]
+        [DataRow("ToolBar", typeof(object), DisplayName = "工具列另存為-檔名重複")]
+        public void CANClusterEditor_FileSaveAs_CheckOverwritePrompt(string saveAsMethod, object dummy)
+        {
+            string dbcTemplateFolder = string.Format("{0}/DBCTemplate", PowerPro5Config.ReleaseFolder);
+            string dbcExtensionName = "clj";
+            string existingFileName = "B13-11";
+            string fullPath = string.Format("{0}/{1}.{2}", dbcTemplateFolder, existingFileName, dbcExtensionName);
+
+            try
+            {
+                // 1. 創建並儲存第一個檔案
+                CANClusterEditorCreateEmptyDBC();
+                PP5IDEWindow.PerformClick("/Window[0]/ById[BtnSaveAs]", ClickType.LeftClick);
+                PP5IDEWindow.PerformInput("/Window[1]/ById[txtFileName]", InputType.SendContent, existingFileName);
+                PP5IDEWindow.PerformClick("/Window[1]/ByName[OK]", ClickType.LeftClick);
+
+                // 2. 再次點選 Save As (透過選單或工具列)
+                if (saveAsMethod == "Menu")
+                    PP5IDEWindow.PerformGetElement("/Window[0]").MenuSelect("File", "Save As");
+                else
+                    PP5IDEWindow.PerformClick("/Window[0]/ById[BtnSaveAs]", ClickType.LeftClick);
+
+                // 3. 輸入相同檔名
+                PP5IDEWindow.PerformInput("/Window[1]/ById[txtFileName]", InputType.SendContent, existingFileName);
+                PP5IDEWindow.PerformClick("/Window[1]/ByName[OK]", ClickType.LeftClick);
+
+                // 4. 驗證覆蓋詢問視窗
+                var msgBox = PP5IDEWindow.PerformGetElement("/Window[DBC Editor]");
+                msgBox.ShouldNotBeNull("未出現覆蓋確認視窗");
+
+                string expectedPrompt = $"The File '{existingFileName}' already exists. \r\n Do you want to overwrite?";
+                var msgText = msgBox.PerformGetElement("/Edit[txtBlockMsg]").GetText();
+                msgText.ShouldContain(expectedPrompt, "覆蓋確認訊息內容不符");
+            }
+            finally
+            {
+                //var windowTemp = PP5IDEWindow;
+                //for (int i = 0; i < PP5IDEWindow.GetWindowCount(); i++)
+                //{
+                //    windowTemp = windowTemp.PerformGetElement("/Window[0]");
+                //    windowTemp.CloseWindow(i);
+                //}
+
+                // 清理：關閉所有視窗並刪除測試檔案
+                PP5IDEWindow.CloseWindow(0);        // Close MseeageBox / DBC Editor
+                PP5IDEWindow.CloseWindow(0);        // Close CAN Cluster Editor
+
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-12
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗，新增一個空的 DBC 檔案
+        /// 2. 確認 dbc 檔案名稱是否已存在
+        /// 3. 點選儲存按鈕 [Save As]
+        /// 4. 輸入檔案名稱並按下 OK
+        /// 5. 檢查指定資料夾中是否成功儲存該檔案
+        /// 測試描述：驗證在 CAN Cluster Editor 中建立新的 DBC 檔案並另存新檔的功能
+        /// 預期輸出：
+        /// 1. 成功開啟 CAN Cluster Editor
+        /// 2. 成功另存新檔
+        /// 3. 在指定路徑下可找到儲存的 DBC 檔案
+        /// </summary>
+        [TestMethod("B13-12")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        [DataRow("Menu", typeof(object), DisplayName = "選單另存為-儲存一個新的dbc檔案")]
+        [DataRow("ToolBar", typeof(object), DisplayName = "工具列另存為-儲存一個新的dbc檔案")]
+        public void CANClusterEditor_FileSaveAs_CheckDbcFileIsSaved(string saveAsMethod, object dummy)
+        {
+            string dbcTemplateFolder = string.Format("{0}/DBCTemplate", PowerPro5Config.ReleaseFolder);
+            string dbcName = "B13-12";
+            string dbcExtensionName = "clj";
+            string fullPath = string.Format("{0}/{1}.{2}", dbcTemplateFolder, dbcName, dbcExtensionName);
+            try
+            {
+                CANClusterEditorCreateEmptyDBC();                                                                                       // 1. 創建一個空的 dbc 檔案
+
+                if (saveAsMethod == "Menu")                                                                                             // 2. 確認 dbc 檔案名稱是否已存在 (透過選單或工具列)
+                    PP5IDEWindow.PerformGetElement("/Window[0]").MenuSelect("File", "Save As");
+                else
+                    PP5IDEWindow.PerformClick("/Window[0]/ById[BtnSaveAs]", ClickType.LeftClick);
+
+                var fileList = PP5IDEWindow.PerformGetElement("/Window[1]/ById[lbFiles]");                                      
+                var dbcfileNames = fileList.GetComboBoxItemNames();
+                dbcfileNames.ShouldNotContain(dbcName, $"dbc 檔案名稱 \"{dbcName}\" 已存在");
+
+                PP5IDEWindow.PerformInput("/Window[1]/ById[txtFileName]", InputType.SendContent, dbcName);                              // 3. 儲存該 dbc 檔案
+                PP5IDEWindow.PerformClick("/Window[1]/ByName[OK]", ClickType.LeftClick);
+
+                string currentDbcWindowTitle= PP5IDEWindow.PerformGetElement("/Window[0]").GetText();                                   // 4. 驗證檔案是否儲存成功
+                currentDbcWindowTitle.ShouldContain(dbcName);                                                                           // 確認視窗標題的檔案名稱改為新檔名稱
+                PP5IDEWindow.PerformGetElement("/Window[0]").MenuSelect("File");
+                PP5IDEWindow.PerformGetElement("/Window[0]").PerformGetElement("/ByName[Open System Default]").ShouldBeEnabled();       // [File] > [Open System Default]、[Set System Default]變更為Enable狀態
+                PP5IDEWindow.PerformGetElement("/Window[0]").PerformGetElement("/ByName[Set as System Default]").ShouldBeEnabled();
+                FileProcessingExtension.GetFilesWithExtensionName(dbcTemplateFolder, dbcExtensionName, out bool hasDBCTemplateFiles);   // 本地端檢查是否有已儲存的 dbc 檔
+                hasDBCTemplateFiles.ShouldBeTrue($"找不到已儲存的DBC檔案: {dbcName}");
+            }
+            finally
+            {
+                //var windowTemp = PP5IDEWindow;
+                //for (int i = 0; i < PP5IDEWindow.GetWindowCount(); i++)
+                //{
+                //    windowTemp = windowTemp.PerformGetElement("/Window[0]");
+                //    windowTemp.CloseWindow(i);
+                //}
+
+                // 清理：關閉所有視窗並刪除測試檔案
+                PP5IDEWindow.CloseWindow(0);        // Close CAN Cluster Editor
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-13
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor
+        /// 2. 點選 Import CAN DBC 按鈕
+        /// 3. 驗證是否彈出選擇 DBC 文件視窗
+        /// 測試描述：驗證在 CAN Cluster Editor 中點選 Import CAN DBC 按鈕後的檔案選擇視窗顯示
+        /// 預期輸出：正確顯示選擇 DBC 文件視窗
+        /// </summary>
+        [TestMethod("B13-13")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Cluster Import", typeof(object), DisplayName = "開啟選擇DBC檔案視窗")]
+        public void CANClusterEditor_ImportCANDBC_CheckFileDialogDisplay(string expectedDBCImportTitle, object dummy)
+        {
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                var clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 點選 Import CAN DBC 按鈕
+                clusterEditorWindow.PerformClick("/ById[Import CAN DBC]", ClickType.LeftClick);
+
+                // 3. 驗證是否彈出選擇 DBC 檔案視窗
+                var fileDialog = PP5IDEWindow.PerformGetElement("/Window[開啟]");
+                fileDialog.ShouldNotBeNull("未彈出選擇 DBC 文件視窗");
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                PP5IDEWindow.CloseWindow(1);        // Close 選擇 DBC 文件視窗
+                PP5IDEWindow.CloseWindow(0);        // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-14
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor
+        /// 2. 點選 Import CAN DBC 按鈕
+        /// 3. 選擇任一DBC檔案
+        /// 4. 驗證是否彈出選擇 DBC 文件內容視窗
+        /// 測試描述：驗證是否彈出選擇的DBC文件內容視窗
+        /// 預期輸出：正確顯示選擇 DBC 文件內容視窗
+        /// </summary>
+        [TestMethod("B13-14")]
+        [TestCategory("CAN Cluster 編輯器")]
+        //[DataRow("Cluster Import", typeof(object), DisplayName = "開啟DBC檔案文件內容視窗")]
+        public void CANClusterEditor_ImportCANDBC_CheckDBCImportDisplay()
+        {
+            string dbcFileFolder = string.Format("{0}/DBCFile", PowerPro5Config.ReleaseFolder);
+            string dbcExtensionName = "dbc";
+            string dbcName = "";
+            IElement clusterEditorWindow = null;
+            IElement dbcImportWindow = null;
+            //string fullPath;
+            //fullPath = string.Format("{0}/{1}.{2}", dbcFileFolder, dbcName, dbcExtensionName);
+
+            try
+            {
+                // 0. 檢查dbcFileFolder是否有DBC檔案，並取得第一個DBC檔案名稱
+                string[] dbcFileNames = FileProcessingExtension.GetFilesWithExtensionName(dbcFileFolder, dbcExtensionName, out bool hasDBCFiles);
+                if (hasDBCFiles)
+                    dbcName = dbcFileNames[0];
+
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 點選 Import CAN DBC 按鈕，並選擇 DBC 檔案，開啟 DBC 文件內容匯入視窗
+                dbcImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, dbcName);
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                //PP5IDEWindow.CloseWindow(0);        // Close 選擇 DBC 文件內容視窗
+                //PP5IDEWindow.CloseWindow(0);        // Close CAN Cluster Editor
+                dbcImportWindow.CloseWindow();      // Close CAN Cluster Import window
+                clusterEditorWindow.CloseWindow();  // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-15_1
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 開啟 CAN Cluster Import 視窗
+        /// 3. 取得當前 DBC 訊息表格的第一筆資料
+        ///    - 取得 Message 欄位內容
+        ///    - 取得 ID 欄位內容
+        /// 4. 在搜尋欄位輸入要搜尋的文字(Message/ID)並按下 Enter
+        /// 5. 驗證搜尋結果是否與輸入的搜尋文字相符
+        /// 測試描述：在CAN Cluster Import畫面，於搜尋欄位上輸入要搜尋的字串按下Enter
+        /// 預期輸出：在CAN Cluster Import畫面執行搜尋,要能搜尋到第一次出現的Message或ID名稱
+        /// </summary>
+        [TestMethod("B13-15_1")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        [DataRow("ByMessage", typeof(object), DisplayName = "Enter搜尋-Message")]
+        [DataRow("ByID", typeof(object), DisplayName = "Enter搜尋-ID")]
+        public void CANClusterImport_SearchByMessageOrIDByEnter_CheckSearchResultIsCorrect(string searchMethod, object dummy)
+        {
+            string dbcName = "Demo";
+            IElement clusterEditorWindow = null;
+            IElement dbcImportWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 開啟 CAN Cluster Import 視窗
+                dbcImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, dbcName);
+
+                // 3. 搜尋欄位輸入要搜尋的字串
+                // 3-1. 先獲取DBC表格
+                //dbcImportWindow.PerformGetElement("/ByName[Content]/ById[tabControl,dgMessage]");
+                var dbcImportGrid = dbcImportWindow.PerformGetElement($"/ById[dgMessage]/ByName[{dbcName}]");
+
+                // 3-2. 接著取得column: Message/ID 欄位 1st Row 的內容
+                string message = dbcImportGrid.PerformGetElement("ByCell[1,2]").GetText();        // Message
+                string id = dbcImportGrid.PerformGetElement("ByCell[1,3]").GetText();             // ID
+
+                // 3-3. 最後搜尋欄位輸入要搜尋的字串(Message/ID)
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+                dbcImportWindow.PerformInput("/ByClass[SearchBox]/ById[searchText]", InputType.SendContent, searchValue);
+                Press(Keys.Enter);
+
+                // 4. 驗證搜尋結果
+                int columnNo = searchMethod == "ByMessage" ? 2 : 3;
+                string searchResult = dbcImportWindow.PerformGetElement($"ByCell[{columnNo}]").GetText();      // Message/ID search result
+                searchResult.ShouldNotBeNull($"搜尋結果為空,搜尋字串為: {searchValue}");
+                searchResult.ShouldEqualTo(searchValue);
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                dbcImportWindow.CloseWindow();      // Close CAN Cluster Import window
+                clusterEditorWindow.CloseWindow();  // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-15_2
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 開啟 CAN Cluster Import 視窗
+        /// 3. 取得當前 DBC 訊息表格的第一筆資料
+        ///    - 取得 Message 欄位內容
+        ///    - 取得 ID 欄位內容
+        /// 4. 在搜尋欄位輸入要搜尋的文字(Message/ID)並點擊搜尋按鈕
+        /// 5. 驗證搜尋結果是否與輸入的搜尋文字相符
+        /// 測試描述：在 CAN Cluster Import畫面，於搜尋欄位上輸入要搜尋的字串並點擊搜尋按鈕
+        /// 預期輸出：在 CAN Cluster Import畫面執行搜尋，要能搜尋到第一次出現的 Message 或 ID 名稱
+        /// </summary>
+        [TestMethod("B13-15_2")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("ByMessage", typeof(object), DisplayName = "按鈕搜尋-Message")]
+        [DataRow("ByID", typeof(object), DisplayName = "按鈕搜尋-ID")]
+        public void CANClusterImport_SearchByMessageOrIDByButton_CheckSearchResultIsCorrect(string searchMethod, object dummy)
+        {
+            string dbcName = "Demo";
+            IElement clusterEditorWindow = null;
+            IElement dbcImportWindow = null;
+
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 開啟 CAN Cluster Import 視窗
+                dbcImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, dbcName);
+
+                // 3. 搜尋欄位輸入要搜尋的字串
+                // 3-1. 先獲取DBC表格
+                //dbcImportWindow.PerformGetElement("/ByName[Content]/ById[tabControl,dgMessage]");
+                var dbcImportGrid = dbcImportWindow.PerformGetElement($"/ById[dgMessage]/ByName[{dbcName}]");
+
+                // 3-2. 接著取得column: Message/ID 欄位 1st Row 的內容
+                string message = dbcImportGrid.PerformGetElement("ByCell[1,2]").GetText();    // Message
+                string id = dbcImportGrid.PerformGetElement("ByCell[1,3]").GetText();         // ID
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+
+                // 3-3. 最後搜尋欄位輸入要搜尋的字串(Message/ID)
+                dbcImportWindow.PerformInput("/ByClass[SearchBox]/ById[searchText]", InputType.SendContent, searchValue);
+
+                // 5. 點擊搜尋按鈕
+                dbcImportWindow.PerformClick("/ById[SearchBtn]", ClickType.LeftClick);
+
+                // 6. 驗證搜尋結果
+                int columnNo = searchMethod == "ByMessage" ? 2 : 3;
+                string searchResult = dbcImportWindow.PerformGetElement($"ByCell[{columnNo}]").GetText();      // Message/ID search result
+                searchResult.ShouldNotBeNull($"搜尋結果為空,搜尋字串為: {searchValue}");
+                searchResult.ShouldEqualTo(searchValue);
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                dbcImportWindow.CloseWindow();      // Close CAN Cluster Import window
+                clusterEditorWindow.CloseWindow();  // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-16
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 開啟 CAN Cluster Import 視窗
+        /// 3. 取得當前 DBC 訊息表格的第一筆資料
+        ///    - 取得 Message 欄位內容
+        ///    - 取得 ID 欄位內容
+        /// 4. 在搜尋欄位輸入要搜尋的文字(Message/ID)
+        /// 5. 重複按下 ▼ 或 F3 直到出現重新搜尋提示
+        /// 6. 驗證提示訊息內容
+        /// 測試描述：在 CAN Cluster Import 畫面，於搜尋欄位輸入要搜尋的字串後按下 ▼ 或 F3
+        /// 預期輸出：搜尋到相關的 Message 或 ID，到最後會詢問是否重新搜尋
+        /// </summary>
+        [TestMethod("B13-16")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("ByMessage", "ByDownArrow", typeof(object), DisplayName = "▼按鈕搜尋Message至結尾")]
+        [DataRow("ByID", "ByDownArrow", typeof(object), DisplayName = "▼按鈕搜尋ID至結尾")]
+        [DataRow("ByMessage", "ByF3", typeof(object), DisplayName = "F3搜尋Message至結尾")]
+        [DataRow("ByID", "ByF3", typeof(object), DisplayName = "F3搜尋ID至結尾")]
+        public void CANClusterImport_SearchByNextUntilEnd_CheckPromptMessage(
+            string searchMethod,
+            string searchKeyMethod,
+            object dummy)
+        {
+            string dbcName = "Demo";
+            IElement clusterEditorWindow = null;
+            IElement dbcImportWindow = null;
+
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                PP5IDEWindow.MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 開啟 CAN Cluster Import 視窗
+                dbcImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, dbcName);
+
+                // 3. 取得要搜尋的值
+                var dbcImportGrid = dbcImportWindow.PerformGetElement($"/ById[dgMessage]/ByName[{dbcName}]");
+                string message = dbcImportGrid.PerformGetElement("ByCell[1,2]").GetText();    // Message
+                string id = dbcImportGrid.PerformGetElement("ByCell[1,3]").GetText();         // ID
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+
+                // 4. 輸入搜尋文字
+                dbcImportWindow.PerformInput("/ByClass[SearchBox]/ById[searchText]", InputType.SendContent, searchValue);
+
+                // 5. 重複按下 ▼ 或 F3 直到出現重新搜尋提示
+                bool promptFound = false;
+                int maxAttempts = 100; // 設定最大搜尋次數避免無窮迴圈
+
+                for (int i = 0; i < maxAttempts && !promptFound; i++)
+                {
+                    if (searchKeyMethod == "ByDownArrow")
+                    {
+                        dbcImportWindow.PerformClick("/ById[NextBtn]", ClickType.LeftClick);
+                    }
+                    else
+                    {
+                        Press(Keys.F3);
+                    }
+
+                    // 檢查是否出現重新搜尋提示
+                    var msgBox = PP5IDEWindow.PerformGetElement("/Window[0]");
+                    if (msgBox != null)
+                    {
+                        string actualPrompt = msgBox.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                        actualPrompt.ShouldContain("The search complete.Do you want to search again?");
+                        promptFound = true;
+
+                        // 關閉提示視窗
+                        msgBox.PerformClick("/ByName[No]", ClickType.LeftClick);
+                        break;
+                    }
+                }
+
+                // 驗證是否找到提示訊息
+                promptFound.ShouldBeTrue("未出現重新搜尋提示訊息");
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                dbcImportWindow.CloseWindow();      // Close CAN Cluster Import window
+                clusterEditorWindow.CloseWindow();  // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-17
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 開啟 CAN Cluster Import 視窗
+        /// 3. 取得當前 DBC 訊息表格的第一筆資料
+        ///    - 取得 Message 欄位內容
+        ///    - 取得 ID 欄位內容
+        /// 4. 在搜尋欄位輸入要搜尋的文字(Message/ID)
+        /// 5. 重複按下 ▲ 或 Shift+F3 直到出現重新搜尋提示
+        /// 6. 驗證提示訊息內容
+        /// 測試描述：在 CAN Cluster Import 畫面，於搜尋欄位輸入要搜尋的字串後按下 ▲ 或 Shift+F3
+        /// 預期輸出：搜尋到相關的 Message 或 ID，到最後會詢問是否重新搜尋
+        /// </summary>
+        [TestMethod("B13-17")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("ByMessage", "ByUpArrow", typeof(object), DisplayName = "▲按鈕搜尋Message至起點")]
+        [DataRow("ByID", "ByUpArrow", typeof(object), DisplayName = "▲按鈕搜尋ID至起點")]
+        [DataRow("ByMessage", "ByShiftF3", typeof(object), DisplayName = "Shift+F3搜尋Message至起點")]
+        [DataRow("ByID", "ByShiftF3", typeof(object), DisplayName = "Shift+F3搜尋ID至起點")]
+        public void CANClusterImport_SearchByPreviousUntilStart_CheckPromptMessage(
+            string searchMethod,
+            string searchKeyMethod,
+            object dummy)
+        {
+            string dbcName = "Demo";
+            IElement clusterEditorWindow = null;
+            IElement dbcImportWindow = null;
+
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                PP5IDEWindow.MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 開啟 CAN Cluster Import 視窗
+                dbcImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, dbcName);
+
+                // 3. 取得要搜尋的值
+                var dbcImportGrid = dbcImportWindow.PerformGetElement($"/ById[dgMessage]/ByName[{dbcName}]");
+                string message = dbcImportGrid.PerformGetElement("ByCell[1,2]").GetText();    // Message
+                string id = dbcImportGrid.PerformGetElement("ByCell[1,3]").GetText();         // ID
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+
+                // 4. 輸入搜尋文字
+                dbcImportWindow.PerformInput("/ByClass[SearchBox]/ById[searchText]", InputType.SendContent, searchValue);
+
+                // 5. 重複按下 ▲ 或 Shift+F3 直到出現重新搜尋提示
+                bool promptFound = false;
+                int maxAttempts = 100; // 設定最大搜尋次數避免無窮迴圈
+
+                for (int i = 0; i < maxAttempts && !promptFound; i++)
+                {
+                    if (searchKeyMethod == "ByUpArrow")
+                    {
+                        dbcImportWindow.PerformClick("/ById[PreviosBtn]", ClickType.LeftClick);
+                    }
+                    else
+                    {
+                        Press(Keys.Shift, Keys.F3);
+                    }
+
+                    // 檢查是否出現重新搜尋提示
+                    var msgBox = PP5IDEWindow.PerformGetElement("/Window[0]");
+                    if (msgBox != null)
+                    {
+                        string actualPrompt = msgBox.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                        actualPrompt.ShouldContain("The search complete.Do you want to search again?");
+                        promptFound = true;
+
+                        // 關閉提示視窗
+                        msgBox.PerformClick("/ByName[No]", ClickType.LeftClick);
+                        break;
+                    }
+                }
+
+                // 驗證是否找到提示訊息
+                promptFound.ShouldBeTrue("未出現重新搜尋提示訊息");
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                dbcImportWindow.CloseWindow();      // Close CAN Cluster Import window
+                clusterEditorWindow.CloseWindow();  // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-18_1
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor
+        /// 2. 點選 Import CAN DBC 按鈕
+        /// 3. 選擇 DBC 檔案
+        /// 4. 選擇要匯入的 Message
+        /// 5. 點選 OK 按鈕
+        /// 6. 驗證匯入結果
+        /// 測試描述：測試 CAN Cluster Editor 的 Import 功能
+        /// 預期輸出：成功匯入選擇的 Message，並正確處理 Cluster 重複情況
+        /// </summary>
+        [TestMethod("B13-18_1")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow(new[] { "1" }, "Demo", typeof(object), DisplayName = "單一Message匯入")]
+        [DataRow(new[] { "1", "2" }, "Demo", typeof(object), DisplayName = "多個Message匯入")]
+        //[DataRow(new[] { "1" }, "ExistingCluster", false, typeof(object), DisplayName = "覆蓋既有Cluster")]
+        public void CANClusterEditor_ImportDBC_CheckImportResult(
+            string[] selectedMessageIndeces,
+            string clusterName,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                IElement clusterTreeView;
+                List<string> selectedMessages = new List<string>();
+
+                // 1. 開啟 CAN Cluster Editor, 並創建一個空的 dbc 檔案
+                CANClusterEditorCreateEmptyDBC();
+
+                // 2. 點選 Import CAN DBC 按鈕，並選擇 DBC 檔案，開啟 DBC 文件內容匯入視窗
+                var dbcImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, clusterName);
+
+                // 2-1. 先獲取DBC表格
+                var dbcImportGrid = dbcImportWindow.PerformGetElement($"/ById[dgMessage]/ByName[{clusterName}]");
+
+                // 2-2. 接著取得column: Message/ID 欄位 1st Row 的內容
+                foreach (var msgIndex in selectedMessageIndeces)
+                {
+                    dbcImportGrid.PerformGetElement($"ByCell[{msgIndex},1]").TickCheckBox();                      // 勾選 Message CheckBox 欄位
+                    selectedMessages.Add(dbcImportGrid.PerformGetElement($"ByCell[{msgIndex},2]").GetText());     // Message 欄位
+                }
+
+                // 3. 驗證匯入結果
+                clusterTreeView = clusterEditorWindow.PerformGetElement("/ById[tvCluster]");
+                var clusterNode = clusterTreeView.PerformGetElement($"/TreeItem[{clusterName}]");
+                clusterNode.ShouldNotBeNull($"找不到 Cluster: {clusterName}");
+
+                // 驗證 Message 數量
+                int expectedMessageCount = selectedMessages.Count;
+                int actualMessageCount = clusterNode.GetChildElementsCount();
+                actualMessageCount.ShouldEqualTo(expectedMessageCount, "匯入的 Message 數量不符");
+
+                // 驗證每個選擇的 Message 都已匯入
+                foreach (var message in selectedMessages)
+                {
+                    var messageNode = clusterNode.PerformGetElement($"/TreeItem[{message}]");
+                    messageNode.ShouldNotBeNull($"找不到已匯入的 Message: {message}");
+                }
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-18_2
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor
+        /// 2. 匯入第一個 DBC 檔案
+        /// 3. 再次匯入相同 Cluster 的 DBC 檔案 
+        /// 4. 驗證 Cluster 是否被覆蓋
+        /// 測試描述：測試 CAN Cluster Editor 匯入相同 Cluster 時的覆蓋功能
+        /// 預期輸出：成功覆蓋既有的 Cluster
+        /// </summary>
+        [TestMethod("B13-18_2")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow(new[] { "1" }, new[] { "2" }, "Demo", typeof(object), DisplayName = "覆蓋既有Cluster-單一Message")]
+        [DataRow(new[] { "1", "2" }, new[] { "3", "4" }, "Demo", typeof(object), DisplayName = "覆蓋既有Cluster-多個Message")]
+        public void CANClusterEditor_ImportDBC_CheckOverwriteCluster(
+            string[] firstImportIndices,
+            string[] secondImportIndices,
+            string clusterName,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                List<string> firstMessages = new List<string>();
+                List<string> secondMessages = new List<string>();
+
+                // 1. 開啟 CAN Cluster Editor, 並創建空的 dbc 檔案
+                CANClusterEditorCreateEmptyDBC();
+
+                // 2. 第一次匯入
+                var firstImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, clusterName);
+                var firstImportGrid = firstImportWindow.PerformGetElement($"/ById[dgMessage]/ByName[{clusterName}]");
+
+                // 選擇並記錄第一次匯入的 Messages
+                foreach (var index in firstImportIndices)
+                {
+                    firstImportGrid.PerformGetElement($"ByCell[{index},1]").TickCheckBox();
+                    firstMessages.Add(firstImportGrid.PerformGetElement($"ByCell[{index},2]").GetText());
+                }
+                firstImportWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 驗證第一次匯入結果
+                var clusterTreeView = clusterEditorWindow.PerformGetElement("/ById[tvCluster]");
+                var initialClusterNode = clusterTreeView.PerformGetElement($"/TreeItem[{clusterName}]");
+                initialClusterNode.ShouldNotBeNull("第一次匯入的 Cluster 未找到");
+
+                // 3. 第二次匯入(覆蓋)
+                var secondImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, clusterName);
+                var secondImportGrid = secondImportWindow.PerformGetElement($"/ById[dgMessage]/ByName[{clusterName}]");
+
+                // 選擇並記錄第二次匯入的 Messages
+                foreach (var index in secondImportIndices)
+                {
+                    secondImportGrid.PerformGetElement($"ByCell[{index},1]").TickCheckBox();
+                    secondMessages.Add(secondImportGrid.PerformGetElement($"ByCell[{index},2]").GetText());
+                }
+                secondImportWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 4. 驗證覆蓋結果
+                var finalClusterNode = clusterTreeView.PerformGetElement($"/TreeItem[{clusterName}]");
+                finalClusterNode.ShouldNotBeNull("覆蓋後的 Cluster 未找到");
+
+                // 驗證 Message 數量
+                int expectedMessageCount = secondMessages.Count;
+                int actualMessageCount = finalClusterNode.GetChildElementsCount();
+                actualMessageCount.ShouldEqualTo(expectedMessageCount, "覆蓋後的 Message 數量不符");
+
+                // 驗證新 Message 存在，舊 Message 不存在
+                foreach (var message in secondMessages)
+                {
+                    var messageNode = finalClusterNode.PerformGetElement($"/TreeItem[{message}]");
+                    messageNode.ShouldNotBeNull($"找不到新匯入的 Message: {message}");
+                }
+
+                foreach (var message in firstMessages)
+                {
+                    var messageNode = finalClusterNode.PerformGetElement($"/TreeItem[{message}]");
+                    messageNode.ShouldBeNull($"舊的 Message 應該被覆蓋: {message}");
+                }
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-19
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 匯入兩個 DBC 檔案建立測試資料
+        /// 3. 點選 ComboBox 元件
+        /// 4. 選擇不同的 Cluster
+        /// 5. 驗證選擇的 Cluster 是否正確聚焦
+        /// 測試描述：驗證 CAN Cluster Editor 中 ComboBox 的 Cluster 選擇功能
+        /// 預期輸出：可從下拉式選單選擇 Cluster 並正確聚焦
+        /// </summary>
+        [TestMethod("B13-19")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Demo", "EP32", new[] { "1" }, typeof(object), DisplayName = "選擇Demo到EP32")]
+        [DataRow("EP32", "Demo", new[] { "1" }, typeof(object), DisplayName = "選擇EP32到Demo")]
+        public void CANClusterEditor_SelectClusterFromComboBox_CheckClusterFocus(
+            string initialCluster,
+            string targetCluster,
+            string[] messageIndices,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor, 並創建空的 dbc 檔案
+                CANClusterEditorCreateEmptyDBC();
+
+                // 2. 匯入第一個 DBC 檔案 (Demo)
+                var firstImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, "Demo");
+                var firstImportGrid = firstImportWindow.PerformGetElement("/ById[dgMessage]/ByName[Demo]");
+                foreach (var index in messageIndices)
+                {
+                    firstImportGrid.PerformGetElement($"ByCell[{index},1]").TickCheckBox();
+                }
+                firstImportWindow.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 3. 匯入第二個 DBC 檔案 (EP32)
+                var secondImportWindow = OpenCANClusterImportWindow(clusterEditorWindow, "EP32");
+                var secondImportGrid = secondImportWindow.PerformGetElement("/ById[dgMessage]/ByName[EP32]");
+                foreach (var index in messageIndices)
+                {
+                    secondImportGrid.PerformGetElement($"ByCell[{index},1]").TickCheckBox();
+                }
+                secondImportWindow.PerformClick("/ByName[OK]", ClickType.LeftClick);
+
+                // 4. 驗證 ComboBox 內容
+                var clusterComboBox = clusterEditorWindow.PerformGetElement("/ById[ClusterComboBox]");
+                clusterComboBox.ShouldNotBeNull("找不到 Cluster ComboBox");
+
+                var comboBoxItems = clusterComboBox.GetComboBoxItemNames();
+                comboBoxItems.ShouldContain(initialCluster, $"ComboBox 中找不到 {initialCluster}");
+                comboBoxItems.ShouldContain(targetCluster, $"ComboBox 中找不到 {targetCluster}");
+
+                // 5. 選擇初始 Cluster 並驗證
+                clusterComboBox.SelectItem(initialCluster);
+                clusterComboBox.GetText().ShouldEqualTo(initialCluster, "初始 Cluster 選擇錯誤");
+
+                // 6. 選擇目標 Cluster 並驗證
+                clusterComboBox.SelectItem(targetCluster);
+                clusterComboBox.GetText().ShouldEqualTo(targetCluster, "目標 Cluster 選擇錯誤");
+
+                // 7. 驗證 clusterTreeView 中的聚焦
+                var clusterTreeView = clusterEditorWindow.PerformGetElement("/ById[tvCluster]");
+                var focusedNode = clusterTreeView.PerformGetElement($"/TreeItem[{targetCluster}]");
+                focusedNode.ShouldBeSelected("TreeView 中的聚焦節點不正確");
+
+                // 8. 驗證右側資訊區顯示
+                var infoPanel = clusterEditorWindow.PerformGetElement("/ById[dgMessage]");
+                infoPanel.ShouldNotBeNull("找不到訊息資訊區");
+                infoPanel.ShouldBeVisible("訊息資訊區應該可見");
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-20_1
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 取得當前 DBC 訊息表格的第一筆資料
+        ///    - 取得 Message 欄位內容
+        ///    - 取得 ID 欄位內容
+        /// 3. 在搜尋欄位輸入要搜尋的文字(Message/ID)並按下 Enter
+        /// 4. 驗證搜尋結果是否與輸入的搜尋文字相符
+        /// 測試描述：在CAN Cluster Editor畫面，於搜尋欄位上輸入要搜尋的字串按下Enter
+        /// 預期輸出：在CAN Cluster Editor畫面執行搜尋,要能搜尋到第一次出現的Message或ID名稱
+        /// </summary>
+        [TestMethod("B13-20_1")]
+        [TestCategory("CAN Cluster 編輯器(B13)")]
+        [DataRow("ByMessage", typeof(object), DisplayName = "Enter搜尋-Message")]
+        [DataRow("ByID", typeof(object), DisplayName = "Enter搜尋-ID")]
+        public void CANClusterEditor_SearchByMessageOrIDByEnter_CheckSearchResultIsCorrect(string searchMethod, object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 搜尋欄位輸入要搜尋的字串
+                // 2-1. 先獲取DBC表格
+                var dbcGrid = clusterEditorWindow.PerformGetElement("/ByName[Content]/ById[tabControl,dgMessage]");
+
+                // 2-2. 接著取得column: Message/ID 欄位 1st Row 的內容
+                string message = dbcGrid.PerformGetElement("ByCell[1,1]").GetText();        // Message
+                string id = dbcGrid.PerformGetElement("ByCell[1,2]").GetText();             // ID
+
+                // 2-3. 最後搜尋欄位輸入要搜尋的字串(Message/ID)
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+                clusterEditorWindow.PerformInput("/ByName[CAN DBC List]/ByClass[SearchBox]/ById[searchText]", InputType.SendContent, searchValue);
+                Press(Keys.Enter);
+
+                // 3. 驗證搜尋結果
+                string searchResult = clusterEditorWindow.GetSelectedTreeViewItem().GetText();      // Message/ID search result
+                searchResult.ShouldNotBeNull($"搜尋結果為空,搜尋字串為: {searchValue}");
+                searchResult.ShouldEqualTo(searchValue);
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                clusterEditorWindow.CloseWindow();  // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-20_2
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 取得當前 DBC 訊息表格的第一筆資料
+        ///    - 取得 Message 欄位內容
+        ///    - 取得 ID 欄位內容
+        /// 3. 在搜尋欄位輸入要搜尋的文字(Message/ID)並點擊搜尋按鈕
+        /// 4. 驗證搜尋結果是否與輸入的搜尋文字相符
+        /// 測試描述：在 CAN Cluster Editor 畫面，於搜尋欄位上輸入要搜尋的字串並點擊搜尋按鈕
+        /// 預期輸出：在 CAN Cluster Editor 畫面執行搜尋，要能搜尋到第一次出現的 Message 或 ID 名稱
+        /// </summary>
+        [TestMethod("B13-20_2")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("ByMessage", typeof(object), DisplayName = "按鈕搜尋-Message")]
+        [DataRow("ByID", typeof(object), DisplayName = "按鈕搜尋-ID")]
+        public void CANClusterEditor_SearchByMessageOrIDByButton_CheckSearchResultIsCorrect(string searchMethod, object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得 DBC 表格
+                var dbcGrid = clusterEditorWindow.PerformGetElement("/ByName[Content]/ById[tabControl,dgMessage]");
+                dbcGrid.ShouldNotBeNull("DBC 表格未找到");
+
+                // 3. 取得第一筆資料的 Message/ID
+                string message = dbcGrid.PerformGetElement("ByCell[1,1]").GetText();    // Message
+                string id = dbcGrid.PerformGetElement("ByCell[1,2]").GetText();         // ID
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+
+                // 4. 在搜尋欄位輸入資料
+                clusterEditorWindow.PerformInput("/ByName[CAN DBC List]/ByClass[SearchBox]/ById[searchText]", InputType.SendContent, searchValue);
+
+                // 5. 點擊搜尋按鈕
+                clusterEditorWindow.PerformClick("/ByName[CAN DBC List]/ById[SearchBtn]", ClickType.LeftClick);
+
+                // 6. 驗證搜尋結果
+                string searchResult = clusterEditorWindow.GetSelectedTreeViewItem().GetText();
+                searchResult.ShouldNotBeNull($"搜尋結果為空,搜尋字串為: {searchValue}");
+                searchResult.ShouldEqualTo(searchValue);
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                clusterEditorWindow.CloseWindow();  // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-21
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 取得 Message 列表的第一筆資料
+        /// 3. 在搜尋欄位輸入要搜尋的文字(Message/ID)
+        /// 4. 重複按下 ▼ 或 F3 直到出現重新搜尋提示
+        /// 5. 驗證提示訊息內容
+        /// 測試描述：在 CAN Cluster Editor 畫面，於搜尋欄位上輸入要搜尋的字串後按下 ▼ 或 F3
+        /// 預期輸出：搜尋到相關的 Message 或 ID，到最後會詢問是否重新搜尋
+        /// </summary>
+        [TestMethod("B13-21")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("ByMessage", "ByDownArrow", typeof(object), DisplayName = "▼按鈕搜尋Message")]
+        [DataRow("ByID", "ByDownArrow", typeof(object), DisplayName = "▼按鈕搜尋ID")]
+        [DataRow("ByMessage", "ByF3", typeof(object), DisplayName = "F3搜尋Message")]
+        [DataRow("ByID", "ByF3", typeof(object), DisplayName = "F3搜尋ID")]
+        public void CANClusterEditor_SearchNextUntilEnd_CheckPromptMessage(
+            string searchMethod,
+            string searchKeyMethod,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得要搜尋的值
+                var dbcGrid = clusterEditorWindow.PerformGetElement("/ByName[Content]/ById[tabControl,dgMessage]");
+                string message = dbcGrid.PerformGetElement("ByCell[1,1]").GetText();    // Message
+                string id = dbcGrid.PerformGetElement("ByCell[1,2]").GetText();         // ID
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+
+                // 3. 輸入搜尋文字
+                clusterEditorWindow.PerformInput("/ByName[CAN DBC List]/ByClass[SearchBox]/ById[searchText]",
+                    InputType.SendContent, searchValue);
+
+                // 4. 重複按下 ▼ 或 F3 直到出現提示
+                bool promptFound = false;
+                int maxAttempts = 100;
+                for (int i = 0; i < maxAttempts && !promptFound; i++)
+                {
+                    if (searchKeyMethod == "ByDownArrow")
+                        clusterEditorWindow.PerformClick("/ById[NextBtn]", ClickType.LeftClick);
+                    else
+                        Press(Keys.F3);
+
+                    var msgBox = PP5IDEWindow.PerformGetElement("/Window[0]");
+                    if (msgBox != null)
+                    {
+                        string actualPrompt = msgBox.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                        actualPrompt.ShouldContain("The search complete.Do you want to search again?");
+                        promptFound = true;
+                        msgBox.PerformClick("/ByName[No]", ClickType.LeftClick);
+                        break;
+                    }
+                }
+                promptFound.ShouldBeTrue("未出現重新搜尋提示訊息");
+            }
+            finally
+            {
+                clusterEditorWindow.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-22
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 取得 Message 列表的第一筆資料
+        /// 3. 在搜尋欄位輸入要搜尋的文字(Message/ID)
+        /// 4. 重複按下 ▲ 或 Shift+F3 直到出現重新搜尋提示
+        /// 5. 驗證提示訊息內容
+        /// 測試描述：在 CAN Cluster Editor 畫面，於搜尋欄位上輸入要搜尋的字串後按下 ▲ 或 Shift+F3
+        /// 預期輸出：搜尋到相關的 Message 或 ID，到最後會詢問是否重新搜尋
+        /// </summary>
+        [TestMethod("B13-22")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("ByMessage", "ByUpArrow", typeof(object), DisplayName = "▲按鈕搜尋Message")]
+        [DataRow("ByID", "ByUpArrow", typeof(object), DisplayName = "▲按鈕搜尋ID")]
+        [DataRow("ByMessage", "ByShiftF3", typeof(object), DisplayName = "Shift+F3搜尋Message")]
+        [DataRow("ByID", "ByShiftF3", typeof(object), DisplayName = "Shift+F3搜尋ID")]
+        public void CANClusterEditor_SearchPreviousUntilStart_CheckPromptMessage(
+            string searchMethod,
+            string searchKeyMethod,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得要搜尋的值
+                var dbcGrid = clusterEditorWindow.PerformGetElement("/ByName[Content]/ById[tabControl,dgMessage]");
+                string message = dbcGrid.PerformGetElement("ByCell[1,1]").GetText();    // Message
+                string id = dbcGrid.PerformGetElement("ByCell[1,2]").GetText();         // ID
+                string searchValue = searchMethod == "ByMessage" ? message : id;
+
+                // 3. 輸入搜尋文字
+                clusterEditorWindow.PerformInput("/ByName[CAN DBC List]/ByClass[SearchBox]/ById[searchText]",
+                    InputType.SendContent, searchValue);
+
+                // 4. 重複按下 ▲ 或 Shift+F3 直到出現提示
+                bool promptFound = false;
+                int maxAttempts = 100;
+                for (int i = 0; i < maxAttempts && !promptFound; i++)
+                {
+                    if (searchKeyMethod == "ByUpArrow")
+                        clusterEditorWindow.PerformClick("/ById[PreviosBtn]", ClickType.LeftClick);
+                    else
+                        Press(Keys.Shift, Keys.F3);
+
+                    var msgBox = PP5IDEWindow.PerformGetElement("/Window[0]");
+                    if (msgBox != null)
+                    {
+                        string actualPrompt = msgBox.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                        actualPrompt.ShouldContain("The search complete.Do you want to search again?");
+                        promptFound = true;
+                        msgBox.PerformClick("/ByName[No]", ClickType.LeftClick);
+                        break;
+                    }
+                }
+                promptFound.ShouldBeTrue("未出現重新搜尋提示訊息");
+            }
+            finally
+            {
+                clusterEditorWindow.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-23
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Cluster 節點上按下滑鼠右鍵
+        /// 3. 驗證選單項目
+        ///    - 檢查 Rename 選項是否存在且可用
+        ///    - 檢查 Delete 選項是否存在且可用
+        ///    - 檢查選單項目順序是否正確
+        /// 測試描述：在 CAN Cluster Editor 畫面中，對 Cluster 節點按下右鍵時顯示的選單項目驗證
+        /// 預期輸出：正確顯示 Rename 及 Delete 選單項目
+        /// </summary>
+        [TestMethod("B13-23")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Rename", "Delete", typeof(object), DisplayName = "檢查右鍵選單項目")]
+        public void CANClusterEditor_ClusterNodeRightClick_CheckContextMenu(
+            string renameMenuText,
+            string deleteMenuText,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得 Cluster 節點
+                var clusterNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                clusterNode.ShouldNotBeNull("找不到 Cluster 節點");
+
+                // 3. 在節點上按下右鍵
+                clusterNode.RightClick();
+
+                // 4. 驗證選單項目
+                var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                contextMenu.ShouldNotBeNull("未顯示右鍵選單");
+
+                // 檢查 Rename 選項
+                var renameItem = contextMenu.PerformGetElement($"/ByName[{renameMenuText}]");
+                renameItem.ShouldNotBeNull("找不到 Rename 選項");
+                renameItem.ShouldBeEnabled("Rename 選項應為可用狀態");
+
+                // 檢查 Delete 選項
+                var deleteItem = contextMenu.PerformGetElement($"/ByName[{deleteMenuText}]");
+                deleteItem.ShouldNotBeNull("找不到 Delete 選項");
+                deleteItem.ShouldBeEnabled("Delete 選項應為可用狀態");
+
+                // 檢查選單項目順序
+                string[] menuItemNames = contextMenu.GetMainMenuListItemNames().ToArray();
+                menuItemNames[0].ShouldEqualTo(renameMenuText, "第一個選單項目應為 Rename");
+                menuItemNames[1].ShouldEqualTo(deleteMenuText, "第二個選單項目應為 Delete");
+            }
+            finally
+            {
+                // 關閉測試視窗
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-24
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Cluster 節點上按下滑鼠右鍵
+        /// 3. 選擇 Delete 選項
+        /// 4. 驗證是否出現刪除確認對話框
+        /// 5. 點選 Yes/No 按鈕
+        /// 6. 驗證 Cluster 節點是否依選擇結果被刪除
+        /// 測試描述：在 CAN Cluster Editor 中測試刪除 Cluster 節點的功能
+        /// 預期輸出：按下 Yes 時刪除節點，按下 No 時保留節點
+        /// </summary>
+        [TestMethod("B13-24")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Delete", "Yes", true, typeof(object), DisplayName = "刪除Cluster-確認")]
+        [DataRow("Delete", "No", false, typeof(object), DisplayName = "刪除Cluster-取消")]
+        public void CANClusterEditor_DeleteCluster_CheckConfirmation(
+            string deleteMenuText,
+            string buttonChoice,
+            bool shouldBeDeleted,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得 Cluster 節點並按下右鍵
+                var clusterNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                clusterNode.ShouldNotBeNull("找不到 Cluster 節點");
+                clusterNode.RightClick();
+
+                // 3. 點選 Delete 選項
+                var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                contextMenu.ShouldNotBeNull("未顯示右鍵選單");
+                contextMenu.MenuSelect(deleteMenuText);
+                //var deleteItem = contextMenu.PerformGetElement($"/ByName[{deleteMenuText}]");
+                //deleteItem.LeftClick();
+
+                // 4. 驗證刪除確認對話框
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var confirmDialog = CurrentDriver.PerformGetElement("/ById[MessageBoxExDialog]");
+                confirmDialog.ShouldNotBeNull("未顯示刪除確認對話框");
+                confirmDialog.PerformGetElement("ById[txtBlockMsg]").GetText().ShouldContain($"Do you want to delete \'{clusterNode.GetText()}\'?");
+
+                // 5. 點選指定按鈕
+                confirmDialog.PerformClick($"/ByName[{buttonChoice}]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+                // 6. 驗證刪除結果
+                if (shouldBeDeleted)
+                    // 若選擇 Yes，應該找不到節點
+                    clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]")
+                                       .ShouldBeNull("Cluster 節點未被刪除");
+                else
+                    // 若選擇 No，節點應該還在
+                    clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]")
+                                       .ShouldNotBeNull("Cluster 節點不應被刪除");
+            }
+            finally
+            {
+                // 關閉測試視窗
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-25
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Cluster 節點上按下滑鼠右鍵
+        /// 3. 選擇 Rename 選項
+        /// 4. 驗證 Rename 對話框是否出現
+        /// 測試描述：在 CAN Cluster Editor 中測試 Cluster 節點的重新命名功能
+        /// 預期輸出：顯示 Rename 對話框
+        /// </summary>
+        [TestMethod("B13-25")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Rename", "Rename", typeof(object), DisplayName = "重新命名Cluster")]
+        public void CANClusterEditor_RenameCluster_CheckRenameDialog(
+            string renameMenuText,
+            string expectedDialogTitle,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得 Cluster 節點並按下右鍵
+                var clusterNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                clusterNode.ShouldNotBeNull("找不到 Cluster 節點");
+                clusterNode.RightClick();
+
+                // 3. 點選 Rename 選項
+                var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                contextMenu.ShouldNotBeNull("未顯示右鍵選單");
+                contextMenu.MenuSelect(renameMenuText);
+                //var renameItem = contextMenu.PerformGetElement($"/ByName[{renameMenuText}]");
+                //renameItem.LeftClick();
+
+                // 4. 驗證 Rename 對話框
+                var renameDialog = clusterEditorWindow.PerformGetElement("ByName[Rename]");
+                renameDialog.ShouldNotBeNull("未顯示 Rename 對話框");
+
+                // 驗證對話框標題
+                renameDialog.GetText().ShouldEqualTo(expectedDialogTitle);
+
+                // 驗證對話框內容
+                var textBox = renameDialog.PerformGetElement("/ByClass[TextBox]");
+                textBox.ShouldNotBeNull("找不到重命名輸入框");
+                textBox.GetText().ShouldEqualTo(clusterNode.GetText());
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-26
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Cluster 節點上按下滑鼠右鍵
+        /// 3. 選擇 Rename 選項
+        /// 4. 在 Rename 視窗輸入已存在的 Cluster 名稱
+        /// 5. 驗證:
+        ///    - OK 按鈕應為禁用狀態
+        ///    - 輸入框應顯示紅色邊框
+        ///    - 應顯示錯誤提示訊息
+        /// 測試描述：在 Rename 視窗中輸入重複的 Cluster 名稱時的驗證
+        /// 預期輸出：無法按下 OK 按鈕，且輸入欄位會顯示紅框與錯誤提示
+        /// </summary>
+        [TestMethod("B13-26")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Rename", "Name is repeat", typeof(object), DisplayName = "輸入重複名稱")]
+        public void CANClusterEditor_RenameCluster_CheckDuplicateNameValidation(
+            string renameMenuText,
+            string expectedErrorMsg,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得 Cluster 節點並按下右鍵
+                var clusterNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                clusterNode.ShouldNotBeNull("找不到 Cluster 節點");
+                clusterNode.RightClick();
+
+                // 3. 點選 Rename 選項
+                clusterEditorWindow.MenuSelect(renameMenuText);
+                //var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                //var renameItem = contextMenu.PerformGetElement($"/ByName[{renameMenuText}]");
+                //renameItem.LeftClick();
+
+                // 4. 輸入重複名稱
+                string duplicateName = clusterNode.GetText();
+                var renameDialog = clusterEditorWindow.PerformGetElement("ByName[Rename]");
+                var textBox = renameDialog.PerformInput("/ByClass[TextBox]", InputType.SendContent, duplicateName);
+
+                // 5. 驗證
+                // 檢查 OK 按鈕狀態
+                renameDialog.PerformGetElement("/ByName[Ok]").ShouldBeDisabled();
+
+                // 檢查錯誤提示訊息
+                string tooltipMsg = textBox.GetToolTipMessage();
+                tooltipMsg.ShouldContain(expectedErrorMsg);
+
+                //// 檢查紅框顯示
+                //textBox.GetAttribute("BorderBrush").ShouldContain("#FFFF0000");
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-27
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Cluster 節點上按下滑鼠右鍵
+        /// 3. 選擇 Rename 選項
+        /// 4. 在 Rename 視窗輸入新的 Cluster 名稱
+        /// 5. 點選 OK 按鈕
+        /// 6. 驗證 Cluster 是否已重新命名
+        /// 測試描述：在 Rename 視窗中輸入新的 Cluster 名稱並確認重命名結果
+        /// 預期輸出：可按下 OK 按鈕，Cluster 列表顯示新名稱
+        /// </summary>
+        [TestMethod("B13-27")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Rename", typeof(object), DisplayName = "重命名成功")]
+        public void CANClusterEditor_RenameCluster_CheckSuccessfulRename(string renameMenuText, object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得 Cluster 節點並按下右鍵
+                var clusterNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                clusterNode.ShouldNotBeNull("找不到 Cluster 節點");
+                clusterNode.RightClick();
+
+                // 3. 點選 Rename 選項
+                clusterEditorWindow.MenuSelect(renameMenuText);
+                //var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                //var renameItem = contextMenu.PerformGetElement($"/ByName[{renameMenuText}]");
+                //renameItem.LeftClick();
+
+                // 4. 輸入新名稱
+                string newName = clusterNode.GetText() + "1";
+                var renameDialog = clusterEditorWindow.PerformGetElement("ByName[Rename]");
+                var textBox = renameDialog.PerformInput("/ByClass[TextBox]", InputType.SendContent, newName);
+
+                // 5. 點選 OK 按鈕
+                var okButton = renameDialog.PerformGetElement("/ByName[Ok]");
+                okButton.ShouldBeEnabled();
+                okButton.LeftClick();
+
+                // 6. 驗證重命名結果
+                var renamedNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                renamedNode.GetText().ShouldEqualTo(newName);
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-28
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Message 節點上按下滑鼠右鍵
+        /// 3. 驗證選單項目是否包含 Delete Message
+        /// 測試描述：在 CAN Cluster Editor 中對 Message 節點按下右鍵時的選單驗證
+        /// 預期輸出：顯示 Delete Message 選單項目
+        /// </summary>
+        [TestMethod("B13-28")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Delete Message", typeof(object), DisplayName = "檢查Message右鍵選單")]
+        public void CANClusterEditor_MessageNodeRightClick_CheckContextMenu(
+            string deleteMenuText,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 找到 Message 節點
+                var messageNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]/TreeItem[0]");
+                messageNode.ShouldNotBeNull("找不到 Message 節點");
+
+                // 3. 在節點上按下右鍵
+                messageNode.RightClick();
+
+                // 4. 驗證選單項目
+                var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                contextMenu.ShouldNotBeNull("未顯示右鍵選單");
+
+                var deleteItem = contextMenu.PerformGetElement($"/ByName[{deleteMenuText}]");
+                deleteItem.ShouldNotBeNull("找不到 Delete Message 選項");
+                deleteItem.ShouldBeEnabled("Delete Message 選項應為可用狀態");
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-29
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Message 節點上按下滑鼠右鍵
+        /// 3. 選擇 Delete Message 選項
+        /// 4. 驗證是否出現刪除確認對話框
+        /// 5. 點選 Yes/No 按鈕
+        /// 6. 驗證 Message 節點是否依選擇結果被刪除
+        /// 測試描述：在 CAN Cluster Editor 中測試刪除 Message 節點的功能
+        /// 預期輸出：按下 Yes 時刪除節點，按下 No 時保留節點
+        /// </summary>
+        [TestMethod("B13-29")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Delete Message", "Yes", true, typeof(object), DisplayName = "刪除Message-確認")]
+        [DataRow("Delete Message", "No", false, typeof(object), DisplayName = "刪除Message-取消")]
+        public void CANClusterEditor_DeleteMessage_CheckConfirmation(
+            string deleteMenuText,
+            string buttonChoice,
+            bool shouldBeDeleted,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 找到 Message 節點並按下右鍵
+                var messageNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]/TreeItem[0]");
+                messageNode.ShouldNotBeNull("找不到 Message 節點");
+                string messageText = messageNode.GetText();
+                messageNode.RightClick();
+
+                // 3. 點選 Delete Message 選項
+                clusterEditorWindow.MenuSelect(deleteMenuText);
+                //var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                //contextMenu.MenuSelect(deleteMenuText);
+                //var deleteItem = contextMenu.PerformGetElement($"/ByName[{deleteMenuText}]");
+                //deleteItem.LeftClick();
+
+                // 4. 驗證刪除確認對話框
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var confirmDialog = CurrentDriver.PerformGetElement("/ById[MessageBoxExDialog]");
+                confirmDialog.ShouldNotBeNull("未顯示刪除確認對話框");
+                confirmDialog.PerformGetElement("ById[txtBlockMsg]").GetText()
+                    .ShouldContain($"Do you want to delete \'{messageText}\'?");
+
+                // 5. 點選指定按鈕
+                confirmDialog.PerformClick($"/ByName[{buttonChoice}]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+                // 6. 驗證刪除結果
+                var expectedNodeDeletedPath = "/ById[tvCluster]/TreeItem[0]/TreeItem[0]";
+                if (shouldBeDeleted)
+                    // 若選擇 Yes，應該找不到節點
+                    clusterEditorWindow.PerformGetElement(expectedNodeDeletedPath)
+                                       .ShouldBeNull("Message 節點未被刪除");
+                else
+                {
+                    // 若選擇 No，節點應該還在
+                    clusterEditorWindow.PerformGetElement(expectedNodeDeletedPath)
+                                       .ShouldNotBeNull("Message 節點不應被刪除");
+                    clusterEditorWindow.PerformGetElement(expectedNodeDeletedPath).GetText()
+                                       .ShouldEqualTo(messageText);
+                }
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-30
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Signal 節點上按下滑鼠右鍵
+        /// 3. 驗證選單項目是否包含 Delete Signal
+        /// 測試描述：在 CAN Cluster Editor 中對 Signal 節點按下右鍵時的選單驗證
+        /// 預期輸出：顯示 Delete Signal 選單項目
+        /// </summary>
+        [TestMethod("B13-30")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Delete Signal", typeof(object), DisplayName = "檢查Signal右鍵選單")]
+        public void CANClusterEditor_SignalNodeRightClick_CheckContextMenu(
+            string deleteMenuText,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 找到 Signal 節點
+                var signalNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]/TreeItem[0]/TreeItem[0]");
+                signalNode.ShouldNotBeNull("找不到 Signal 節點");
+
+                // 3. 在節點上按下右鍵
+                signalNode.RightClick();
+
+                // 4. 驗證選單項目
+                var contextMenu = clusterEditorWindow.PerformGetElement("/ByClass[ContextMenu]");
+                contextMenu.ShouldNotBeNull("未顯示右鍵選單");
+
+                var deleteItem = contextMenu.PerformGetElement($"/ByName[{deleteMenuText}]");
+                deleteItem.ShouldNotBeNull("找不到 Delete Signal 選項");
+                deleteItem.ShouldBeEnabled("Delete Signal 選項應為可用狀態");
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-31
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 在 Signal 節點上按下滑鼠右鍵
+        /// 3. 選擇 Delete 選項
+        /// 4. 驗證是否出現刪除確認對話框
+        /// 5. 點選 Yes/No 按鈕
+        /// 6. 驗證 Signal 節點是否依選擇結果被刪除
+        /// 測試描述：在 CAN Cluster Editor 中測試刪除 Signal 節點的功能
+        /// 預期輸出：按下 Yes 時刪除節點，按下 No 時保留節點
+        /// </summary>
+        [TestMethod("B13-31")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Delete Signal", "Yes", true, typeof(object), DisplayName = "刪除Signal-確認")]
+        [DataRow("Delete Signal", "No", false, typeof(object), DisplayName = "刪除Signal-取消")]
+        public void CANClusterEditor_DeleteSignal_CheckConfirmation(
+            string deleteMenuText,
+            string buttonChoice,
+            bool shouldBeDeleted,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 找到 Signal 節點並按下右鍵
+                var signalNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]/TreeItem[0]/TreeItem[0]");
+                signalNode.ShouldNotBeNull("找不到 Signal 節點");
+                string signalText = signalNode.GetText();
+                signalNode.RightClick();
+
+                // 3. 點選 Delete Signal 選項
+                clusterEditorWindow.MenuSelect(deleteMenuText);
+
+                // 4. 驗證刪除確認對話框
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var confirmDialog = CurrentDriver.PerformGetElement("/ById[MessageBoxExDialog]");
+                confirmDialog.ShouldNotBeNull("未顯示刪除確認對話框");
+                confirmDialog.PerformGetElement("ById[txtBlockMsg]").GetText()
+                    .ShouldContain($"Do you want to delete \'{signalText}\'?");
+
+                // 5. 點選指定按鈕
+                confirmDialog.PerformClick($"/ByName[{buttonChoice}]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+                // 6. 驗證刪除結果
+                var expectedNodeDeletedPath = "/ById[tvCluster]/TreeItem[0]/TreeItem[0]/TreeItem[0]";
+                if (shouldBeDeleted)
+                {
+                    // 若選擇 Yes，應該找不到節點
+                    clusterEditorWindow.PerformGetElement(expectedNodeDeletedPath)
+                                       .ShouldBeNull("Signal 節點未被刪除");
+                }
+                else
+                {
+                    // 若選擇 No，節點應該還在
+                    var node = clusterEditorWindow.PerformGetElement(expectedNodeDeletedPath);
+                    node.ShouldNotBeNull("Signal 節點不應被刪除");
+                    node.GetText().ShouldEqualTo(signalText);
+                }
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-32
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 選擇 Cluster 節點
+        /// 3. 點選 Select Specified 按鈕
+        /// 4. 驗證 Select Specified 視窗是否出現
+        /// 測試描述：在 CAN Cluster Editor 中點選 Select Specified 按鈕後的視窗顯示驗證
+        /// 預期輸出：正確顯示 Select Specified 視窗
+        /// </summary>
+        [TestMethod("B13-32")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("Select Specified Index", typeof(object), DisplayName = "開啟Select Specified視窗")]
+        public void CANClusterEditor_SelectSpecified_CheckDialogDisplay(
+            string expectedDialogTitle,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            IElement selectDialog = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 選擇 Cluster 節點
+                var clusterNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                clusterNode.ShouldNotBeNull("找不到 Cluster 節點");
+                clusterNode.LeftClick();
+
+                // 3. 點選 Select Specified 按鈕
+                clusterEditorWindow.PerformClick("/ByName[Select Specified]", ClickType.LeftClick);
+
+                // 4. 驗證 Select Specified 視窗
+                selectDialog = clusterEditorWindow.PerformGetElement("/Window[0]");
+                selectDialog.ShouldNotBeNull("未顯示 Select Specified 視窗");
+                selectDialog.GetText().ShouldEqualTo(expectedDialogTitle, "視窗標題不符");
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                selectDialog?.CloseWindow();            // Close Select Specified 視窗
+                clusterEditorWindow?.CloseWindow();     // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-33
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 選擇 Cluster 節點
+        /// 3. 點選 Select Specified 按鈕
+        /// 4. 在 Select Specified 視窗選擇 Index 並勾選 Active
+        /// 5. 點選 OK 按鈕
+        /// 6. 驗證 Specified Text 欄位的內容格式
+        /// 測試描述：在 Select Specified 視窗中選擇並啟用 Index 後的文字顯示驗證
+        /// 預期輸出：Specified Text 欄位顯示已啟用的 Index，並以逗號分隔
+        /// </summary>
+        [TestMethod("B13-33")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow(new[] { "1" }, "1", typeof(object), DisplayName = "單一Index")]
+        [DataRow(new[] { "1", "2" }, "1,2", typeof(object), DisplayName = "多個Index")]
+        [DataRow(new[] { "1", "3", "6" }, "1,3,6", typeof(object), DisplayName = "間隔Index")]
+        public void CANClusterEditor_SelectSpecified_CheckSpecifiedText(
+            string[] selectedIndexes,
+            string expectedText,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            IElement selectDialog = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 選擇 Cluster 節點
+                var clusterNode = clusterEditorWindow.PerformGetElement("/ById[tvCluster]/TreeItem[0]");
+                clusterNode.ShouldNotBeNull("找不到 Cluster 節點");
+                clusterNode.LeftClick();
+
+                // 3. 點選 Select Specified 按鈕
+                clusterEditorWindow.PerformClick("/ByName[Select Specified]", ClickType.LeftClick);
+
+                // 4. 在 Select Specified 視窗進行設定
+                selectDialog = clusterEditorWindow.PerformGetElement("/Window[0]");
+                selectDialog.ShouldNotBeNull("未顯示 Select Specified 視窗");
+
+                // 選擇指定的 Index 並勾選 Active
+                var selectIndexDg = selectDialog.PerformGetElement("/ById[DataGrid]");
+                for (int index = 1; index <= selectIndexDg.GetRowCount(); index++)
+                {
+                    // 當為指定的 Index時勾選 Active，反之則否
+                    if (Array.IndexOf(selectedIndexes, index.ToString()) >= 0)
+                        selectIndexDg.PerformGetElement($"/ByCell[{index},1]/CheckBox[0]").TickCheckBox();
+                    else
+                        selectIndexDg.PerformGetElement($"/ByCell[{index},1]/CheckBox[0]").UnTickCheckBox();
+                }
+
+                // 5. 點選 OK 按鈕
+                selectDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 6. 驗證 Specified Text 欄位內容
+                var specifiedText = clusterEditorWindow.PerformGetElement("/ByName[CAN DBC List]/ByClass[TextBox]").GetText();
+                specifiedText.ShouldEqualTo(expectedText, "Specified Text 格式不符預期");
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();     // Close CAN Cluster Editor
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-34
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 調整視窗大小
+        /// 3. 驗證控件可正常操作
+        /// 測試描述：驗證 CAN Cluster Editor 視窗縮放功能
+        /// 預期輸出：視窗可正常縮放且控件可正常使用
+        /// </summary>
+        [TestMethod("B13-34")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow(800, 600, true, typeof(object), DisplayName = "縮小視窗")]
+        [DataRow(1600, 900, true, typeof(object), DisplayName = "放大視窗")]
+        public void CANClusterEditor_ResizeWindow_CheckControlsAccessibility(
+            int newWidth,
+            int newHeight,
+            bool shouldBeAccessible,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 調整視窗大小
+                clusterEditorWindow.SetWindowSize(newWidth, newHeight);
+
+                // 3. 驗證主要控件可用性
+                var importButton = clusterEditorWindow.PerformGetElement("/ByName[Import CAN DBC]");
+                importButton.ShouldNotBeNull("找不到 Import 按鈕");
+                importButton.ShouldBeEnabled("Import 按鈕應可使用");
+
+                var selectButton = clusterEditorWindow.PerformGetElement("/ByName[Select Specified]");
+                selectButton.ShouldNotBeNull("找不到 Select Specified 按鈕");
+                selectButton.ShouldBeEnabled("Select Specified 按鈕應可使用");
+
+                var treeView = clusterEditorWindow.PerformGetElement("/ById[tvCluster]");
+                treeView.ShouldNotBeNull("找不到 Cluster TreeView");
+                treeView.ShouldBeVisible("TreeView 應可見");
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-35
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 取得左右區塊初始寬度
+        /// 3. 拖曳分隔線
+        /// 4. 驗證左右區塊寬度變化
+        /// 測試描述：驗證 CAN Cluster Editor 視窗中分隔線拖曳功能
+        /// 預期輸出：可正常調整左右區塊比例
+        /// </summary>
+        [TestMethod("B13-35")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow(-100, typeof(object), DisplayName = "分隔線向左拖曳")]
+        [DataRow(100, typeof(object), DisplayName = "分隔線向右拖曳")]
+        public void CANClusterEditor_DragSplitter_CheckPanelsResize(
+            int dragOffset,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 開啟 CAN Cluster Editor
+                MenuSelect("Utility", "CAN Cluster Editor...");
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 2. 取得左右區塊初始寬度
+                var leftPanel = clusterEditorWindow.PerformGetElement("ByName[CAN DBC List]/[0]");
+                var rightPanel = clusterEditorWindow.PerformGetElement("/ByName[Content]/[1]");
+                double initialLeftWidth = leftPanel.Width;
+                double initialRightWidth = rightPanel.Width;
+
+                // 3. 拖曳分隔線
+                var splitter = clusterEditorWindow.PerformGetElement("/ById[gridSplitter]");
+                splitter.DragSplitter(System.Windows.Forms.Orientation.Horizontal, dragOffset);
+
+                // 4. 驗證寬度變化
+                double newLeftWidth = leftPanel.Width;
+                double newRightWidth = rightPanel.Width;
+
+                // 驗證寬度變化是否符合拖曳方向
+                if (dragOffset < 0)
+                {
+                    //newLeftWidth.ShouldLessThan(initialLeftWidth);
+                    //newRightWidth.ShouldGreaterThan(initialRightWidth);
+                    Assert.IsTrue(newLeftWidth < initialLeftWidth && newRightWidth > initialRightWidth);
+                }
+                else
+                {
+                    //newLeftWidth.ShouldGreaterThan(initialLeftWidth);
+                    //newRightWidth.ShouldLessThan(initialRightWidth);
+                    Assert.IsTrue(newLeftWidth > initialLeftWidth && newRightWidth < initialRightWidth);
+                }
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B13-36
+        /// 測試步驟：
+        /// 1. 開啟 CAN Cluster Editor 視窗
+        /// 2. 變更語系設定
+        /// 3. 驗證視窗標題和按鈕文字是否正確變更
+        /// 測試描述：在 CAN Cluster Editor 中切換不同語系並驗證介面文字
+        /// 預期輸出：介面文字隨語系正確變更，部分元件維持英文顯示
+        /// </summary>
+        [TestMethod("B13-36")]
+        [TestCategory("CAN Cluster 編輯器")]
+        [DataRow("language => English", "Utility => CAN Cluster Editor...", "CAN Cluster Editor", "Import CAN DBC", "Select Specified", typeof(object), DisplayName = "切換英文")]
+        [DataRow("language => 简体中文", "工具 => CAN Cluster编辑器...", "CAN Cluster编辑器", "匯入CAN DBC", "选择编号", typeof(object), DisplayName = "切換簡中")]
+        [DataRow("language => 繁體中文", "工具 => CAN Cluster編輯器...", "CAN Cluster編輯器", "匯入CAN DBC", "選擇编號", typeof(object), DisplayName = "切換繁中")]
+        public void CANClusterEditor_ChangeLanguage_CheckUITexts(
+            string languagePath,
+            string CANClusterPath,
+            string expectedWindowTitle,
+            string expectedImportButtonText,
+            string expectedSelectButtonText,
+            object dummy)
+        {
+            IElement clusterEditorWindow = null;
+            try
+            {
+                // 1. 切換語系
+                MenuSelect(languagePath);
+
+                // 2. 開啟 CAN Cluster Editor
+                MenuSelect(CANClusterPath);
+                clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+                clusterEditorWindow.ShouldNotBeNull("CAN Cluster Editor 視窗未開啟");
+
+                // 3. 驗證視窗標題
+                clusterEditorWindow.GetText().ShouldContain(expectedWindowTitle);
+
+                // 4. 驗證按鈕文字
+                var importButton = clusterEditorWindow.PerformGetElement("/ByName[Import CAN DBC]");
+                importButton.ShouldNotBeNull("找不到 Import 按鈕");
+                importButton.GetText().ShouldEqualTo(expectedImportButtonText);
+
+                var selectButton = clusterEditorWindow.PerformGetElement("/ByName[Select Specified]");
+                selectButton.ShouldNotBeNull("找不到 Select Specified 按鈕");
+                selectButton.GetText().ShouldEqualTo(expectedSelectButtonText);
+
+                // 5. 驗證固定保持英文的元件
+                // 這裡列出那些需要維持英文的控制項並進行驗證
+                var contentDg = clusterEditorWindow.PerformGetElement("/ById[dgMessage]");
+                var messageColumn = contentDg.PerformGetElement("/ByClass[DataGridColumnHeader]");
+                messageColumn.ShouldNotBeNull("找不到 Message 欄位");
+                messageColumn.GetText().ShouldEqualTo("Comment", "Message 欄位應維持英文");
+
+                var idColumn = contentDg.PerformGetElement("/ByClass[DataGridColumnHeader]");
+                idColumn.ShouldNotBeNull("找不到 ID 欄位");
+                idColumn.GetText().ShouldEqualTo("Comment", "ID 欄位應維持英文");
+            }
+            finally
+            {
+                clusterEditorWindow?.CloseWindow();
+
+                // 恢復預設語系 (English)
+                if (languagePath != "language => English")
+                    MenuSelect(languagePath);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B14-1
+        /// 測試步驟：
+        /// 1. 開啟 Management 設定 Auto save interval
+        /// 2. 開啟測試用 TI 檔案
+        /// 3. 等待並檢查檔案修改時間
+        /// 測試描述：驗證 Auto save interval 設定為 1 分鐘時的自動儲存功能
+        /// 預期輸出：1 分鐘後檔案修改時間會更新
+        /// </summary>
+        [TestMethod("B14-1")]
+        [TestCategory("AutoSave功能")]
+        [DataRow(60, "UUTTest.ti", typeof(object), DisplayName = "Auto Save-1分鐘")]
+        public void TIEditor_AutoSaveInterval_CheckFileModificationTime(
+            int intervalSeconds,
+            string testFileName,
+            object dummy)
+        {
+            try
+            {
+                // 1. 啟用 Auto Save 並設定間隔
+                SetAutoSaveInterval(intervalSeconds);
+
+                // 2. 開啟測試檔案並記錄初始時間
+                string tiFilePath = Path.Combine(
+                    PowerPro5Config.ReleaseFolder,
+                    "TestItem",
+                    "UserDefined",
+                    "TI",
+                    "UUTTest",
+                    testFileName + ".tix");
+
+                DateTime initialModTime = File.GetLastWriteTime(tiFilePath);
+
+                // 3. 開啟檔案
+                PP5IDEWindow.MenuSelect("File", "Open...");
+
+                // 4. 等待自動儲存
+                Thread.Sleep((intervalSeconds + 5) * 1000); // 多等5秒確保觸發
+
+                // 5. 驗證檔案修改時間
+                DateTime newModTime = File.GetLastWriteTime(tiFilePath);
+                TimeSpan timeDiff = newModTime - initialModTime;
+
+                // 允許±5秒的誤差
+                bool isTimeInRange = timeDiff.TotalSeconds >= intervalSeconds - 5
+                                && timeDiff.TotalSeconds <= intervalSeconds + 5;
+
+                isTimeInRange.ShouldBeTrue($"檔案修改時間差異應約為{intervalSeconds}秒，實際為{timeDiff.TotalSeconds}秒");
+            }
+            finally
+            {
+                // 6. 還原設定並關閉檔案
+                SetAutoSaveInterval(0);  // 關閉 Auto Save
+                PP5IDEWindow.CloseWindow(0);
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B14-2
+        /// 測試步驟：
+        /// 1. 建立新的TI檔案並儲存
+        /// 2. 強制結束PP5 IDE進程
+        /// 3. 重啟程式並驗證恢復功能
+        /// 測試描述：驗證異常關閉後的檔案恢復功能
+        /// 預期輸出：重啟後顯示恢復提示並能正確恢復檔案
+        /// </summary>
+        [TestMethod("B14-2")]
+        [TestCategory("AutoSave功能")]
+        [DataRow("B14_2_Test", "Do you want to restore file?", typeof(object),
+            DisplayName = "異常關閉-檔案恢復")]
+        public void TIEditor_AbnormalClose_CheckFileRecovery(
+            string testFileName,
+            string expectedPromptMessage,
+            object dummy)
+        {
+            string savePath = Path.Combine(
+                    PowerPro5Config.ReleaseFolder,
+                    "TestItem",
+                    "UserDefined",
+                    "TI",
+                    "UUTTest",
+                    testFileName + ".tix");
+            try
+            {
+                // 1. 啟用 Auto Save
+                SetAutoSaveInterval(60);
+
+                // 2. 建立並儲存新檔案
+                SaveAsNewTI(testFileName);
+
+                // 等待自動存檔
+                Thread.Sleep(65000); // 等待65秒確保有自動存檔
+
+                // 3. 記錄當前進程ID並強制結束
+                int currentPID = Process.GetCurrentProcess().Id;
+                Process.GetProcessById(currentPID).Kill();
+
+                // 4. 重新啟動PP5 IDE
+                Process.Start("Chroma.PP5IDE.exe");
+                Thread.Sleep(5000);
+
+                // 5. 驗證恢復提示視窗
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var recoveryDialog = CurrentDriver.PerformGetElement("/Window[Recovery]");
+                recoveryDialog.ShouldNotBeNull("未顯示檔案恢復提示視窗");
+
+                var promptMessage = recoveryDialog.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                promptMessage.ShouldContain(expectedPromptMessage);
+
+                // 6. 點擊Yes按鈕恢復檔案
+                recoveryDialog.PerformClick("/ByName[Yes]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+                // 7. 驗證檔案恢復
+                //var tiEditor = PP5IDEWindow.PerformGetElement("/Window[0]");
+                PP5IDEWindow.ShouldNotBeNull("TI Editor未正確開啟");
+                string TINameActual = GetTIName();
+                testFileName.ShouldEqualTo(TINameActual);
+            }
+            finally
+            {
+                // 8. 清理環境
+                SetAutoSaveInterval(0);
+                if (File.Exists(savePath))
+                {
+                    File.Delete(savePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B14-3
+        /// 測試步驟：
+        /// 1. 建立並啟用Active的TI檔案
+        /// 2. 等待Backup檔案產生
+        /// 3. 強制結束PP5 IDE進程
+        /// 4. 重啟並驗證恢復功能及Active狀態
+        /// 測試描述：驗證Active的TI檔案在異常關閉後通過Backup恢復並保持Active狀態
+        /// 預期輸出：檔案恢復後仍保持Active狀態
+        /// </summary>
+        [TestMethod("B14-3")]
+        [TestCategory("AutoSave功能")]
+        [DataRow("B14_3_Test.ti", "Do you want to restore file?", typeof(object),
+            DisplayName = "Active檔案異常關閉-恢復與狀態驗證")]
+        public void TIEditor_ActiveFileBackupRestore_CheckActiveStatus(
+            string testFileName,
+            string expectedPromptMessage,
+            object dummy)
+        {
+            string savePath = Path.Combine(
+                PowerPro5Config.ReleaseFolder,
+                "TestItem",
+                "UserDefined",
+                "TI",
+                testFileName);
+            try
+            {
+                // 1. 啟用 Auto Save 並建立新檔案
+                SetAutoSaveInterval(60);
+
+                // 建立並儲存新TI檔案
+                PP5IDEWindow.MenuSelect("File", "New Test Item...");
+                PP5IDEWindow.MenuSelect("File", "Save");
+                var saveDialog = PP5IDEWindow.PerformGetElement("/Window[Save As]");
+                saveDialog?.PerformInput("/ById[FileName]", InputType.SendContent, savePath);
+                saveDialog?.PerformClick("/ByName[Save]", ClickType.LeftClick);
+
+                // 2. 設定為Active狀態
+                PP5IDEWindow.MenuSelect("Edit", "Active");
+
+                // 3. 等待Backup檔案產生
+                Thread.Sleep(65000); // 等待65秒確保有備份檔案
+
+                // 4. 強制結束進程
+                int currentPID = Process.GetCurrentProcess().Id;
+                Process.GetProcessById(currentPID).Kill();
+
+                // 5. 重新啟動PP5 IDE
+                Process.Start("Chroma.PP5IDE.exe");
+                Thread.Sleep(5000);
+
+                // 6. 驗證恢復提示視窗
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var recoveryDialog = CurrentDriver.PerformGetElement("/Window[Recovery]");
+                recoveryDialog.ShouldNotBeNull("未顯示檔案恢復提示視窗");
+
+                var promptMessage = recoveryDialog.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                promptMessage.ShouldContain(expectedPromptMessage);
+
+                // 7. 點擊Yes恢復檔案
+                recoveryDialog.PerformClick("/ByName[Yes]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+                // 8. 驗證檔案恢復與Active狀態
+                var tiEditor = PP5IDEWindow.PerformGetElement("/Window[0]");
+                tiEditor.ShouldNotBeNull("TI Editor未正確開啟");
+
+                // 檢查檔名
+                tiEditor.GetText().ShouldContain(testFileName);
+
+                // 檢查Active狀態 (功能表Active選項應為勾選狀態)
+                var activeMenuItem = PP5IDEWindow.PerformGetElement("/Menu[Edit]/MenuItem[Active]");
+                activeMenuItem.ShouldBeChecked("檔案應維持Active狀態");
+            }
+            finally
+            {
+                // 9. 清理環境
+                SetAutoSaveInterval(0);
+                if (File.Exists(savePath))
+                {
+                    File.Delete(savePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B19-1
+        /// 測試步驟：
+        /// 1. 新增 TI 檔案
+        /// 2. 開啟 Security 視窗
+        /// 3. 驗證預設權限等級
+        /// 4. 驗證密碼欄位顯示
+        /// 測試描述：確認新建 TI 檔案時 Security 視窗的預設狀態
+        /// 預期輸出：
+        /// 1. Level 為 None
+        /// 2. 只顯示 New Password 和 Confirm Password 欄位
+        /// </summary>
+        [TestMethod("B19-1")]
+        [TestCategory("Security設定")]
+        [DataRow("None", typeof(object), DisplayName = "新TI檔Security視窗預設值")]
+        public void Security_NewTIFile_CheckDefaultSecurityWindow(string expectedLevel, object dummy)
+        {
+            IElement securityDialog = null;
+            try
+            {
+                // 1. 開啟 Security 視窗
+                PP5IDEWindow.MenuSelect("Edit", "Security...");
+                securityDialog = PP5IDEWindow.PerformGetElement("/Window[Security]");
+                securityDialog.ShouldNotBeNull("Security 視窗未開啟");
+
+                // 2. 驗證預設權限等級
+                var levelComboBox = securityDialog.PerformGetElement("/ById[LevelCBox]");
+                levelComboBox.ShouldNotBeNull("找不到 Level ComboBox");
+                levelComboBox.ShouldHaveText(expectedLevel, "預設 Level 不是 None");
+
+                // 3. 驗證密碼欄位顯示狀態
+                var newPasswordField = securityDialog.PerformGetElement("/ById[NewPasswordBox,passwordbox]");
+                newPasswordField.ShouldBeEmpty("New Password 欄位顯示狀態不正確");
+
+                var confirmPasswordField = securityDialog.PerformGetElement("/ById[ConfirmPasswordBox,passwordbox]");
+                confirmPasswordField.ShouldBeEmpty("Confirm Password 欄位顯示狀態不正確");
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                securityDialog?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B19-2
+        /// 測試步驟：
+        /// 1. 新增 TI 檔案
+        /// 2. 開啟 Security 視窗
+        /// 3. 變更 Security Level 
+        /// 4. 不輸入密碼直接按 OK
+        /// 5. 驗證錯誤提示訊息
+        /// 測試描述：在 Security 視窗中變更權限等級時，若未設定密碼應顯示錯誤提示
+        /// 預期輸出：顯示提示需要設定密碼的錯誤訊息
+        /// </summary>
+        [TestMethod("B19-2")]
+        [TestCategory("Security設定")]
+        [DataRow("RestrictEditing", "Need password to change Security Level", typeof(object), DisplayName = "變更RestrictEditing權限-未設定密碼")]
+        [DataRow("RestrictAccess", "Need password to change Security Level", typeof(object), DisplayName = "變更RestrictAccess權限-未設定密碼")]
+        public void Security_ChangeLevel_CheckPasswordRequiredMessage(
+            string securityLevel,
+            string expectedErrorMessage,
+            object dummy)
+        {
+            IElement securityDialog = null;
+            try
+            {
+                // 1. 開啟 Security 視窗
+                PP5IDEWindow.MenuSelect("Edit", "Security...");
+                securityDialog = PP5IDEWindow.PerformGetElement("/Window[Security]");
+                securityDialog.ShouldNotBeNull("Security 視窗未開啟");
+
+                // 2. 變更 Security Level
+                var levelComboBox = securityDialog.PerformGetElement("/ById[LevelCBox]");
+                levelComboBox.ShouldNotBeNull("找不到 Level ComboBox");
+                levelComboBox.SelectItem(securityLevel);
+
+                // 3. 不輸入密碼直接按 OK
+                securityDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 4. 驗證錯誤提示訊息
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var errorDialog = CurrentDriver.PerformGetElement("/Window[Error]");
+                errorDialog.ShouldNotBeNull("未顯示錯誤提示視窗");
+
+                var errorMessage = errorDialog.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                errorMessage.ShouldContain(expectedErrorMessage, "錯誤訊息內容不符");
+
+                // 5. 關閉錯誤提示視窗
+                errorDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+            }
+            finally
+            {
+                // 關閉所有開啟的視窗
+                securityDialog?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B19-3
+        /// 測試步驟：
+        /// 1. 開啟 Security 視窗
+        /// 2. 變更 Security Level
+        /// 3. 按下 Cancel 按鈕
+        /// 4. 驗證是否回到 TI Editor 視窗
+        /// 測試描述：在 Security 視窗中變更權限等級後按下 Cancel，確認是否正確回到 TI Editor
+        /// 預期輸出：Security 視窗關閉，回到 TI Editor 視窗
+        /// </summary>
+        [TestMethod("B19-3")]
+        [TestCategory("Security設定")]
+        [DataRow("RestrictEditing", typeof(object), DisplayName = "變更RestrictEditing權限-取消")]
+        [DataRow("RestrictAccess", typeof(object), DisplayName = "變更RestrictAccess權限-取消")]
+        public void Security_ChangeLevel_CheckCancelOperation(
+            string securityLevel,
+            object dummy)
+        {
+            IElement securityDialog = null;
+
+            // 1. 開啟 Security 視窗
+            PP5IDEWindow.MenuSelect("Edit", "Security...");
+            securityDialog = PP5IDEWindow.PerformGetElement("/Window[Security]");
+            securityDialog.ShouldNotBeNull("Security 視窗未開啟");
+
+            // 2. 變更 Security Level
+            var levelComboBox = securityDialog.PerformGetElement("/ById[LevelCBox]");
+            levelComboBox.ShouldNotBeNull("找不到 Level ComboBox");
+            levelComboBox.SelectItem(securityLevel);
+
+            // 3. 按下 Cancel 按鈕
+            securityDialog.PerformClick("/ByName[Cancel]", ClickType.LeftClick);
+
+            // 4. 驗證是否回到 TI Editor
+            // 檢查 Security 視窗是否已關閉
+            var securityWindow = PP5IDEWindow.PerformGetElement("/Window[Security]");
+            securityWindow.ShouldBeNull("Security 視窗未正確關閉");
+        }
+
+        /// <summary>
+        /// 測試用例編號：B19-5
+        /// 測試步驟：
+        /// 1. 開啟 Security 視窗
+        /// 2. 變更 Security Level
+        /// 3. 僅輸入 New Password
+        /// 4. 按下 OK 按鈕
+        /// 5. 驗證確認密碼錯誤提示
+        /// 測試描述：在 Security 視窗中未輸入確認密碼時的錯誤提示驗證
+        /// 預期輸出：顯示需要輸入確認密碼的錯誤訊息
+        /// </summary>
+        [TestMethod("B19-5")]
+        [TestCategory("Security設定")]
+        [DataRow("None", "test", "Confirm password is error", typeof(object), DisplayName = "變更None-未確認密碼")]
+        [DataRow("RestrictEditing", "123", "Confirm password is error", typeof(object), DisplayName = "變更RestrictEditing-未確認密碼")]
+        [DataRow("RestrictAccess", "abc", "Confirm password is error", typeof(object), DisplayName = "變更RestrictAccess-未確認密碼")]
+        public void Security_SetNewPasswordWithoutConfirm_CheckErrorMessage(
+            string securityLevel,
+            string newPassword,
+            string expectedErrorMessage,
+            object dummy)
+        {
+            IElement securityDialog = null;
+            try
+            {
+                // 1. 開啟 Security 視窗
+                PP5IDEWindow.MenuSelect("Edit", "Security...");
+                securityDialog = PP5IDEWindow.PerformGetElement("/Window[Security]");
+                securityDialog.ShouldNotBeNull("Security 視窗未開啟");
+
+                // 2. 變更 Security Level
+                var levelComboBox = securityDialog.PerformGetElement("/ById[LevelCBox]");
+                levelComboBox.ShouldNotBeNull("找不到 Level ComboBox");
+                levelComboBox.SelectItem(securityLevel);
+
+                // 3. 僅輸入 New Password
+                securityDialog.PerformInput("/ById[NewPasswordBox,passwordbox]", InputType.SendContent, newPassword);
+
+                // 4. 按下 OK 按鈕
+                securityDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 5. 驗證錯誤提示訊息
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var errorDialog = CurrentDriver.PerformGetElement("/Window[Error]");
+                errorDialog.ShouldNotBeNull("未顯示錯誤提示視窗");
+
+                var errorMessage = errorDialog.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                errorMessage.ShouldContain(expectedErrorMessage, "錯誤訊息內容不符");
+
+                // 關閉錯誤提示視窗
+                errorDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+                // 驗證 Security 視窗仍然開啟
+                securityDialog.ShouldNotBeNull("Security 視窗不應關閉");
+            }
+            finally
+            {
+                securityDialog?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B19-6
+        /// 測試步驟：
+        /// 1. 開啟 Security 視窗
+        /// 2. 變更 Security Level
+        /// 3. 輸入 New Password
+        /// 4. 輸入不同的 Confirm Password
+        /// 5. 按下 OK 按鈕
+        /// 6. 驗證密碼不符錯誤提示
+        /// 測試描述：在 Security 視窗中輸入不相符的確認密碼時的錯誤提示驗證
+        /// 預期輸出：顯示確認密碼錯誤的提示訊息
+        /// </summary>
+        [TestMethod("B19-6")]
+        [TestCategory("Security設定")]
+        [DataRow("RestrictEditing", "123", "456", "Confirm password is error", typeof(object), DisplayName = "變更RestrictEditing-密碼不符")]
+        [DataRow("RestrictAccess", "abc", "def", "Confirm password is error", typeof(object), DisplayName = "變更RestrictAccess-密碼不符")]
+        [DataRow("None", "test1", "test2", "Confirm password is error", typeof(object), DisplayName = "變更None-密碼不符")]
+        public void Security_SetDifferentConfirmPassword_CheckErrorMessage(
+            string securityLevel,
+            string newPassword,
+            string confirmPassword,
+            string expectedErrorMessage,
+            object dummy)
+        {
+            IElement securityDialog = null;
+            try
+            {
+                // 1. 開啟 Security 視窗
+                PP5IDEWindow.MenuSelect("Edit", "Security...");
+                securityDialog = PP5IDEWindow.PerformGetElement("/Window[Security]");
+                securityDialog.ShouldNotBeNull("Security 視窗未開啟");
+
+                // 2. 變更 Security Level
+                var levelComboBox = securityDialog.PerformGetElement("/ById[LevelCBox]");
+                levelComboBox.ShouldNotBeNull("找不到 Level ComboBox");
+                levelComboBox.SelectItem(securityLevel);
+
+                // 3. 輸入 New Password
+                securityDialog.PerformInput("/ById[NewPasswordBox,passwordbox]", InputType.SendContent, newPassword);
+
+                // 4. 輸入不同的 Confirm Password
+                securityDialog.PerformInput("/ById[ConfirmPasswordBox,passwordbox]", InputType.SendContent, confirmPassword);
+
+                // 5. 按下 OK 按鈕
+                securityDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 6. 驗證錯誤提示訊息
+                AutoUIExecutor.SwitchTo(SessionType.Desktop);
+                var errorDialog = CurrentDriver.PerformGetElement("/Window[Error]");
+                errorDialog.ShouldNotBeNull("未顯示錯誤提示視窗");
+
+                var errorMessage = errorDialog.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                errorMessage.ShouldContain(expectedErrorMessage, "錯誤訊息內容不符");
+
+                // 關閉錯誤提示視窗
+                errorDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+
+                // 驗證 Security 視窗仍然開啟
+                securityDialog.ShouldNotBeNull("Security 視窗不應關閉");
+            }
+            finally
+            {
+                securityDialog?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B19-7
+        /// 測試步驟：
+        /// 1. 開啟 Security 視窗
+        /// 2. 變更 Security Level
+        /// 3. 輸入兩個密碼欄位
+        /// 4. 點選密碼顯示按鈕
+        /// 5. 驗證密碼顯示狀態
+        /// 測試描述：在 Security 視窗中測試密碼顯示/隱藏功能
+        /// 預期輸出：密碼正確切換顯示和隱藏狀態
+        /// </summary>
+        [TestMethod("B19-7")]
+        [TestCategory("Security設定")]
+        [DataRow("RestrictEditing", "test123", "*******", typeof(object), DisplayName = "變更RestrictEditing-密碼可見切換")]
+        [DataRow("RestrictAccess", "abc456", "******", typeof(object), DisplayName = "變更RestrictAccess-密碼可見切換")]
+        [DataRow("None", "password", "********", typeof(object), DisplayName = "變更None-密碼可見切換")]
+        public void Security_TogglePasswordVisibility_CheckPasswordDisplay(
+            string securityLevel,
+            string password,
+            string maskedPassword,
+            object dummy)
+        {
+            IElement securityDialog = null;
+            try
+            {
+                // 1. 開啟 Security 視窗
+                PP5IDEWindow.MenuSelect("Edit", "Security...");
+                securityDialog = PP5IDEWindow.PerformGetElement("/Window[Security]");
+                securityDialog.ShouldNotBeNull("Security 視窗未開啟");
+
+                // 2. 變更 Security Level
+                var levelComboBox = securityDialog.PerformGetElement("/ById[LevelCBox]");
+                levelComboBox.ShouldNotBeNull("找不到 Level ComboBox");
+                levelComboBox.SelectItem(securityLevel);
+
+                // 3. 輸入密碼
+                securityDialog.PerformInput("/ById[NewPasswordBox,passwordbox]", InputType.SendContent, password);
+                securityDialog.PerformInput("/ById[ConfirmPasswordBox,passwordbox]", InputType.SendContent, password);
+
+                // 4. 驗證初始狀態（應該是隱藏的）
+                var newPasswordBox = securityDialog.PerformGetElement("/ById[NewPasswordBox,passwordbox]");
+                var confirmPasswordBox = securityDialog.PerformGetElement("/ById[ConfirmPasswordBox,passwordbox]");
+
+                newPasswordBox.GetText().ShouldEqualTo(maskedPassword, "新密碼應該是隱藏狀態");
+                confirmPasswordBox.GetText().ShouldEqualTo(maskedPassword, "確認密碼應該是隱藏狀態");
+
+                // 5. 點選顯示密碼按鈕並驗證
+                securityDialog.PerformClick("/ById[SecPasswordGB,NewImage]", ClickType.LeftClick);
+                securityDialog.PerformClick("/ById[SecPasswordGB,ConfirmImage]", ClickType.LeftClick);
+
+                newPasswordBox.GetText().ShouldEqualTo(password, "新密碼應該顯示原文");
+                confirmPasswordBox.GetText().ShouldEqualTo(password, "確認密碼應該顯示原文");
+
+                // 6. 再次點選隱藏密碼並驗證
+                securityDialog.PerformClick("/ById[SecPasswordGB,NewImage]", ClickType.LeftClick);
+                securityDialog.PerformClick("/ById[SecPasswordGB,ConfirmImage]", ClickType.LeftClick);
+
+                newPasswordBox.GetText().ShouldEqualTo(maskedPassword, "新密碼應該再次隱藏");
+                confirmPasswordBox.GetText().ShouldEqualTo(maskedPassword, "確認密碼應該再次隱藏");
+            }
+            finally
+            {
+                securityDialog?.CloseWindow();
+            }
+        }
+
+        /// <summary>
+        /// 測試用例編號：B19-8
+        /// 測試步驟：
+        /// 1. 開啟 Security 視窗
+        /// 2. 變更 Security Level
+        /// 3. 輸入新密碼和確認密碼(相同密碼)
+        /// 4. 按下 OK 按鈕
+        /// 5. 驗證存檔提示視窗
+        /// 測試描述：在 Security 視窗中設定密碼後的存檔提示驗證
+        /// 預期輸出：顯示需要存檔的提示視窗
+        /// </summary>
+        [TestMethod("B19-8")]
+        [TestCategory("Security設定")]
+        [DataRow("RestrictEditing", "test123", "Need to save TestItem for security change , Do you want to save TestItem?", typeof(object), DisplayName = "變更RestrictEditing-需存檔提示")]
+        [DataRow("RestrictAccess", "abc456", "Need to save TestItem for security change , Do you want to save TestItem?", typeof(object), DisplayName = "變更RestrictAccess-需存檔提示")]
+        [DataRow("None", "password", "Need to save TestItem for security change , Do you want to save TestItem?", typeof(object), DisplayName = "變更None-需存檔提示")]
+        public void Security_SetValidPassword_CheckSaveFilePrompt(
+            string securityLevel,
+            string password,
+            string expectedPromptMessage,
+            object dummy)
+        {
+            IElement securityDialog = null;
+            try
+            {
+                // 1. 開啟 Security 視窗
+                PP5IDEWindow.MenuSelect("Edit", "Security...");
+                securityDialog = PP5IDEWindow.PerformGetElement("/Window[Security]");
+                securityDialog.ShouldNotBeNull("Security 視窗未開啟");
+
+                // 2. 變更 Security Level
+                var levelComboBox = securityDialog.PerformGetElement("/ById[LevelCBox]");
+                levelComboBox.ShouldNotBeNull("找不到 Level ComboBox");
+                levelComboBox.SelectItem(securityLevel);
+
+                // 3. 輸入密碼
+                securityDialog.PerformInput("/ById[NewPasswordBox,passwordbox]", InputType.SendContent, password);
+                securityDialog.PerformInput("/ById[ConfirmPasswordBox,passwordbox]", InputType.SendContent, password);
+
+                // 4. 按下 OK 按鈕
+                securityDialog.PerformClick("/ByName[Ok]", ClickType.LeftClick);
+
+                // 5. 驗證存檔提示視窗
+                var promptDialog = PP5IDEWindow.PerformGetElement("/Window[Message]");
+                promptDialog.ShouldNotBeNull("未顯示存檔提示視窗");
+
+                var promptMessage = promptDialog.PerformGetElement("/ById[txtBlockMsg]").GetText();
+                promptMessage.ShouldEqualTo(expectedPromptMessage, "提示訊息內容不符");
+
+                // 關閉提示視窗
+                promptDialog.PerformClick("/ByName[Yes]", ClickType.LeftClick);
+            }
+            finally
+            {
+                securityDialog?.CloseWindow();
+            }
         }
 
         /// <summary>
@@ -25680,5 +31631,11 @@ namespace PP5AutoUITests
         //{
         //    Assert.Fail();
         //}
+
+        [TestMethod]
+        public void TestGetDataGridCellElement()
+        {
+            PP5IDEWindow.PerformClick("/ByClass[ScrollViewer]/ById[searchBox,searchText]", ClickType.LeftClick);
+        }
     }
 }

@@ -20,11 +20,28 @@ namespace PP5AutoUITests
 
         public FileSystemWatcherWrapper() {}
 
-        //public FileSystemWatcherWrapper(string[] _filters) 
-        //{
-        //    filters = _filters;
-        //}
-        //public FileSystemWatcherWrapper(string path) { }
+        public void CreateFileWatcher_FullFileName(string path, NotifyFilters notifyFilters, string fileToWatch)
+        {
+            // Create a new FileSystemWatcher and set its properties.
+            FileSystemWatcher watcher = new FileSystemWatcher();
+            watcher.Path = path;
+            /* Watch for changes in CreationTime and LastWrite */
+            watcher.NotifyFilter = notifyFilters;
+            // Watch files with given extension, default is txt
+            watcher.Filter = fileToWatch;
+            //watcher.Filter = "";
+
+            // Add event handlers.
+            watcher.Changed += new FileSystemEventHandler(OnChanged);
+            watcher.Created += new FileSystemEventHandler(OnChanged);
+            watcher.Deleted += new FileSystemEventHandler(OnChanged);
+            watcher.Renamed += new RenamedEventHandler(OnRenamed);
+
+            // Begin watching.
+            watcher.EnableRaisingEvents = true;
+            //watcher.SynchronizingObject = this;
+            watchers.Add(watcher);
+        }
 
         public void CreateFileWatcher(string path, NotifyFilters notifyFilters, string fileExtToWatch = "txt")
         {
@@ -47,6 +64,14 @@ namespace PP5AutoUITests
             watcher.EnableRaisingEvents = true;
             //watcher.SynchronizingObject = this;
             watchers.Add(watcher);
+        }
+
+        public void CreateFileWatchers(string[] paths, NotifyFilters notifyFilters, string[] fileExtsToWatch)
+        {
+            for(int i = 0; i < paths.Length; i++)
+            {
+                CreateFileWatcher(paths[i], notifyFilters, fileExtsToWatch[i]);
+            }
         }
 
         // Define the event handlers.
@@ -92,6 +117,12 @@ namespace PP5AutoUITests
             {
                 return false;
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var watcher in watchers)
+                watcher?.Dispose();
         }
     }
 }

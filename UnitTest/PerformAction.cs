@@ -50,6 +50,14 @@ namespace PP5AutoUITests
             return elementFound;
         }
 
+        public static IElement PerformClick(this PP5Driver driver, string elementPath, MoveToElementOffsetStartingPoint clickingPosition, params ClickType[] clickTypes)
+        {
+            IElement elementFound = driver.PerformGetElement(elementPath);
+            ((PP5Element)elementFound).MoveToElement(clickingPosition, 0, 0);
+            elementFound.PerformClick(clickTypes);
+            return elementFound;
+        }
+
         /// <summary>
         /// For elementPath format, please refer to <see cref="PerformGetElement(IElement, string)"/> for detailed information
         /// <para>Example:</para>
@@ -164,43 +172,9 @@ namespace PP5AutoUITests
                 return elementFound;
 
             foreach (var elePath in elementPaths)
-            {
-                var parts = elePath.Split('[');
-                string elementControlType = parts[0];
-                string elementLocator = parts[1].TrimEnd(']');
+                elementFound = AH.HandleAllCases(elementSrc, elePath);
 
-                switch (AH.GetControlTypeCategory(elementControlType))
-                {
-                    case PerformTypeCategory.DataGrid:
-                        elementFound = AH.HandleDataGridCases(elementFound, elementControlType, elementLocator);
-                        break;
-
-                    case PerformTypeCategory.ByIdOrName:
-                        elementFound = AH.HandleByIdOrNameCase(elementFound, elementControlType, elementLocator);
-                        break;
-
-                    case PerformTypeCategory.ByName:
-                        elementFound = AH.HandleByNameCase(elementFound, elementControlType, elementLocator);
-                        break;
-
-                    case PerformTypeCategory.ById:
-                        elementFound = AH.HandleByIdCase(elementFound, elementControlType, elementLocator);
-                        break;
-
-                    case PerformTypeCategory.ByClass:
-                        elementFound = AH.HandleByClassCase(elementFound, elementControlType, elementLocator);
-                        break;
-
-                    case PerformTypeCategory.ByCondition:
-                        elementFound = AH.HandleByConditionCase(elementFound, elementControlType, elementLocator);
-                        break;
-
-                    default:
-                        elementFound = AH.HandleDefaultCase(elementFound, elementControlType, elementLocator);
-                        break;
-                }
-
-                /* Legacy method using If-else
+            /* Legacy method using If-else
                 //if (elementControlType.StartsWith("ByDataGrid", StringComparison.InvariantCultureIgnoreCase) ||
                 //    elementControlType.StartsWith("ByCell", StringComparison.InvariantCultureIgnoreCase) ||
                 //    elementControlType.StartsWith("ByRow", StringComparison.InvariantCultureIgnoreCase) ||
@@ -258,7 +232,6 @@ namespace PP5AutoUITests
                 //        elementFound = elementSrc.GetSpecificChildOfControlTypeByBFS(eleCtrlType, elementLocator);
                 //}
                 */
-            }
             return elementFound;
         }
 
@@ -400,6 +373,28 @@ namespace PP5AutoUITests
             return elementFound;
         }
 
+        public static List<IElement> PerformGetElements(this IElement elementSrc, string elementPath)
+        {
+            // Parsing the element path
+            IElement elementTmp = elementSrc;
+            List<IElement> elementsFound = new List<IElement>();
+            var elementPaths = elementPath.Split('/').ToList();
+            elementPaths.RemoveAt(0);
+
+            // 2024/12/06, return self-element if elementPath: "/" is given
+            if (elementPaths.Count == 1 && elementPaths[0] == null)
+                return new List<IElement>() { elementSrc };
+
+            for (int i = 0; i < elementPaths.Count; i++)
+            {
+                if (i == elementPaths.Count - 1)
+                    elementsFound = AH.HandleAllCases_multiElements(elementTmp, elementPaths[i]);
+                else
+                    elementTmp = AH.HandleAllCases(elementTmp, elementPaths[i]);
+            }
+            return elementsFound;
+        }
+
         private static void PerformClick(this IElement element, ClickType[] clickTypes)
         {
             foreach (var clickType in clickTypes)
@@ -409,22 +404,22 @@ namespace PP5AutoUITests
                     case ClickType.None:
                         break;
                     case ClickType.LeftClick:
-                        element.LeftClick();
+                        element?.LeftClick();
                         break;
                     case ClickType.LeftDoubleClick:
-                        element.DoubleClick();
+                        element?.DoubleClick();
                         break;
                     case ClickType.RightClick:
-                        element.RightClick();
+                        element?.RightClick();
                         break;
                     case ClickType.LeftDoubleClickDelay:
-                        element.LeftClickWithDelay(50);
+                        element?.LeftClickWithDelay(50);
                         break;
                     case ClickType.TickCheckBox:
-                        element.TickCheckBox();
+                        element?.TickCheckBox();
                         break;
                     case ClickType.UnTickCheckBox:
-                        element.UnTickCheckBox();
+                        element?.UnTickCheckBox();
                         break;
                 }
             }
@@ -440,7 +435,7 @@ namespace PP5AutoUITests
                 case InputType.PasteContent:
                 case InputType.CopyContent:
                 case InputType.CutContent:
-                    element.PerformInputAction(inputType);
+                    element?.PerformInputAction(inputType);
                     break;
 
                 case InputType.SendSingleKeys:
@@ -448,7 +443,7 @@ namespace PP5AutoUITests
                 case InputType.SendContent:
                 case InputType.CopyAndPaste:
                 case InputType.CutAndPaste:
-                    element.PerformInputAction(inputType, inputParams);
+                    element?.PerformInputAction(inputType, inputParams);
                     break;
             }
         }
@@ -483,20 +478,20 @@ namespace PP5AutoUITests
             {
                 case InputType.SendSingleKeys:
                     string inputString = inputParams as string;
-                    element.SendSingleKeys(inputString);
+                    element?.SendSingleKeys(inputString);
                     break;
                 case InputType.SendComboKeys:
                     string[] inputStringList = inputParams as string[];
-                    element.SendComboKeys(inputStringList);
+                    element?.SendComboKeys(inputStringList);
                     break;
                 case InputType.SendContent:
                     string keysToSend = inputParams as string;
-                    element.SendText(keysToSend);
+                    element?.SendText(keysToSend);
                     break;
                 case InputType.CopyAndPaste:
                 case InputType.CutAndPaste:
                     IElement ToElement = inputParams as IElement;
-                    element.PerformInputMixedAction(inputType, ToElement);
+                    element?.PerformInputMixedAction(inputType, ToElement);
                     break;
             }
         }
@@ -719,6 +714,76 @@ namespace PP5AutoUITests
             return isLegalFormat;
         }
 
+        internal IElement HandleAllCases(IElement elementSrc, string singleElePath)
+        {
+            var parts = singleElePath.Split('[');
+            string elementControlType = parts[0];
+            string elementLocator = parts[1].TrimEnd(']');
+            IElement elementFound = null;
+
+            switch (GetControlTypeCategory(elementControlType))
+            {
+                case PerformTypeCategory.DataGrid:
+                    elementFound = HandleDataGridCases(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                case PerformTypeCategory.ByIdOrName:
+                    elementFound = HandleByIdOrNameCase(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                case PerformTypeCategory.ByName:
+                    elementFound = HandleByNameCase(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                case PerformTypeCategory.ById:
+                    elementFound = HandleByIdCase(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                case PerformTypeCategory.ByClass:
+                    elementFound = HandleByClassCase(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                case PerformTypeCategory.ByCondition:
+                    elementFound = HandleByConditionCase(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                default:
+                    elementFound = HandleDefaultCase(elementSrc, elementControlType, elementLocator);
+                    break;
+            }
+
+            return elementFound;
+        }
+
+        internal List<IElement> HandleAllCases_multiElements(IElement elementSrc, string singleElePath)
+        {
+            List<IElement> elementsFound = new List<IElement>();
+            var parts = singleElePath.Split('[');
+            string elementControlType = parts[0];
+            string elementLocator = null;
+            if (singleElePath.Contains("[") || singleElePath.Contains("]"))
+                elementLocator = parts[1].TrimEnd(']');
+
+            switch (GetControlTypeCategory(elementControlType))
+            {
+                case PerformTypeCategory.ByClass:
+                    elementsFound = HandleByClassCase_multiElements(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                case PerformTypeCategory.ByCondition:
+                    elementsFound = HandleByConditionCase_multiElements(elementSrc, elementControlType, elementLocator);
+                    break;
+
+                default:
+                    if (elementLocator == null)
+                        elementsFound = HandleDefaultCase_multiElements(elementSrc, elementControlType);
+                    else
+                        elementsFound.Add(HandleDefaultCase(elementSrc, elementControlType, elementLocator));
+                    break;
+            }
+            return elementsFound;
+        }
+
         internal IElement HandleDataGridCases(IElement elementSrc, string elementControlType, string elementLocator)
         {
             IElement elementFound;
@@ -834,6 +899,7 @@ namespace PP5AutoUITests
                 elementFound = elementFound.GetElement<IElement, IElement>(SharedSetting.NORMAL_TIMEOUT, ClassNameBys);
             return elementFound;
 
+            /*
             //for (int i = 0; i < elementLocatorParts.Length; i++)
             //{
             //    if (elementControlType.Contains("#Retry"))
@@ -842,6 +908,7 @@ namespace PP5AutoUITests
             //        elementFound = elementFound.GetElement<IElement, IElement>(PP5By.ClassName(elementLocatorParts[i]));
             //}
             //return elementFound;
+            */
         }
 
         internal IElement HandleDataGridCases(PP5Driver driver, string elementControlType, string elementLocator)
@@ -985,6 +1052,46 @@ namespace PP5AutoUITests
                 elementFound = elementSrc.GetSpecificChildOfControlTypeByBFS(eleCtrlType, elementLocator);
             }
             return elementFound;
+        }
+
+        internal List<IElement> HandleByClassCase_multiElements(IElement elementSrc, string elementControlType, string elementLocator)
+        {
+            List<IElement> elementsFound = new List<IElement>();
+            var elementLocatorParts = elementLocator.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            By[] ClassNameBys = new By[elementLocatorParts.Length];
+            for (int i = 0; i < elementLocatorParts.Length; i++)
+            {
+                ClassNameBys[i] = PP5By.ClassName(elementLocatorParts[i].Trim());
+            }
+
+            if (elementControlType.Contains("#Retry"))
+                elementsFound = elementSrc.GetElementsWithRetry<IElement, IElement>(SharedSetting.NORMAL_TIMEOUT, ClassNameBys).ToList();
+            else
+                elementsFound = elementSrc.GetElements<IElement, IElement>(SharedSetting.NORMAL_TIMEOUT, ClassNameBys).ToList();
+            return elementsFound;
+        }
+
+        internal List<IElement> HandleByConditionCase_multiElements(IElement elementSrc, string elementControlType, string elementLocator)
+        {
+            List<IElement> elementsFound = new List<IElement>();
+            if (elementControlType.Contains('#'))
+            {
+                Func<IElement, bool> condition = null;
+                if (elementLocator == "Visible")
+                {
+                    condition = (e) => e.isElementVisible();
+                }
+
+                var controlType = elementControlType.Split('#')[1];
+                elementsFound = elementSrc.GetSpecificChildrenOfControlType(TypeExtension.GetEnumByDescription<ElementControlType>(controlType), condition).ToList();
+            }
+            return elementsFound;
+        }
+
+        internal List<IElement> HandleDefaultCase_multiElements(IElement elementSrc, string elementControlType)
+        {
+            ElementControlType eleCtrlType = TypeExtension.GetEnumByDescription<ElementControlType>(elementControlType);
+            return elementSrc.GetSpecificChildrenOfControlTypeBFS(eleCtrlType).ToList();
         }
 
         internal PerformTypeCategory GetControlTypeCategory(string elementControlType)

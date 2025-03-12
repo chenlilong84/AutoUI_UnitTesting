@@ -4,10 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PP5AutoUITests", "UnitTest\PP5AutoUITests.csproj", "{8656D85B-9367-4427-81BE-B82DDD7BAE03}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3D720BEC-95A0-40CC-AC1E-D185761E34DA} = {3D720BEC-95A0-40CC-AC1E-D185761E34DA}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chroma.UnitTest.Common", "D:\My docu\新人訓練\專案\Chroma.UnitTest\Chroma.UnitTest.Common\Chroma.UnitTest.Common.csproj", "{3D720BEC-95A0-40CC-AC1E-D185761E34DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chroma.UnitTest.Common", "..\Chroma.UnitTest\Chroma.UnitTest.Common\Chroma.UnitTest.Common.csproj", "{3D720BEC-95A0-40CC-AC1E-D185761E34DA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chroma.UnitTest.Common.Tests", "D:\My docu\新人訓練\專案\Chroma.UnitTest\Chroma.UnitTest.Common.Tests\Chroma.UnitTest.Common.Tests.csproj", "{E867374F-62BC-43C4-A65B-E0920EB51994}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chroma.UnitTest.Common.Tests", "..\Chroma.UnitTest\Chroma.UnitTest.Common.Tests\Chroma.UnitTest.Common.Tests.csproj", "{E867374F-62BC-43C4-A65B-E0920EB51994}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

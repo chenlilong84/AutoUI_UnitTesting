@@ -15,6 +15,7 @@ namespace PP5AutoUITests
         public void TIEditor_TestMethodSetup()
         {
             OpenNewTIEditorWindow();
+            taskManager.StartNewTask("LoadCommandGroup", LoadCommandGroup);
         }
 
         [TestMethod]
@@ -285,7 +286,7 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, "ReadAC_Current", "ReadAC_Frequency", "SetACDev_CPPHParameter2");
 
             // Check commands are correctly added
-            CollectionAssert.AreEqual(new List<string> { "ReadAC_Current", "ReadAC_Frequency", "SetACDev_CPPHParameter2" }, GetSingleColumnValues(DataTableAutoIDType.PGGrid, 5/*Test Command*/));
+            CollectionAssert.AreEqual(new List<string> { "ReadAC_Current", "ReadAC_Frequency", "SetACDev_CPPHParameter2" }, GetSingleColumnValues(TIDataTableAutoIDType.PGGrid, 5/*Test Command*/));
         }
 
         [TestMethod]
@@ -302,7 +303,7 @@ namespace PP5AutoUITests
             AddCommandsBy(cgt, 1, 10, 25);
 
             // Check commands are correctly added
-            CollectionAssert.AreEqual(new List<string>{ "ABS", "LOG", "XOR" }, GetSingleColumnValues(DataTableAutoIDType.PGGrid, 5/*Test Command*/));
+            CollectionAssert.AreEqual(new List<string>{ "ABS", "LOG", "XOR" }, GetSingleColumnValues(TIDataTableAutoIDType.PGGrid, 5/*Test Command*/));
         }
 
         #endregion

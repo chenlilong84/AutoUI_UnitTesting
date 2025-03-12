@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace PP5AutoUITests
 {
-    public enum TIPanelType : int
+    public enum WindowVisualState : int
     {
-        TIContextPanel = 0,
-        TCParameterPanel,
-        VariablePanel,
-        TCListPanel,
+        None = -1,
+        Normal = 0,
+        Maximized = 1,
+        Minimized = 2,
     }
 }

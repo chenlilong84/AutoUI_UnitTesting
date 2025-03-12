@@ -58,7 +58,8 @@ namespace PP5AutoUITests
 
         private readonly string winAppDriverPath = @"C:\Program Files (x86)\Windows Application Driver\WinAppDriver.exe";
         //private readonly string PP5AppPath = @"C:\Users\adam.chen\Desktop\Debug\bin\Chroma.MainPanel.exe";
-        private readonly string PP5AppPath = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\Chroma.MainPanel.exe";
+        //private readonly string PP5AppPath = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\Chroma.MainPanel.exe";
+        private readonly string PP5AppPath = string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseBinFolder, PowerPro5Config.MainPanelProcessName + ".exe");
         //public string WinAppDriverPath { get; set; }
 
         //private bool isWinAppDriverStarted = false;
@@ -73,6 +74,8 @@ namespace PP5AutoUITests
         {
             return currentDriverNotGeneric;
         }
+
+        public void CleanUpDrivers() => UsedDrivers.Clear();
 
         #endregion
 
@@ -112,6 +115,7 @@ namespace PP5AutoUITests
         private void Init()
         {
             //UsedDrivers = new Dictionary<SessionType, WindowsDriver<WindowsElement>>();
+
             StartWinAppDriver();
             StartPP5();
 
@@ -123,7 +127,7 @@ namespace PP5AutoUITests
         #region WinAppDriver 
 
         // call WinAppDriver
-        private void StartWinAppDriver()
+        internal void StartWinAppDriver()
         {
             WinAppDriverProcess = StartProcess(winAppDriverPath, windowStyle: ProcessWindowStyle.Minimized);
             //hideWinAppDriverWindow();
@@ -199,13 +203,10 @@ namespace PP5AutoUITests
             //UsedDrivers.TryGetValue(sessionType, out CurrentDriver);
             //currentDriver.ResetInputState();
             //currentDriver.ResetApp();
-
-            if (currentDriver != null)
-            {
-                //if (PowerPro5Config.PP5WindowSessionType == sessionType.ToString())
-                if (currentDriver.sessionType == sessionType)
+            //if (PowerPro5Config.PP5WindowSessionType == sessionType.ToString())
+            if (currentDriver != null && sessionType == currentDriver.sessionType)
+                if (!(currentDriver.sessionType == SessionType.MainPanel && !currentDriver.WindowHandles.Contains(PowerPro5Config.PP5WindowHandleHex)))
                     return currentDriver;
-            }
 
             if (sessionType != SessionType.Desktop)
                 currentDriver = DriverFactory.GetInstance().Attach(sessionType);
@@ -215,6 +216,14 @@ namespace PP5AutoUITests
             currentDriver.sessionType = sessionType;
             return currentDriver;
         }
+
+        public void SwitchToDesktop()
+        {
+            var sessionType = SessionType.Desktop;
+            currentDriver = DriverFactory.GetInstance().Get(sessionType).CreateNewDriver();
+            currentDriver.sessionType = sessionType;
+        }
+
         #endregion
 
         //public IWindow GetWindow()

@@ -21,8 +21,10 @@ namespace PP5AutoUITests.Session
             //targetAppPath = @"C:\Users\adam.chen\Desktop\Debug\bin\Chroma.MainPanel.exe";
             //targetAppWorkingDir = @"C:\Users\adam.chen\Desktop\Debug\bin\";
             WaitForAppLaunch = 10;
-            base.targetAppPath = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\Chroma.MainPanel.exe";
-            base.targetAppWorkingDir = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\";
+            //targetAppPath = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\Chroma.MainPanel.exe";
+            //targetAppWorkingDir = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\";
+            targetAppPath = string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseBinFolder, PowerPro5Config.MainPanelProcessName + ".exe");
+            //targetAppWorkingDir = PowerPro5Config.ReleaseBinFolder;
         }
 
         public PP5Driver CreateNewDriver()
@@ -34,7 +36,7 @@ namespace PP5AutoUITests.Session
             appCapabilities.AddAdditionalCapability("ms:waitForAppLaunch", WaitForAppLaunch);
             currentDriver = new PP5Driver(new Uri(WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(180), sessionType);
 
-            Assert.IsNotNull(currentDriver);
+            currentDriver.ShouldNotBeNull($"PP5Driver: {sessionType.ToString()} created failed!");
 
             // Set implicit timeout to 1.5 seconds to make element search to retry every 500 ms for at most three times
             //currentDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10.0);

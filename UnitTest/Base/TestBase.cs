@@ -171,14 +171,20 @@ namespace PP5AutoUITests
         internal static tifiTestData tiTestData = new tifiTestData();
         internal static FileSystemWatcherWrapper fileWatcher;
 
-        static object fileWatcherLock = new object();
+        internal object fileWatcherLock = new object();
+        internal static object taskManagerLock = new object();
         public delegate void LogMessageDelegate(string message);
         public delegate string GetTIFilePathDelegate(string TIName, TestItemSourceType sourceType, TestItemType itemType, TestItemRunType runType);
         public static void LogMessage(string message) => Logger.LogMessage(message);
         public string TIFilePath = null;
         public static HashSet<string> TIFilePaths = new HashSet<string>();
         public static string TIName;
+        public static string oldTIName;
+        public static bool isTINameChanged = false;
         //public static bool isSubOrThreadTI = false;
+
+        private static string _originalSystemCommandPath;
+        private static string _tempSystemCommandPath;
 
         [AssemblyInitialize]
         public static void BeforeClass(TestContext tc)
@@ -205,6 +211,12 @@ namespace PP5AutoUITests
             // close winAppDriver
             //AutoUIExecutor.WinAppDriverProcess.Dispose();
             //AutoUIExecutor.WinAppDriverProcess.Close();
+
+            fileWatcher.FileChanged -= FileWatcher_UpdateTiInfos;
+            fileWatcher.Dispose();
+            if (File.Exists(_tempSystemCommandPath))
+                File.Delete(_tempSystemCommandPath);
+
             AutoUIExecutor.WinAppDriverProcess.Kill();
 
             //Console.WriteLine("After all tests");
@@ -261,22 +273,65 @@ namespace PP5AutoUITests
             //EnableMouse(false); // Disable mouse usage before testing
             //ActivateDevice(false, DeviceType.Mouse);
 #endif
+            PowerPro5Config.Initialize();
             DisableMemoryMonitorWindow(); // Disable Memory Monitor that shows memory warning window before starting the driver
-            JsonUpdateProperty(filePath: $"{PowerPro5Config.ReleaseDataFolder}//SystemSetup.ssx",   // Turn off TI&TP autosave
-                               nodePath: "Datas",
-                               propertyName: "AutoBackupInterval",
-                               newValue: 0);
+            SetAutoSaveInterval(0);         // Turn off TI&TP autosave (Interval=0)
 
-            //LoadCommandGroupInfos();
-            //await LoadCommandGroupTask();
-            int taskId = taskManager.StartNewTask("LoadCommandGroup", LoadCommandGroup);
-            SharedSetting.forceRefreshPP5Window = false;
+            // Initialize file watcher
+            fileWatcher = new FileSystemWatcherWrapper();
+            InitializeSystemCommandWatch();
+            InitializeTestItemsWatch();
 
-            fileWatcher = new FileSystemWatcherWrapper();                                                                                   // 创建 FileSystemWatcherWrapper 实例
             //foreach (string path in GetAllTIFileFolders())
-            //    fileWatcher.CreateFileWatcher(path, NotifyFilters.FileName, "tix");                                                         // 创建文件监视器: .tix (watch all TIs in all TI related folders)
-            fileWatcher.CreateFileWatcher(PowerPro5Config.ReleaseDataFolder, NotifyFilters.LastWrite | NotifyFilters.CreationTime, "til");  // 创建文件监视器: .til (watch TestItemList.til in System Data folder)
-            fileWatcher.FileChanged += FileWatcher_UpdateTiInfos;                                                                           // 订阅 FileChanged 事件
+            //    fileWatcher.CreateFileWatcher(path, NotifyFilters.FileName, "tix");                       // 创建文件监视器: .tix (watch all TIs in all TI related folders)
+        }
+
+        public static void InitializeSystemCommandWatch()
+        {
+            _originalSystemCommandPath = string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseDataFolder, PowerPro5Config.SystemCommandFileName);
+            _tempSystemCommandPath = string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseDataFolder, PowerPro5Config.SystemCommand + "_tmp.csx");
+
+            // 初始複製
+            File.Copy(_originalSystemCommandPath, _tempSystemCommandPath, true);
+
+            // 設定檔案監控
+            //_systemCommandWatcher = new FileSystemWatcher
+            //{
+            //    Path = Path.GetDirectoryName(_originalSystemCommandPath),
+            //    Filter = "SystemCommand.csx",
+            //    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size
+            //};
+            NotifyFilters notifyFilters = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            fileWatcher.CreateFileWatcher_FullFileName(Path.GetDirectoryName(_originalSystemCommandPath), notifyFilters, PowerPro5Config.SystemCommand + ".csx");         // 创建文件监视器: SystemCommand.csx
+            fileWatcher.FileChanged += (s, e) =>                                                            // 订阅 FileChanged 事件
+            {
+                try
+                {
+                    // 等待檔案解鎖
+                    Thread.Sleep(100);
+                    File.Copy(_originalSystemCommandPath, _tempSystemCommandPath, true);
+                }
+                catch (IOException)
+                {
+                    // 處理檔案被鎖定的情況
+                }
+            };
+        }
+
+        public static void InitializeTestItemsWatch()
+        {
+            NotifyFilters notifyFilters = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            fileWatcher.CreateFileWatcher(PowerPro5Config.ReleaseDataFolder, notifyFilters, "til");         // 创建文件监视器: .til (watch TestItemList.til in System Data folder)
+            fileWatcher.FileChanged += FileWatcher_UpdateTiInfos;                                           // 订阅 FileChanged 事件
+        }
+
+        public static void SetAutoSaveInterval(int interval)
+        {
+            JsonUpdateProperty(
+                filePath: $"{PowerPro5Config.ReleaseDataFolder}//SystemSetup.ssx",
+                nodePath: "Datas",
+                propertyName: "AutoBackupInterval",
+                newValue: interval);
         }
 
         // 事件处理程序
@@ -284,6 +339,17 @@ namespace PP5AutoUITests
         {
             //Console.WriteLine($"File Changed: {e.FullPath}, ChangeType: {e.ChangeType}");
             //WaitUntil(() => !IsFileLocked(e.FullPath));
+            if (e.ChangeType == WatcherChangeTypes.Changed && isTINameChanged)
+                foreach (string TIFilePath in TIFilePaths)
+                    if (File.Exists(TIFilePath) && IsThreadTIOrSubTI(Path.GetDirectoryName(TIFilePath)))
+                    {
+                        string lastFolderName = Path.GetDirectoryName(TIFilePath).Split('\\').Last();
+                        string groupName = IsSubTI(lastFolderName) ? "Sub TI" : "Thread TI";
+                        int cmdNameIndex = cmdGroupDataDict[groupName].CommandNames.FindIndex(cmd => cmd == Path.GetFileNameWithoutExtension(TIFilePath));
+                        if (cmdNameIndex == -1)
+                            cmdGroupDataDict[groupName].CommandNames[cmdGroupDataDict[groupName].CommandNames.FindIndex(cmd => cmd == oldTIName)] = Path.GetFileNameWithoutExtension(TIFilePath);
+                        return;
+                    }
 
             //Thread.Sleep(6000);
             //string tiName = Path.GetFileNameWithoutExtension(e.FullPath);
@@ -302,6 +368,12 @@ namespace PP5AutoUITests
             //taskManager.StartNewTask(() => LogMessage("Loading cmd group names: \"Thread TI\""));
             //taskManager.StartNewTask(() => LoadCommandGroupCommandNames("Sub TI"));
             //taskManager.StartNewTask(() => LoadCommandGroupCommandNames("Thread TI"));
+        }
+
+        internal static void FileWatcher_UpdateDllOrPythonInfos(object sender, FileSystemEventArgs e)
+        {
+            if (File.Exists(e.FullPath))
+                LoadCommandGroupCommandNames(e.FullPath.Split('\\').Last());
         }
 
         //const int ERROR_SHARING_VIOLATION = 32;
@@ -401,9 +473,9 @@ namespace PP5AutoUITests
         public static void LoadCommandGroupInfos()
         {
             // Read SystemCommand.csx and find all GroupName and IsDevice values
-            JsonGetProperty(filePath: $"{PowerPro5Config.ReleaseDataFolder}//SystemCommand.csx", nodePath: "CommandGroupInfos@IsDevice", out List<bool> IsDeviceBooleanValues);
-            JsonGetProperty(filePath: $"{PowerPro5Config.ReleaseDataFolder}//SystemCommand.csx", nodePath: "CommandGroupInfos@GroupID", out List<int> GroupIds);
-            JsonGetProperty(filePath: $"{PowerPro5Config.ReleaseDataFolder}//SystemCommand.csx", nodePath: "CommandGroupInfos@GroupName", out List<string> GroupNameKeys);
+            JsonGetProperty(filePath: GetTmpCommandFileFullPath(), nodePath: "CommandGroupInfos@IsDevice", out List<bool> IsDeviceBooleanValues);
+            JsonGetProperty(filePath: GetTmpCommandFileFullPath(), nodePath: "CommandGroupInfos@GroupID", out List<int> GroupIds);
+            JsonGetProperty(filePath: GetTmpCommandFileFullPath(), nodePath: "CommandGroupInfos@GroupName", out List<string> GroupNameKeys);
 
             var commandGroupDataList = new List<CommandGroupData>();
             for (int i = 0; i < GroupNameKeys.Count; i++)
@@ -432,14 +504,11 @@ namespace PP5AutoUITests
                 commandNames = GetThreadTiOrSubTiNames(groupName);
             else
             {
-                string commandFilePath = GetCommandFileFullPath();
-                //JsonGetProperty(filePath: commandFilePath, nodePath: "CommandGroupInfos@GroupName", out List<string> GroupNameKeys);
-
                 int groupIndex = GetGroupNames().IndexOf(groupName);
 
                 // Read SystemCommand.csx and find all GroupName and IsDevice values
-                JsonGetProperty(filePath: commandFilePath, nodePath: $"CommandGroupInfos[{groupIndex}]/Commands@CommandName", out commandNames);
-                JsonGetProperty(filePath: commandFilePath, nodePath: $"CommandGroupInfos[{groupIndex}]/Commands@Visible", out visibilityList);
+                JsonGetProperty(filePath: GetTmpCommandFileFullPath(), nodePath: $"CommandGroupInfos[{groupIndex}]/Commands@CommandName", out commandNames);
+                JsonGetProperty(filePath: GetTmpCommandFileFullPath(), nodePath: $"CommandGroupInfos[{groupIndex}]/Commands@Visible", out visibilityList);
             }
 
             //JsonGetProperty(filePath: $"{PowerPro5Config.ReleaseDataFolder}//SystemCommand.csx", nodePath: "CommandGroupInfos@GroupName", out List<string> GroupNameKeys);
@@ -514,20 +583,26 @@ namespace PP5AutoUITests
 
         public static bool AddCommandInCGIList(string groupName, string cmdName)
         {
+            taskManager.currentTask.Wait();
             //if (cmdGroupDataDict.Count == 0)
             //    LoadCommandGroupInfos();
 
             //var groupList = cmdGroupDataDict.Keys.ToList();
 
+            bool isJsonCreateNewNodeSuccess;
+            //lock (taskManagerLock)
+            //{
             int CGIListIdx = GetGroupNames().IndexOf(groupName);
 
             string nodepathToUpdate = $"CommandGroupInfos[{CGIListIdx}]/Commands[0>-1]@CommandName={cmdName}";
 
             // Create a new node in the cgi list and saved in the SystemCommand.csx file
-            bool isJsonCreateNewNodeSuccess = JsonCreateNewNodeInList(filePath: GetCommandFileFullPath(),
+            isJsonCreateNewNodeSuccess = JsonCreateNewNodeInList(filePath: GetTmpCommandFileFullPath(),
                                                                       nodePath: nodepathToUpdate);
 
-            taskManager.StartNewTask("LoadCommandGroupCommandNames", () => LoadCommandGroupCommandNames(groupName));
+            LoadCommandGroupCommandNames(groupName);
+            //taskManager.StartNewTask("LoadCommandGroupCommandNames", () => LoadCommandGroupCommandNames(groupName));
+            //}
             //LoadCommandGroupCommandNames(groupName);
             return isJsonCreateNewNodeSuccess;
         }
@@ -538,6 +613,7 @@ namespace PP5AutoUITests
             //    LoadCommandGroupInfos();
 
             //var groupList = cmdGroupDataDict.Keys.ToList();
+            taskManager.currentTask.Wait();
 
             int CGIListIdx = GetGroupNames().IndexOf(groupName);
             int groupId = GetGroupID(groupName);
@@ -548,7 +624,7 @@ namespace PP5AutoUITests
             string nodepathToUpdate = $"{nodePart}@{propertyPart}";
 
             // Create a new node in the cgi list and saved in the SystemCommand.csx file
-            bool isJsonCreateNewNodeSuccess = JsonCreateNewNodeInList(filePath: GetCommandFileFullPath(),
+            bool isJsonCreateNewNodeSuccess = JsonCreateNewNodeInList(filePath: GetTmpCommandFileFullPath(),
                                                                       nodePath: nodepathToUpdate);
 
             taskManager.StartNewTask("LoadCommandGroupCommandNames", () => LoadCommandGroupCommandNames(groupName));
@@ -621,7 +697,9 @@ namespace PP5AutoUITests
             return TIFileNames;
         }
 
-        public static bool IsThreadTIOrSubTI(string folderName) => SplitPathIntoDirectories(folderName).Any(dir => dir == "ThreadTI" || dir == "SubTI");
+        public static bool IsThreadTIOrSubTI(string folderName) => IsSubTI(folderName) || IsThreadTI(folderName);
+        public static bool IsThreadTI(string folderName) => SplitPathIntoDirectories(folderName).LastOrDefault(dir => dir == "ThreadTI") != null;
+        public static bool IsSubTI(string folderName) => SplitPathIntoDirectories(folderName).LastOrDefault(dir => dir == "SubTI") != null;
 
         public static IEnumerable<string> SplitPathIntoDirectories(string path)
         {
@@ -645,8 +723,8 @@ namespace PP5AutoUITests
 
                 WaitUntil(() => CheckWindowOpened(PowerPro5Config.LoginWindowName));
 
-                if (!CheckLoginPageIsOpened())
-                    return;
+                //if (!CheckLoginPageIsOpened())
+                //    return;
 
                 // KeyboardInput VirtualKeys=""root"Keys.Tab + Keys.TabKeys.Tab + Keys.TabKeys.Tab + Keys.Tab" CapsLock=False NumLock=True ScrollLock=False
                 Logger.LogMessage("KeyboardInput VirtualKeys=\"\"root\" CapsLock=False NumLock=True ScrollLock=False");
@@ -655,8 +733,11 @@ namespace PP5AutoUITests
                 //PP5Session.FindElementByAccessibilityId("Username")?.SendKeys("root");
                 //PP5Session.FindElementByAccessibilityId("OK_button")?.Click();
 
-                CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("Username")).SendText("root");
-                CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("OK_button")).LeftClick();
+                //CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("Username")).SendText("root");
+                //CurrentDriver.GetWebElementFromWebDriver(MobileBy.AccessibilityId("OK_button")).LeftClick();
+                CurrentDriver.PerformInput("/ById[Username]", InputType.SendContent, "root");
+                CurrentDriver.PerformClick("/ById[OK_button]", ClickType.LeftClick);
+                AutoUIExecutor.SwitchTo(SessionType.MainPanel);
 
                 WaitUntil(() => CheckPP5WindowIsOpened(WindowType.MainPanelMenu));
                 //WaitUntil(() => CheckMainPanelIsOpened());
@@ -1244,6 +1325,8 @@ namespace PP5AutoUITests
 
         public void PerformOpenNewTI(bool closeCurrTI = true)
         {
+            SpinWait.SpinUntil(() => CheckAllTasksCompleted());
+
             // If save TI window message box popup, click No
             if (closeCurrTI)
                 PerformCloseTI();
@@ -1316,8 +1399,8 @@ namespace PP5AutoUITests
             //Console.WriteLine("LeftClick on Text \"Ok\"");
             TIEnterWindow.GetBtnElement("Ok").LeftClick();
 
-            //RefreshDataTable(DataTableAutoIDType.LoginGrid);
-            //List<string> existingTINames = GetSingleColumnValues(DataTableAutoIDType.LoginGrid, "Test Item Name", excludeLastRow: false);
+            //RefreshDataTable(TIDataTableAutoIDType.LoginGrid);
+            //List<string> existingTINames = GetSingleColumnValues(TIDataTableAutoIDType.LoginGrid, "Test Item Name", excludeLastRow: false);
 
             //if (!existingTINames.Contains(tiName))
             //    Assert.Fail($"No TI existed with given TI Name: {tiName}");
@@ -1387,8 +1470,8 @@ namespace PP5AutoUITests
 
             //.GetRdoBtnElement(runType.GetDescription()).LeftClick();
 
-            //RefreshDataTable(DataTableAutoIDType.LoginGrid);
-            //List<string> existingTINames = GetSingleColumnValues(DataTableAutoIDType.LoginGrid, "Test Item Name", excludeLastRow: false);
+            //RefreshDataTable(TIDataTableAutoIDType.LoginGrid);
+            //List<string> existingTINames = GetSingleColumnValues(TIDataTableAutoIDType.LoginGrid, "Test Item Name", excludeLastRow: false);
             //if (!existingTINames.Contains(tiName))
             //    Assert.Fail($"No TI existed with given TI Name: {tiName}");
 
@@ -1568,6 +1651,7 @@ namespace PP5AutoUITests
             //WaitUntil(() => PP5IDEWindow.PerformGetElement("/Window[Save Test Item]") != null);
             PP5IDEWindow.PerformInput("/ByName#Retry[Save Test Item]/ById[TINameTxtBox]", InputType.SendContent, tiName);
             PP5IDEWindow.PerformClick("/Window[Save Test Item]/ByName[Ok]", ClickType.LeftClick);
+            TIName = tiName;
             WaitUntilTIFinishedSaving();
             //WaitUntil(() => PP5IDEWindow.PerformGetElement("/ByCondition#ToolBar[Visible]/RadioButton[4]").Enabled);
 
@@ -1632,7 +1716,7 @@ namespace PP5AutoUITests
             // Change the group
             //WindowsElement comboBox = GetComboBoxElementByID("GroupCmb");
             //if (CheckComboBoxHasItemByName(comboBox, group))
-            //    ComboBoxSelectByName(comboBox, group);
+            //    SelectItem(comboBox, group);
             ComboBoxSelectByName("GroupCmb", group);
 
             // LeftClick on Button "Ok"
@@ -1658,17 +1742,21 @@ namespace PP5AutoUITests
             PP5IDEWindow.PerformInput("/ByCell@TestItem_DataGrid[5]", InputType.SendContent, Remark);
         }
 
-        public void TIRename(string TIName, string newTIName)
+        public void TIRename(string tiName, string newTIName)
         {
+            isTINameChanged = true;
+            UpdateTIFilePath(tiName, newTIName);
+
             SwitchToModule(WindowType.Management);
-            SearchTI(TIName);
+            SearchTI(tiName);
 
             PP5IDEWindow.PerformClick("/ByName[Rename]", ClickType.LeftClick);
             AutoUIExecutor.SwitchTo(SessionType.Desktop);
-            CurrentDriver.PerformInput("/Window[Rename Test Item]/Edit[NewName]", InputType.SendSingleKeys, newTIName);
+            CurrentDriver.PerformInput("/Window[Rename Test Item]/ById[NewName]", InputType.SendSingleKeys, newTIName);
             CurrentDriver.PerformClick("/Window[Rename Test Item]/ByName[OK]", ClickType.LeftClick);
             AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
             WaitUntil(() => PP5IDEWindow.PerformGetElement("/ByCell@TestItem_DataGrid[1]").Text == newTIName);
+
             //if (CheckMessageBoxOpened(PP5By.Id("MessageBoxExDialog")))
             //{
             //CurrentDriver.PerformClick("/ById[MessageBoxExDialog]/ByName[Yes]", ClickType.LeftClick);
@@ -1676,17 +1764,64 @@ namespace PP5AutoUITests
             //TIFilePath = Path.Combine(Directory.GetParent(TIFilePath).FullName, newTIName + Path.GetExtension(TIFilePath));
         }
 
+        public void UpdateTIFilePath(string tiName, string newTIName)
+        {
+            string tiFilePathTmp = "";
+            foreach (string tiFilePath in TIFilePaths)
+            {
+                if (tiFilePath.Split('\\').Last().Contains(tiName))
+                    tiFilePathTmp = tiFilePath;
+            }
+            TIFilePaths.Remove(tiFilePathTmp);
+            oldTIName = tiName;
+            TIName = newTIName;
+            tiFilePathTmp = tiFilePathTmp.Replace(tiName, TIName);
+            TIFilePaths.Add(tiFilePathTmp);
+        }
+
         public void SearchTI(string TIName)
         {
             PP5IDEWindow.PerformClick("/ByCondition#ToolBar[Visible]/RadioButton[1]", ClickType.LeftClick); // Click on TP/TI button
 
             IElement mainTab = PP5IDEWindow.PerformGetElement("/Tab[mainTab]");                             // Click on Test Item tab
-            IElement TestItemTabItem = mainTab.TabSelect(1, "Test Item");
+            IElement TestItemTabItem = mainTab.TabSelect("Test Item");
 
-            mainTab.TabSelect(1, "Test Program");                                                           // Switch to TP then back to TI (Since search TI will failed)
-            mainTab.TabSelect(1, "Test Item");
+            mainTab.TabSelect("Test Program");                                                           // Switch to TP then back to TI (Since search TI will failed)
+            mainTab.TabSelect("Test Item");
 
             TestItemTabItem.PerformInput("/ByIdOrName[searchText]", InputType.SendContent, TIName);         // Search the TI with name
+            Press(Keys.Enter);
+        }
+
+        public void SearchItem(string ItemName, MngtDataTableAutoIDType autoIDType)
+        {
+            //MngtToolBarButton mngtToolBarBtnIdx = 0;
+            MngtDataTableAutoIDType autoIDTypeForReload = 0;
+            string tabNameForReload;
+            string tabNameForSearch = autoIDType.GetDescription();
+
+            //if (autoIDType == MngtDataTableAutoIDType.TestItem_DataGrid || autoIDType == MngtDataTableAutoIDType.TestProgram_DataGrid)
+            //{
+            //    mngtToolBarBtnIdx = MngtToolBarButton.TPTI;
+            //    autoIDTypeForReload = autoIDType == MngtDataTableAutoIDType.TestItem_DataGrid ? MngtDataTableAutoIDType.TestProgram_DataGrid : MngtDataTableAutoIDType.TestItem_DataGrid;
+            //}
+            //else if (autoIDType == MngtDataTableAutoIDType.PythonDataGrid || autoIDType == MngtDataTableAutoIDType.DllDataGrid)
+            //{
+            //    mngtToolBarBtnIdx = MngtToolBarButton.ExFuncion;
+            //    autoIDTypeForReload = autoIDType == MngtDataTableAutoIDType.DllDataGrid ? MngtDataTableAutoIDType.PythonDataGrid : MngtDataTableAutoIDType.DllDataGrid;
+            //}
+            //else { }
+            tabNameForReload = autoIDTypeForReload.GetDescription();
+
+            //PP5IDEWindow.PerformClick($"/ByCondition#ToolBar[Visible]/RadioButton[{(int)mngtToolBarBtnIdx}]", ClickType.LeftClick);  // Click on the corresponding tool bar button
+
+            IElement mainTab = PP5IDEWindow.PerformGetElement("/Tab[mainTab]");                                                 // Click on corresponding tab
+            IElement tabItem = mainTab.TabSelect(tabNameForSearch);
+
+            mainTab.TabSelect(tabNameForReload);                                                                                
+            mainTab.TabSelect(tabNameForSearch);
+
+            tabItem.PerformInput("/ByIdOrName[searchText]", InputType.SendContent, ItemName);                                   // Search the item with name
             Press(Keys.Enter);
         }
 
@@ -1965,7 +2100,7 @@ namespace PP5AutoUITests
                 // Select enum item in Default cell
                 string SelectedEnumValue = enumItems.Count != 0 ? enumItems[enumItemSelectionIndex].ToString() : "";
                 if (!SelectedEnumValue.IsEmpty())
-                    varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").ComboBoxSelectByName(SelectedEnumValue);
+                    varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").SelectItem(SelectedEnumValue);
             }
         }
 
@@ -2003,7 +2138,7 @@ namespace PP5AutoUITests
                 // Select enum item in Default cell
                 string SelectedEnumValue = enumItems.Count != 0 ? enumItems[enumItemSelectionIndex].ToString() : "";
                 if (!SelectedEnumValue.IsEmpty())
-                    varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").ComboBoxSelectByName(SelectedEnumValue);
+                    varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").SelectItem(SelectedEnumValue);
             }
         }
 
@@ -2034,7 +2169,7 @@ namespace PP5AutoUITests
                 // Select enum item in Default cell
                 string SelectedEnumValue = enumItems.Count != 0 ? enumItems[enumItemSelectionIndex].ToString() : "";
                 if (!SelectedEnumValue.IsEmpty())
-                    varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").ComboBoxSelectByName(SelectedEnumValue);
+                    varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Default").SelectItem(SelectedEnumValue);
                 //Press(Keys.Enter);
             }
         }
@@ -2045,7 +2180,7 @@ namespace PP5AutoUITests
             PP5DataGrid varDataGrid = CreateNewVariable1(tabType, ShowName, CallName, DataType);
 
             // Select "ComboBox" in Edit Type combobox
-            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Edit Type").ComboBoxSelectByName(EditType.ToString());
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Edit Type").SelectItem(EditType.ToString());
             return varDataGrid;
         }
 
@@ -2055,7 +2190,7 @@ namespace PP5AutoUITests
             PP5DataGrid varDataGrid = CreateNewVariable1(tabType, ShowName, CallName, DataType, arrSize1);
 
             // Select "ComboBox" in Edit Type combobox
-            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Edit Type").ComboBoxSelectByName(EditType.ToString());
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Edit Type").SelectItem(EditType.ToString());
             return varDataGrid;
         }
 
@@ -2065,7 +2200,7 @@ namespace PP5AutoUITests
             PP5DataGrid varDataGrid = CreateNewVariable1(tabType, ShowName, CallName, DataType, arrSize1, arrSize2);
 
             // Select "ComboBox" in Edit Type combobox
-            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Edit Type").ComboBoxSelectByName(EditType.ToString());
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Edit Type").SelectItem(EditType.ToString());
             return varDataGrid;
         }
 
@@ -2074,7 +2209,7 @@ namespace PP5AutoUITests
             PP5DataGrid varDataGrid = CreateNewVariable1(tabType, ShowName, CallName);
 
             // Input "Float" in Data Type cell
-            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Data Type").ComboBoxSelectByName(DataType.GetDescription());
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Data Type").SelectItem(DataType.GetDescription());
 
             if (IsVariable1DArrayDataType(DataType))
                 VariableTypeSizeSelect1DArray(arrSize1);
@@ -2093,6 +2228,11 @@ namespace PP5AutoUITests
             //if (DataType == (DataType & DataType1DArray))
             //if (IsVariable1DArrayDataType(DataType))
             //{
+            if (int.Parse(arrSize1) > 100000)
+            {
+                ((PP5Element)PP5IDEWindow).ErrorMessages.Add("/Window[0]/Edit[0]", PP5IDEWindow.PerformGetElement("/Window[0]/Edit[0]").GetToolTipMessage());
+                return;
+            }
             PP5IDEWindow.PerformInput("/ByName[Array Size Editor]/ById[SizeTxtBox]", InputType.SendContent, arrSize1);
             PP5IDEWindow.PerformClick("/ByName[Array Size Editor,Ok]", ClickType.LeftClick);
             //}
@@ -2136,9 +2276,9 @@ namespace PP5AutoUITests
 
             //// Testing get data table element from cache
             // Press page down until last row show up
-            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement((DataTableAutoIDType)tabType));
+            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement((TIDataTableAutoIDType)tabType));
             //PP5DataGrid varDataGrid = (PP5DataGrid)varDataGridEle;
-            //int rowCount = GetRowCount((DataTableAutoIDType)tabType);
+            //int rowCount = GetRowCount((TIDataTableAutoIDType)tabType);
 
             // First Add a new empty row
             //varDataGrid.RefreshSelectedCell();
@@ -2163,8 +2303,13 @@ namespace PP5AutoUITests
 
             //// Testing get data table element from cache
             // Press page down until last row show up
-            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement((DataTableAutoIDType)tabType));
-            varDataGrid.GetCellBy(varDataGrid.LastRowNo + 1, "No").LeftClick();
+            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement((TIDataTableAutoIDType)tabType));
+            int No;
+            if (tabType == VariableTabType.Global)
+                No = 2;
+            else
+                No = 1;
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo + 1, No).LeftClick();
 
             Press(Keys.Tab);
             varDataGrid.RefreshSelectedCell();
@@ -2212,6 +2357,8 @@ namespace PP5AutoUITests
 
             // Select "ComboBox" in Edit Type combobox
             Press(Keys.Tab);
+            if (tabType == VariableTabType.Global)      // 20250121, Adam fix the bug of Global tab edit type combobox can't open automatically
+                Press(Keys.F4);
             SendSingleKeys(EditType.ToString());
             Press(Keys.Enter);
 
@@ -2280,7 +2427,7 @@ namespace PP5AutoUITests
             }
 
             // Step 3: Add Default Value
-            VariableSelectionMoveTo(tabType, dataType, editType, VariableColumnType.EditType, VariableColumnType.Default);
+            //VariableSelectionMoveTo(tabType, dataType, editType, VariableColumnType.EditType, VariableColumnType.Default);
             VariableInfo variableInfo = new VariableInfo(tabType, callName, dataType, editType);
             AddValueToDataGrid(varDataGrid, variableInfo, VariableColumnType.Default, defaultValue);
 
@@ -2317,7 +2464,7 @@ namespace PP5AutoUITests
             PP5DataGrid varDataGrid = CreateNewVariable2(tabType, ShowName, CallName);
 
             // Input "Float" in Data Type cell
-            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Data Type").ComboBoxSelectByName(DataType.GetDescription());
+            varDataGrid.GetCellBy(varDataGrid.LastRowNo, "Data Type").SelectItem(DataType.GetDescription());
             //Press(Keys.Enter);
 
             if (IsVariable1DArrayDataType(DataType))
@@ -2344,7 +2491,7 @@ namespace PP5AutoUITests
 
             //// Testing get data table element from cache
             // Press page down until last row show up
-            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement((DataTableAutoIDType)tabType));
+            PP5DataGrid varDataGrid = new PP5DataGrid((PP5Element)GetDataTableElement((TIDataTableAutoIDType)tabType));
             //varDataGrid.LastRowNo = varDataGrid.RowCount;
             //if (varDataGrid.LastRowNo > 1 && varDataGrid.GetAttribute("Scroll.VerticallyScrollable") == bool.TrueString
             //                 && varDataGrid.GetAttribute("Scroll.VerticalScrollPercent") != "100")
@@ -2615,7 +2762,7 @@ namespace PP5AutoUITests
             {
                 case VariableColumnType.Min:
                     validateVariable = new ValidateVariableValue(VariableCheckCanAddMinValue);
-                    break; 
+                    break;
                 case VariableColumnType.Max:
                     validateVariable = new ValidateVariableValue(VariableCheckCanAddMaxValue);
                     break;
@@ -2833,7 +2980,7 @@ namespace PP5AutoUITests
             string valueTemp = value;
             List<string[]> values = ParseArrayValues(ref valueTemp, out _, out _);
             VariableRowInfo vri = varDataGrid.TiVariables.GetVariableRowInfoSet(variableInfo.TabType, variableInfo.CallName);
-            long HexStringOrExternalSignal = vri.CanSetHexString ? vri.CanSetExternalSignal ? 
+            long HexStringOrExternalSignal = vri.CanSetHexString ? vri.CanSetExternalSignal ?
                                              (long)VariableDataType.HexStringCtgy : (long)VariableEditType.External_Signal : -1;
             VariableValueEditorAddValue(valueTemp, values, variableInfo.DataType, HexStringOrExternalSignal);
         }
@@ -2842,7 +2989,7 @@ namespace PP5AutoUITests
         public void AddValueToDataGrid(PP5DataGrid varDataGrid, VariableInfo variableInfo, VariableColumnType columnType, object value)
         {
             // Step 1.1 validation of column type
-            if (columnType == VariableColumnType.Min || columnType == VariableColumnType.Max || 
+            if (columnType == VariableColumnType.Min || columnType == VariableColumnType.Max ||
                 columnType == VariableColumnType.Default || columnType == VariableColumnType.Format)
             {
                 if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
@@ -2856,11 +3003,11 @@ namespace PP5AutoUITests
             //validateVariable.Invoke(variableInfo, value);
             if (!VariableCheckCanAddValue(variableInfo, columnType, value))
             {
-                string errorMessage = columnType == VariableColumnType.Format ? "Only \"Float\" related datatype is supported!" 
+                string errorMessage = columnType == VariableColumnType.Format ? "Only \"Float\" related datatype is supported!"
                                                                               : $"Can't setup \"{columnType.ToString()}\" value with given parameters";
                 throw new ArgumentException(errorMessage, variableInfo.DataType.ToString());
             }
-                
+
 
             // Step 2. Move to the given
             VariableSelectionMoveToSpecified(varDataGrid, variableInfo.TabType, variableInfo.DataType, variableInfo.EditType, columnType);
@@ -2879,7 +3026,7 @@ namespace PP5AutoUITests
                     //VariableValueEditorAddValue(valueTemp, values, dataType);
                     // Step 2: Modify Default Value if HexString
                     if (IsVariableHexStringDataType(variableInfo.DataType))
-                        value = string.Concat(Enumerable.Repeat(value, int.Parse(varDataGrid.GetCellValue(1, "Max."))));
+                        value = string.Concat(Enumerable.Repeat(value, int.Parse(varDataGrid.GetCellValue(varDataGrid.LastRowNo, "Max."))));
                     AddValueToDataGrid(varDataGrid, variableInfo, value.ToString());
                     break;
 
@@ -2899,7 +3046,7 @@ namespace PP5AutoUITests
             {
                 string fmExpected = format.GetDescription();
                 varDataGrid.SelectedCellInfo.SendText(fmExpected);
-                fmExpected.ShouldEqualTo(varDataGrid.GetCellValue(1, "Format"));
+                fmExpected.ShouldEqualTo(varDataGrid.GetCellValue(varDataGrid.LastRowNo, "Format"));
             }
         }
 
@@ -3149,8 +3296,8 @@ namespace PP5AutoUITests
             if (manualSetup)
             {
                 variableEditorWindow.PerformClick("/ByClass[GroupBox]/ById[TC_ParameterApply]/ByName[Outer]", ClickType.LeftClick);
-                variableEditorWindow.PerformGetElement("/ByName[Outer]/ById[svOuter,cb_1Dchar]").ComboBoxSelectByName(Rank1SplitChar.Comma.GetDescription());
-                variableEditorWindow.PerformGetElement("/ByName[Outer]/ById[svOuter,cb_2Dchar]").ComboBoxSelectByName(Rank2SplitChar.Semicolon.GetDescription());
+                variableEditorWindow.PerformGetElement("/ByName[Outer]/ById[svOuter,cb_1Dchar]").SelectItem(Rank1SplitChar.Comma.GetDescription());
+                variableEditorWindow.PerformGetElement("/ByName[Outer]/ById[svOuter,cb_2Dchar]").SelectItem(Rank2SplitChar.Semicolon.GetDescription());
                 List<string[]> arr = new List<string[]>();
                 string valTemp = value;
                 if (HexStringOrExternalSignal == (int)VariableDataType.HexString)
@@ -3177,8 +3324,8 @@ namespace PP5AutoUITests
                 else
                     edtBxInner.PerformInput("/", InputType.SendContent, value);
                 variableEditorWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
-                variableEditorWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
             }
+            variableEditorWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
         }
 
         private void Setup1DArray(string value, bool manualSetup, long HexStringOrExternalSignal)
@@ -3187,7 +3334,7 @@ namespace PP5AutoUITests
             if (manualSetup)
             {
                 variableEditorWindow.PerformClick("/ByClass[GroupBox]/ById[TC_ParameterApply]/ByName[Outer]", ClickType.LeftClick);
-                variableEditorWindow.PerformGetElement("/ByName[Outer]/ById[svOuter,cb_char]").ComboBoxSelectByName(Rank1SplitChar.Comma.GetDescription());
+                variableEditorWindow.PerformGetElement("/ByName[Outer]/ById[svOuter,cb_char]").SelectItem(Rank1SplitChar.Comma.GetDescription());
                 if (HexStringOrExternalSignal == (int)VariableDataType.HexString)
                     SetupHexString(value.Split(','));
                 else if (HexStringOrExternalSignal == (int)VariableEditType.External_Signal)
@@ -3212,7 +3359,6 @@ namespace PP5AutoUITests
                 else
                     edtBxInner.PerformInput("/", InputType.SendContent, value);
                 variableEditorWindow.PerformClick("/ByName[Inner]/ById[svInner]/ByName[Apply]", ClickType.LeftClick);
-                variableEditorWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
             }
             variableEditorWindow.PerformClick("/ByName[Ok]", ClickType.LeftClick);
         }
@@ -3367,7 +3513,7 @@ namespace PP5AutoUITests
             bool isLast = false;
             if (fromColumnIdx < toColumnIdx)  // left to right
             {
-                for (int i = fromColumnIdx;  i < toColumnIdx; i++)
+                for (int i = fromColumnIdx; i < toColumnIdx; i++)
                 {
                     if (i == toColumnIdx - 1) { isLast = true; }
                     Press(Keys.Tab);
@@ -3407,7 +3553,7 @@ namespace PP5AutoUITests
                     if (EditType == VariableEditType.EditBox && (IsVariableArrayDataType(DataType) && !IsVariableHexStringDataType(DataType)
                                                                                                     && !IsVariableStringDataType(DataType)
                                                                                                     && !IsVariableByteArrayDataType(DataType)))
-                            PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Cancel]", ClickType.LeftClick);
+                        PP5IDEWindow.PerformClick("/ByName[Variables Value Editor,Cancel]", ClickType.LeftClick);
                     break;
                 case VariableColumnType.Default:
                     if (EditType == VariableEditType.EditBox)
@@ -3589,7 +3735,7 @@ namespace PP5AutoUITests
             //return CommandsMapCache;
         }
 
-        //public void RefreshDataTable(DataTableAutoIDType DataGridType)
+        //public void RefreshDataTable(TIDataTableAutoIDType DataGridType)
         //{
         //    SaveGridTable(GetDataTableElement(DataGridType), DataGridType);
         //}
@@ -3609,7 +3755,7 @@ namespace PP5AutoUITests
             //}
         }
 
-        public IEnumerable<IElement> GetColumnBy(DataTableAutoIDType DataGridType, int colNo, bool excludeLastRow = true)
+        public IEnumerable<IElement> GetColumnBy(TIDataTableAutoIDType DataGridType, int colNo, bool excludeLastRow = true)
         {
             return GetDataTableElement(DataGridType).GetColumnBy(colNo);
 
@@ -3633,7 +3779,7 @@ namespace PP5AutoUITests
             //                      : dataTableLookUp[colName].ToList();    
         }
 
-        public IEnumerable<IWebElement> GetRowCellElementsBy(DataTableAutoIDType DataGridType, int rowNo)
+        public IEnumerable<IWebElement> GetRowCellElementsBy(TIDataTableAutoIDType DataGridType, int rowNo)
         {
             return GetDataTableElement(DataGridType).GetDataTableRowElements()[rowNo - 1].GetCellElementsOfRow();
 
@@ -3658,7 +3804,7 @@ namespace PP5AutoUITests
             return cell.GetCellValue();
         }
 
-        public int GetRowCount(DataTableAutoIDType DataGridType)
+        public int GetRowCount(TIDataTableAutoIDType DataGridType)
         {
             string DataGridAutomationID = DataGridType.ToString();
             return GetRowCount(DataGridAutomationID);
@@ -3669,7 +3815,7 @@ namespace PP5AutoUITests
             return GetDataTableElement(DataGridAutomationID).GetDataTableRowElements().Count;
         }
 
-        public List<string> GetSingleColumnValues(DataTableAutoIDType DataGridType, int colNo, bool excludeLastRow = true)
+        public List<string> GetSingleColumnValues(TIDataTableAutoIDType DataGridType, int colNo, bool excludeLastRow = true)
         {
             IEnumerable<IWebElement> column = GetColumnBy(DataGridType, colNo, excludeLastRow);
             List<string> columnValues = new List<string>();
@@ -3684,7 +3830,7 @@ namespace PP5AutoUITests
             }
         }
 
-        public List<string> GetSingleRowValues(DataTableAutoIDType DataGridType, int rowNo)
+        public List<string> GetSingleRowValues(TIDataTableAutoIDType DataGridType, int rowNo)
         {
             IEnumerable<IWebElement> row = GetRowCellElementsBy(DataGridType, rowNo);
             List<string> rowValues = new List<string>();
@@ -3724,6 +3870,8 @@ namespace PP5AutoUITests
             //}
             */
 
+            // Wait for the command group info is loaded
+            SpinWait.SpinUntil(() => CheckAllTasksCompleted());
             IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType);      // Expand the group item tree
             AddCommandBy(groupTreeItem, cmdNumber, addCount, out IElement cmdToAdd);     // Add the command by given parameters
             TreeViewCollapseAll(cmdToAdd);                                                  // Press left arrow key twice to Close the group tree view
@@ -3775,6 +3923,8 @@ namespace PP5AutoUITests
             //}
             */
 
+            // Wait for the command group info is loaded
+            SpinWait.SpinUntil(() => CheckAllTasksCompleted());
             IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType);
             AddCommandBy(groupTreeItem, cmdName, addCount, out IElement cmdToAdd);       // Add the command by given parameters
             TreeViewCollapseAll(cmdToAdd);                                                  // Press left arrow key twice to Close the group tree view
@@ -3970,6 +4120,8 @@ namespace PP5AutoUITests
             //}
             */
 
+            // Wait for the command group info is loaded
+            SpinWait.SpinUntil(() => CheckAllTasksCompleted());
             IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType);
             AddCommandsBy(groupTreeItem, cmdNames, out IElement cmdToAdd);               // Add the command by given parameters
             TreeViewCollapseAll(cmdToAdd);                                                  // Press left arrow key twice to Close the group tree view
@@ -4069,6 +4221,8 @@ namespace PP5AutoUITests
             if (cmdNumbers.Any(n => n <= 0))                                                // Check cmdNumbers has no negative values
                 throw new CommandNumberOutOfRangeException(cmdNumbers.Min());
 
+            // Wait for the command group info is loaded
+            SpinWait.SpinUntil(() => CheckAllTasksCompleted());
             IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType);
             AddCommandsBy(groupTreeItem, cmdNumbers, out IElement cmdToAdd);             // Add the command by given parameters
             TreeViewCollapseAll(cmdToAdd);                                                  // Press left arrow key twice to Close the group tree view
@@ -4183,10 +4337,12 @@ namespace PP5AutoUITests
             */
         }
 
-        // Base method to get command by command Name
-        public IElement GetCommandBy(TestCmdGroupType cmdGrpType, string cmdName, bool collapseTreeView = false)
+        public IElement GetCommandBy(TestCmdGroupType cmdGrpType, string cmdName, bool doExpand, bool collapseTreeView = false)
         {
-            IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType);
+            // Wait for the command group info is loaded
+            //WaitUntil(() => CheckAllTasksCompleted());
+            SpinWait.SpinUntil(() => CheckAllTasksCompleted());
+            IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType, doExpand);
             IElement cmdToAdd = GetCommand(groupTreeItem, GetGroupNameByEnum(cmdGrpType), cmdName);                                       // Add the command by given parameters
 
             if (collapseTreeView)
@@ -4195,16 +4351,30 @@ namespace PP5AutoUITests
             return cmdToAdd;
         }
 
-        // Base method to get command by command Number
-        public IElement GetCommandBy(TestCmdGroupType cmdGrpType, int cmdNumber, bool collapseTreeView = false)
+        // Base method to get command by command Name
+        public IElement GetCommandBy(TestCmdGroupType cmdGrpType, string cmdName, bool collapseTreeView = false)
         {
-            IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType);
+            return GetCommandBy(cmdGrpType, cmdName, doExpand: true, collapseTreeView);
+        }
+
+        // Base method to get command by command Number
+        public IElement GetCommandBy(TestCmdGroupType cmdGrpType, int cmdNumber, bool doExpand, bool collapseTreeView = false)
+        {
+            // Wait for the command group info is loaded
+            //WaitUntil(() => CheckAllTasksCompleted());
+            SpinWait.SpinUntil(() => CheckAllTasksCompleted());
+            IElement groupTreeItem = GetCmdGroupTreeItemByGroupName(cmdGrpType, doExpand);
             IElement cmdToAdd = GetCommand(groupTreeItem, cmdNumber);                                                   // Add the command by given parameters
 
             if (collapseTreeView)
                 TreeViewCollapseAll(cmdToAdd);                                                                          // Press left arrow key twice to Close the group tree view
 
             return cmdToAdd;
+        }
+
+        public IElement GetCommandBy(TestCmdGroupType cmdGrpType, int cmdNumber, bool collapseTreeView = false)
+        {
+            return GetCommandBy(cmdGrpType, cmdNumber, doExpand: true, collapseTreeView);
         }
 
         public void AddCommandBy(IElement groupTreeItem, string cmdName, int addCount, out IElement cmdToAdd)
@@ -4232,7 +4402,7 @@ namespace PP5AutoUITests
                 throw new CommandNumberOutOfRangeException(cmdNumber);
 
             AddCommand(cmdTreeItems, cmdNumber, addCount);
-            cmdToAdd = cmdTreeItems[cmdNumber];
+            cmdToAdd = cmdTreeItems[cmdNumber - 1];
             /*
             //cmdToAdd = cmdNumber == -1 ? cmdTreeItems.Last() : cmdTreeItems[cmdNumber];
 
@@ -4304,7 +4474,8 @@ namespace PP5AutoUITests
         // Base method to add a single command (used by all other AddCommand/AddCommands methods)
         private void AddCommand(ReadOnlyCollection<IElement> cmdTreeItems, int cmdNumber, int addCount = 1)
         {
-            IElement cmdToAdd = cmdNumber == -1 ? cmdTreeItems.Last() : cmdTreeItems[cmdNumber];
+            cmdTreeItems = cmdTreeItems.OrderBy(cti => cti.GetText()).ToList().AsReadOnly();
+            IElement cmdToAdd = cmdNumber == -1 ? cmdTreeItems.Last() : cmdTreeItems[cmdNumber - 1];
 
             //// If element if out of screen, move to the element first
             while (bool.Parse(cmdToAdd.GetAttribute("IsOffscreen")))
@@ -4337,7 +4508,8 @@ namespace PP5AutoUITests
         // Base method to get a single command (used by all other AddCommand/AddCommands methods)
         private IElement GetCommand(ReadOnlyCollection<IElement> cmdTreeItems, int cmdNumber)
         {
-            IElement cmdToAdd = cmdNumber == -1 ? cmdTreeItems.Last() : cmdTreeItems[cmdNumber];
+            cmdTreeItems = cmdTreeItems.OrderBy(cti => cti.GetText()).ToList().AsReadOnly();
+            IElement cmdToAdd = cmdNumber == -1 ? cmdTreeItems.Last() : cmdTreeItems[cmdNumber - 1];
 
             //// If element if out of screen, move to the element first
             while (bool.Parse(cmdToAdd.GetAttribute("IsOffscreen")))
@@ -4364,15 +4536,17 @@ namespace PP5AutoUITests
         }
 
 
-        public IElement GetCmdGroupTreeItemByGroupName(TestCmdGroupType cmdGrpType)
+        public IElement GetCmdGroupTreeItemByGroupName(TestCmdGroupType cmdGrpType, bool doExpand = true)
         {
             string groupName = GetGroupNameByEnum(cmdGrpType);
             IElement commandTree = GetCommandTreeByGroupName(groupName);
             if (commandTree == null)
                 return null;
 
+            IElement groupTreeItem;
             CommandTreeViewScrollToTop(commandTree);                                                                    // Scroll to the top if not
-            ExpandCommandGroup(commandTree, groupName, out IElement groupTreeItem);                                     // Expand the group item tree
+            //if (doExpand)
+            ExpandCommandGroup(commandTree, groupName, doExpand, out groupTreeItem);                                     // Expand the group item tree
             return groupTreeItem;
         }
 
@@ -4414,8 +4588,9 @@ namespace PP5AutoUITests
             do
             {
                 // Get the group element by groupname
-                groupTreeItem = commandTree.GetTreeViewItems()
-                                           .FirstOrDefault(e => e.GetTextElement(groupName)?.Text == groupName);
+                //groupTreeItem = commandTree.GetTreeViewItems()
+                //                           .FirstOrDefault(e => e.GetTextElement(groupName)?.Text == groupName);
+                GetCommandGroup(commandTree, groupName, out groupTreeItem);
 
                 // If element if out of screen, press page down to find the element
                 if (groupTreeItem == null)
@@ -4428,9 +4603,19 @@ namespace PP5AutoUITests
             } while (bool.Parse(groupTreeItem?.GetAttribute("IsOffscreen")));
         }
 
-        private void ExpandCommandGroup(IElement commandTree, string groupName, out IElement groupTreeItem)
+        private void GetCommandGroup(IElement commandTree, string groupName, out IElement groupTreeItem)
         {
-            SearchForCommandGroup(commandTree, groupName, out groupTreeItem);
+            // Get the group element by groupname
+            groupTreeItem = commandTree.GetTreeViewItems()
+                                       .FirstOrDefault(e => e.GetTextElement(groupName)?.Text == groupName);
+        }
+
+        private void ExpandCommandGroup(IElement commandTree, string groupName, bool doExpand, out IElement groupTreeItem)
+        {
+            if (doExpand)
+                SearchForCommandGroup(commandTree, groupName, out groupTreeItem);
+            else
+                GetCommandGroup(commandTree, groupName, out groupTreeItem);
 
             // 2024/07/09, Adam, Expand the command group
             if (groupTreeItem != null)
@@ -4626,11 +4811,12 @@ namespace PP5AutoUITests
 
         public IElement GetColorSettingItem(IElement ColorSettingPage, ColorSettingPageType csPageType, TestCmdGroupType cmdGrpType, int idx = 1)
         {
-            IElement commandTree = ColorSettingPage.GetExtendedElement(PP5By.Id(csPageType.GetDescription()));
+            //IElement commandTree = ColorSettingPage.GetExtendedElement(PP5By.Id(csPageType.GetDescription()));
+            IElement commandTree = ColorSettingPage.PerformGetElement($"/ById[{csPageType.GetDescription()}]");
             //Console.WriteLine($"LeftClick on Text \"{groupName}\"");
 
             CommandTreeViewScrollToTop(commandTree);                                                            // Scroll to the top if not
-            ExpandCommandGroup(commandTree, GetGroupNameByEnum(cmdGrpType), out IElement groupTreeItem);        // Expand the group item tree
+            ExpandCommandGroup(commandTree, GetGroupNameByEnum(cmdGrpType), doExpand: true, out IElement groupTreeItem);        // Expand the group item tree
             return GetCommand(groupTreeItem, idx);                                                              // Add the command by given parameters
 
             /* Legacy methods  
@@ -4742,7 +4928,7 @@ namespace PP5AutoUITests
             //    return comboBox.GetElements(By.ClassName("ListBoxItem"));
             //else
             //    return null;
-            
+
             PP5IDEWindow.GetWebElementFromWebElement(MobileBy.AccessibilityId(comboBoxID)).LeftClick();
             cmbItems = PP5IDEWindow.GetWebElementFromWebElement(By.ClassName("Popup"))
                                     .GetWebElementsFromWebElement(By.ClassName("ListBoxItem"));
@@ -4826,7 +5012,7 @@ namespace PP5AutoUITests
         // cell headers: "ShowName", "CallName", "DisplayedType", "DisplayedEditType", "Minimum",
         //               "Maximum", "Default", "Format", "DisplayedEnum"
         // DataGridByInfo classNames: PGGrid, CndGrid, RstGrid, TmpGrid, GlbGrid, DefectCodeGrid, ParameterGrid, LoginGrid
-        //public void SaveGridTable(IWebElement gridTableElement, DataTableAutoIDType DataGridType)
+        //public void SaveGridTable(IWebElement gridTableElement, TIDataTableAutoIDType DataGridType)
         //{
         //    //WindowsElement HeaderPanel = CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataGridAutomationID)).GetElementFromWebElement(By.Name("HeaderPanel"));
 
@@ -4856,7 +5042,7 @@ namespace PP5AutoUITests
         //        Dictionary<string, IWebElement> kvps = new Dictionary<string, IWebElement>();
         //        string header;
         //        IWebElement cell;
-                
+
         //        foreach (var headerAndCol in headers.Zip(column, Tuple.Create))
         //        {
         //            header = headerAndCol.Item1;
@@ -4961,7 +5147,7 @@ namespace PP5AutoUITests
             */
         }
 
-        public IElement GetDataTableElement(DataTableAutoIDType DataGridType)
+        public IElement GetDataTableElement(TIDataTableAutoIDType DataGridType)
         {
             string DataGridAutomationID = DataGridType.ToString();
 
@@ -4973,37 +5159,37 @@ namespace PP5AutoUITests
             /* Legacy method  
             //switch (DataGridType)
             //{
-            //    case DataTableAutoIDType.PGGrid:
+            //    case TIDataTableAutoIDType.PGGrid:
             //        // Test Item Context
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.PGGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.PGGrid.ToString()));
 
-            //    case DataTableAutoIDType.CndGrid:
+            //    case TIDataTableAutoIDType.CndGrid:
             //        // Condition
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.CndGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.CndGrid.ToString()));
 
-            //    case DataTableAutoIDType.RstGrid:
+            //    case TIDataTableAutoIDType.RstGrid:
             //        // Result
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.RstGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.RstGrid.ToString()));
 
-            //    case DataTableAutoIDType.TmpGrid:
+            //    case TIDataTableAutoIDType.TmpGrid:
             //        // Temp
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.TmpGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.TmpGrid.ToString()));
 
-            //    case DataTableAutoIDType.GlbGrid:
+            //    case TIDataTableAutoIDType.GlbGrid:
             //        // Global
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.GlbGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.GlbGrid.ToString()));
 
-            //    case DataTableAutoIDType.DefectCodeGrid:
+            //    case TIDataTableAutoIDType.DefectCodeGrid:
             //        // Defect Code
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.DefectCodeGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.DefectCodeGrid.ToString()));
 
-            //    case DataTableAutoIDType.ParameterGrid:
+            //    case TIDataTableAutoIDType.ParameterGrid:
             //        // Test command Parameter
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.ParameterGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.ParameterGrid.ToString()));
 
-            //    case DataTableAutoIDType.LoginGrid:
+            //    case TIDataTableAutoIDType.LoginGrid:
             //        // Open Test Item
-            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(DataTableAutoIDType.LoginGrid.ToString()));
+            //        return CurrentDriver.GetElementFromWebElement(MobileBy.AccessibilityId(TIDataTableAutoIDType.LoginGrid.ToString()));
 
             //    default:
             //        return null;
@@ -5077,7 +5263,7 @@ namespace PP5AutoUITests
                 return CurrentDriver.PerformGetElement($"/ByName[{PowerPro5Config.MainPanelWindowName}]") != null;
 
             IElement currWindow = PP5IDEWindow;
-            if (currWindow == null) 
+            if (currWindow == null)
                 return false;
 
             return windowType.GetDescription() == PP5IDEWindow.ModuleName;
@@ -5096,7 +5282,7 @@ namespace PP5AutoUITests
 
             //return currWindow.GetElementFromWebElement(By.Name(currWindow.Title));
             return currWindow.GetExtendedElement(PP5By.Name(currWindow.Title));
-            
+
             //if (windowType == WindowType.GUIEditor || windowType == WindowType.OnlineControl || windowType == WindowType.Report)
             //{
             //    return Regex.IsMatch(currWindow.Title, @$"Chroma ATS IDE - \[{windowType.GetDescription()} - .+\]");
@@ -5133,9 +5319,12 @@ namespace PP5AutoUITests
 
         public static string GetCommandFileFullPath()
         {
-           return string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseDataFolder, PowerPro5Config.SystemCommandFileName);
+            return _originalSystemCommandPath;
         }
-
+        public static string GetTmpCommandFileFullPath()
+        {
+            return _tempSystemCommandPath;
+        }
 
         public void SetColor(IElement colorTabItem, ColorSettingType colorSettingType, string colorCode = "default" /*default color: transparent White (#00FFFFFF)*/)
         {
@@ -5174,7 +5363,7 @@ namespace PP5AutoUITests
                 //            .SelectComboBoxItemByIndex(colorIndex, supportKeyInputSearch: false);
 
                 PP5IDEWindow.GetExtendedElement(PP5By.Id("DefaultPicker"))
-                            .ComboBoxSelectByIndex(colorIndex);
+                            .SelectItem(colorIndex);
             }
         }
 
@@ -5198,11 +5387,27 @@ namespace PP5AutoUITests
 
             PP5IDEWindow.PerformInput("/ByName[Enum Item Creater]/Edit[1]", InputType.SendContent, value);
             PP5IDEWindow.PerformClick("/ByName[Enum Item Creater,Ok]", ClickType.LeftClick);
-            var nameCellAdded = PP5IDEWindow.PerformGetElement($"/ByName[Enum Item Editor]/ById[EnumItemGrid]/ByCell[1,#{name}]");
-            if (nameCellAdded != null)
-                return true;
-            else 
-                return false;
+            //var nameCellAdded = PP5IDEWindow.PerformGetElement($"/ByName[Enum Item Editor]/ById[EnumItemGrid]/ByCell[1,#{name}]");
+            //if (nameCellAdded != null)
+            //    return true;
+            //else 
+            //    return false;
+            return PP5IDEWindow.PerformGetElement($"/ByName[Enum Item Editor]/ById[EnumItemGrid]/ByCell[1,#{name}]") != null;
+        }
+
+        public bool EditEnumItem(string name, string value)
+        {
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Editor,Modify]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformInput("/ByName[Enum Item Creater]/Edit[0]", InputType.SendContent, name);
+            PP5IDEWindow.PerformInput("/ByName[Enum Item Creater]/Edit[1]", InputType.SendContent, value);
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Creater,Ok]", ClickType.LeftClick);
+            //var nameCellAdded = PP5IDEWindow.PerformGetElement($"/ByName[Enum Item Editor]/ById[EnumItemGrid]/ByCell[1,#{name}]");
+            //if (nameCellAdded != null)
+            //    return true;
+            //else
+            //    return false;
+            return PP5IDEWindow.PerformGetElement($"/ByName[Enum Item Editor]/ById[EnumItemGrid]/ByCell[1,#{name}]") != null;
         }
 
         public bool AddNewEnumItem(PP5DataGrid dataGrid, int rowNo, string name, string value)
@@ -5213,11 +5418,19 @@ namespace PP5AutoUITests
             return AddNewEnumItemSuccess;
         }
 
+        public bool EditEnumItem(PP5DataGrid dataGrid, int rowNo, string name, string value)
+        {
+            dataGrid.GetCellBy(rowNo, VariableColumnType.EnumItem.GetDescription()).LeftClick();
+            bool EditEnumItemSuccess = EditEnumItem(name, value);
+            PP5IDEWindow.PerformClick("/ByName[Enum Item Editor,Ok]", ClickType.LeftClick);
+            return EditEnumItemSuccess;
+        }
+
         public void AddNewEnumItems(PP5DataGrid dataGrid, int rowNo, string[] names, string[] values)
         {
             dataGrid.GetCellBy(rowNo, VariableColumnType.EnumItem.GetDescription()).LeftClick();
 
-            for (int i = 0; i < names.Length; i++) 
+            for (int i = 0; i < names.Length; i++)
             {
                 AddNewEnumItem(names[i], values[i]);
             }
@@ -5239,7 +5452,7 @@ namespace PP5AutoUITests
             SwitchToModule(WindowType.Management);
 
             PP5IDEWindow.PerformClick("/ByCondition#ToolBar[Visible]/RadioButton[3]", ClickType.LeftClick); // Click on MISC button
-            IElement mainTab = PP5IDEWindow.PerformGetElement("/Tab[mainTab]");                             
+            IElement mainTab = PP5IDEWindow.PerformGetElement("/Tab[mainTab]");
             IElement DefectCodeTabItem = mainTab.TabSelect(3, "Defect Code");                               // Click on Defect Code tab
 
             var dfs = DefectCodeTabItem.PerformGetElement("/ById[DefectCodeDataGrid]").GetSingleColumnValues(1/*Defect Code*/);
@@ -5247,7 +5460,7 @@ namespace PP5AutoUITests
             if (dfs.Contains(defectCode.ToString()) || cdfs.Contains(customerDefectCode.ToString()))
             {
                 MenuSelect("Windows", orgModule); return;
-            }   
+            }
 
             DefectCodeTabItem.PerformClick("/ByName[Ok]", ClickType.LeftClick);
 
@@ -5325,6 +5538,63 @@ namespace PP5AutoUITests
             return canScrollDict;
         }
 
+        /// <summary>
+        /// 拖曳方式改變布局(改變panel大小)
+        /// </summary>
+        /// <param name="sourcePanelType">來源面板類型</param>
+        /// <param name="orientation">拖曳方向</param>
+        /// <param name="dragPosition">拖曳位置</param>
+        /// <param name="dragOffsetX">拖曳偏移量X</param>
+        /// <param name="dragOffsetY">拖曳偏移量Y</param>
+        public void DragPanelSplitter(TIPanelType sourcePanelType, System.Windows.Forms.Orientation orientation, System.Windows.Automation.DockPosition dragPosition, int dragOffsetX, int dragOffsetY)
+        {
+            var sourcePanel = PP5IDEWindow.PerformGetElement($"/ById[{sourcePanelType}]");
+
+            MoveToElementOffsetStartingPoint startingPoint = MoveToElementOffsetStartingPoint.Center;
+            if (orientation == System.Windows.Forms.Orientation.Vertical && dragPosition == System.Windows.Automation.DockPosition.Top)
+                startingPoint = MoveToElementOffsetStartingPoint.OuterCenterTop;
+            else if (orientation == System.Windows.Forms.Orientation.Vertical && dragPosition == System.Windows.Automation.DockPosition.Bottom)
+                startingPoint = MoveToElementOffsetStartingPoint.OuterCenterBottom;
+            else if (orientation == System.Windows.Forms.Orientation.Horizontal && dragPosition == System.Windows.Automation.DockPosition.Left)
+                startingPoint = MoveToElementOffsetStartingPoint.OuterCenterLeft;
+            else if (orientation == System.Windows.Forms.Orientation.Horizontal && dragPosition == System.Windows.Automation.DockPosition.Right)
+                startingPoint = MoveToElementOffsetStartingPoint.OuterCenterRight;
+
+            ((PP5Element)sourcePanel).DragAndDropToOffset(startingPoint, 0, 0, dragOffsetX, dragOffsetY);
+        }
+
+        /// <summary>
+        /// 合併方式改變布局
+        /// </summary>
+        /// <param name="sourcePanelType">來源面板類型</param>
+        /// <param name="destPanelType">要合併的面板類型</param>
+        public void DragAndMergePanel(TIPanelType sourcePanelType, TIPanelType destPanelType)
+        {
+            var sourcePanel = PP5IDEWindow.PerformGetElement($"/ById[{sourcePanelType}]");                                          // Get the source panel
+            ((PP5Element)sourcePanel).DragAndDropToOffset(MoveToElementOffsetStartingPoint.InnerCenterTop, 0, 0, 10, 10);           // Float the source panel
+            var destPanel = PP5IDEWindow.PerformGetElement($"/ById[{destPanelType}]");                                              // Get the dest panel
+            int distX = destPanel.PointAtCenter.X - sourcePanel.PointAtCenter.X;                                                    // Calulate the remaining distance to dock into the dest panel
+            int distY = destPanel.PointAtCenter.Y - sourcePanel.PointAtTopCenter.Y;
+            ((PP5Element)sourcePanel).DragAndDropToOffset(MoveToElementOffsetStartingPoint.InnerCenterTop, 0, 0, distX, distY);     // Dock the source panel
+        }
+
+        /// <summary>
+        /// 浮動方式改變布局
+        /// </summary>
+        /// <param name="panelType">要浮動的面板類型</param>
+        public bool FloatPanel(TIPanelType panelType)
+        {
+            // 模擬雙擊或選單操作，使面板浮動
+            var panel = PP5IDEWindow.PerformClick($"/ById[{panelType}]", ClickType.LeftClick);
+            Point panelPosDocked = panel.PointAtCenter;
+
+            panel.PerformClick("/", MoveToElementOffsetStartingPoint.InnerCenterTop, ClickType.RightClick);
+            PP5IDEWindow.PerformClick("/ByClass[Popup,ItemContextMenu]/ByName[Float]", ClickType.LeftClick);
+
+            panelPosDocked.ShouldEqualTo(panel.PointAtCenter);
+            return true;
+        }
+
         public void RestoreDefaultDocking(WindowType windowType)
         {
             string mainMenuItemName;
@@ -5340,6 +5610,117 @@ namespace PP5AutoUITests
             string moduleName = windowType.GetDescription();
             MenuSelect(mainMenuItemName, "Default Dock");
             PP5IDEWindow.PerformClick($"/ByName[{moduleName},Yes]", ClickType.LeftClick);
+        }
+
+        public void SetResolution(int width, int height)
+        {
+            AutoUIExecutor.SwitchTo(SessionType.Desktop);
+            CurrentDriver.PerformClick("/ByName[工作列]/ByClass[TrayNotifyWnd]/ByName[顯示桌面]", ClickType.LeftClick);
+            CurrentDriver.PerformClick("/Pane[桌面 1]", MoveToElementOffsetStartingPoint.TopLeft, ClickType.RightClick);
+            CurrentDriver.PerformClick("/ByName[桌面 1,路徑位置,顯示設定(D)]", ClickType.LeftClick);
+            CurrentDriver.PerformClick("/ById[ItemsControlScrollViewer]/ByName[多部顯示器]/ById[SystemSettings_Display_MainMonitor_CheckBox]", ClickType.LeftClick);
+            CurrentDriver.PerformGetElement($"/ById[SystemSettings_Display_Resolution_ComboBox]").SelectItem($"{width} × {height}");
+            CurrentDriver.PerformClick("/ByName[設定]/ById[SystemSettings_Display_LaunchDialog_Window,SystemSettings_Display_LaunchDialog_KeepButton]", ClickType.LeftClick);
+            AutoUIExecutor.SwitchTo(SessionType.PP5IDE);
+        }
+
+        public void CANClusterEditorCreateEmptyDBC()
+        {
+            string dbcFileName = "UnClassified";
+            // 開啟 CAN Cluster 編輯器視窗
+            // 假設以下為打開 CAN Cluster Editor 的操作 (範例寫法)
+            PP5IDEWindow.MenuSelect("Utility", "CAN Cluster Editor...");
+
+            // 在 CAN Cluster 編輯器視窗中點選 [File] -> [New]
+            var clusterEditorWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+            clusterEditorWindow.ShouldNotBeNull("CAN Cluster 編輯器視窗未開啟");
+
+            clusterEditorWindow.MenuSelect("File", "New");
+
+            // 確認已開啟名為 "UnClassifield" 的空 dbc 檔
+            // 假設窗口標題或顯示名稱可取得
+            var dbcTitle = clusterEditorWindow.GetText();
+            dbcTitle.ShouldContain(dbcFileName, $"DBC 檔名應為 {dbcFileName}");
+
+            // 開啟File選單
+            clusterEditorWindow.MenuSelect("File");
+
+            // 檢查 [File] -> [Open System Default] 是否為 Enable 狀態
+            PP5IDEWindow.PerformGetElement("/ByName[Open System Default]").ShouldBeEnabled("[Open System Default] 應為Enable狀態");
+
+            // 檢查 [File] -> [Set System Default] 是否為 Disable 狀態
+            PP5IDEWindow.PerformGetElement("/ByName[Set as System Default]").ShouldBeDisabled("[Set as System Default] 應為Disable狀態");
+        }
+
+        public IElement OpenCANClusterImportWindow(IElement clusterEditorWindow, string dbcName)
+        {
+            string dbcExtensionName = "dbc";
+            string expectedDBCImportTitle = "Cluster Import";
+
+            // 點選 Import CAN DBC 按鈕
+            clusterEditorWindow.PerformClick("/ByName[Import CAN DBC]", ClickType.LeftClick);
+
+            // 驗證檔案選擇視窗
+            var fileDialog = PP5IDEWindow.PerformGetElement("/Window[開啟]");
+            fileDialog.ShouldNotBeNull("未彈出選擇 DBC 文件視窗");
+
+            // 選擇任一DBC檔案
+            fileDialog.PerformClick($"/ByName[項目檢視,{dbcName}.{dbcExtensionName}]/ById[System.ItemNameDisplay]", ClickType.LeftClick);
+            fileDialog.PerformClick("/ByName[開啟(O)]", ClickType.LeftClick);
+            //fileDialog.PerformGetElement($"/ByName[{targetFolder}]").ShouldNotBeNull($"無法瀏覽到資料夾 {targetFolder}");
+
+            // 驗證是否彈出選擇 DBC 文件內容視窗
+            var dbcImportWindow = PP5IDEWindow.PerformGetElement("/Window[0]");
+            var currentDbcImportTitle = dbcImportWindow.GetText();     // 確認視窗標題為預期標題expectedDBCImportTitle
+            expectedDBCImportTitle.ShouldContain(currentDbcImportTitle);
+
+            return dbcImportWindow;
+        }
+
+        public string GetTIName()
+        {
+            PP5IDEWindow.ShouldNotBeNull("TI Editor未正確開啟");
+            var TILabel = PP5IDEWindow.PerformGetElement("/ById[TIContextPanel]/ByClass[PGGridAeraView]/ById[TitleTxtBlk]");
+            return TILabel.GetText().Split('-').Last();
+        }
+
+        public void DeleteTIorTPorCommand(MngtDataTableAutoIDType mngtDTAutoID, string name)
+        {
+            // Set active column index for TestItem / Python command / Dll command
+            int activeColumn = mngtDTAutoID == MngtDataTableAutoIDType.TestItem_DataGrid ? 3 : 2;
+            SwitchToModule(WindowType.Management);
+
+            // Navigate to the corresponding tab
+            string selectTabPath = mngtDTAutoID.GetDescription();
+            MngtToolBarButton mngtToolBarBtnIdx = 0;
+
+            if (mngtDTAutoID == MngtDataTableAutoIDType.TestItem_DataGrid || mngtDTAutoID == MngtDataTableAutoIDType.TestProgram_DataGrid)
+                mngtToolBarBtnIdx = MngtToolBarButton.TPTI;
+            else if (mngtDTAutoID == MngtDataTableAutoIDType.PythonDataGrid || mngtDTAutoID == MngtDataTableAutoIDType.DllDataGrid)
+                mngtToolBarBtnIdx = MngtToolBarButton.ExFuncion;
+            else { }
+
+            PP5IDEWindow.PerformClick($"/ByCondition#ToolBar[Visible]/RadioButton[{(int)mngtToolBarBtnIdx}]", ClickType.LeftClick);
+            IElement mainTab = PP5IDEWindow.PerformGetElement("/Tab[mainTab]");
+            IElement tabItem = mainTab.TabSelect(selectTabPath);
+
+            // Search the item with name
+            SearchItem(name, mngtDTAutoID);
+
+            if (mngtDTAutoID != MngtDataTableAutoIDType.TestProgram_DataGrid)
+            {
+                // Disable the TI/python command/dll command by unchecking the "active" checkbox
+                tabItem.GetSelectedRow(mngtDTAutoID.ToString())
+                       .GetCellBy(activeColumn).GetFirstCheckBoxElement()
+                       .UnTickCheckBox();
+            }
+
+            // Delete the item
+            if (PP5IDEWindow.PerformGetElement("/ByName[Error]") != null)
+                PP5IDEWindow.PerformClick("/Window[0]/Button[Ok]", ClickType.LeftClick);
+
+            PP5IDEWindow.PerformClick("/Button[Delete]", ClickType.LeftClick);
+            PP5IDEWindow.PerformClick("/Window[0]/Button[Yes]", ClickType.LeftClick);
         }
 
         //// For TP Editor, later to do

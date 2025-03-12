@@ -1371,10 +1371,18 @@ namespace PP5AutoUITests
                     elements = ElementSrc.FindElements(findType);
                     if (!elements.IsNullOrEmpty())
                     {
-                        if (elements.FirstOrDefault().IsSameElement(elementSrc) && elementSrc.Name.Contains(elementSrc.ModuleName))
-                        {
+                        //if (elements.FirstOrDefault().IsSameElement(elementSrc) && elementSrc.Name.Contains(elementSrc.ModuleName))
+                        if (elements.FirstOrDefault().IsSameElement(elementSrc))
+                            {
                             var elementsTmp = elements.ToList();
-                            elementsTmp.RemoveAt(0);
+                            elementsTmp.Remove(elementSrc);
+                            // 修改排序邏輯：WindowInteractionState = 2 的視窗排在最後
+                            elementsTmp.Sort((a, b) =>
+                            {
+                                var stateA = (WindowInteractionState)Enum.Parse(typeof(WindowInteractionState), a.GetAttribute("Window.WindowInteractionState"));
+                                var stateB = (WindowInteractionState)Enum.Parse(typeof(WindowInteractionState), b.GetAttribute("Window.WindowInteractionState"));
+                                return stateA.CompareTo(stateB);
+                            });
                             elements = elementsTmp.AsReadOnly();
                         }
                     }
@@ -3229,7 +3237,7 @@ namespace PP5AutoUITests
         #region ComboBox/ListBox Methods
         // 先暫時分成兩個方法(給/不給comboBoxID)
         // 不給comboBoxID作法: combobox後再做動作
-        public static void ComboBoxSelectByName(this IElement element, string name)
+        public static void SelectItem(this IElement element, string name)
         {
             switch (element.ControlType)
             {
@@ -3302,13 +3310,14 @@ namespace PP5AutoUITests
 
             ////}
 
-            //ComboBoxSelectByName(name);
+            //SelectItem(name);
             //else
             //    return;
         }
 
-        public static void ComboBoxSelectByIndex(this IElement element, int index)
+        public static IElement SelectItem(this IElement element, int index)
         {
+            IElement listItem = null;
             switch (element.ControlType)
             {
                 // Scenario A: dataGrid/Cell中，點選後會開啟的列表框(ListView)
@@ -3317,7 +3326,7 @@ namespace PP5AutoUITests
                     {
                         element.DoubleClickWithDelay(10);                                       // Open the combobox / listbox
                         if (element.GetFirstComboBoxElement() != null)                          // Case A-1: gridcell觸發Combobox子元素 (management內適用)
-                            element.GetFirstComboBoxElement().SelectComboBoxItemByIndex2(index);
+                            listItem = element.GetFirstComboBoxElement().SelectComboBoxItemByIndex2(index);
                     }
                     else if (element.ModuleName == WindowType.TIEditor.GetDescription() ||
                              element.ModuleName == WindowType.TPEditor.GetDescription())
@@ -3326,7 +3335,7 @@ namespace PP5AutoUITests
                         //    Press(Keys.Up);
                         //else
                             element.LeftClick();
-                        element.SelectComboBoxItemByIndex2(index);                            // Case A-2: gridcell觸發Listbox顯示於popup視窗，在控件中直接輸入Name選擇item (TI/TP內適用)
+                        listItem = element.SelectComboBoxItemByIndex2(index);                            // Case A-2: gridcell觸發Listbox顯示於popup視窗，在控件中直接輸入Name選擇item (TI/TP內適用)
                     }
                     break;
 
@@ -3336,7 +3345,7 @@ namespace PP5AutoUITests
                 //  3.Report中Category, Test Items多選控件      
                 //    > 行為同下拉式組合框
                 case ElementControlType.ComboBox:
-                    element.SelectComboBoxItemByIndex2(index);
+                    listItem = element.SelectComboBoxItemByIndex2(index);
                     break;
 
                 // Scenario C: 複合式視窗，但包含列表選項(ListItem)的情形:
@@ -3345,11 +3354,13 @@ namespace PP5AutoUITests
                 case ElementControlType.ListBox:
                     element.GetComboBoxItems(out ReadOnlyCollection<IElement> cmbItems);
                     cmbItems[index].LeftClick();
+                    listItem = cmbItems[index];
                     break;
 
                 default:
                     throw new NotImplementedException();
             }
+            return listItem;
         }
         #endregion
 

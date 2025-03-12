@@ -38,4 +38,16 @@ namespace PP5AutoUITests
         Delete = 7,
         Test = 8,
     }
+
+    /// <summary>
+    /// 定義 Management Toolbar 的功能按鈕種類
+    /// </summary>
+    public enum MngtToolBarButton : int
+    {
+        Security = 0,
+        TPTI,
+        SystemSetup,
+        MISC,
+        ExFuncion
+    }
 }

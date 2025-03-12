@@ -18,8 +18,9 @@ namespace PP5AutoUITests.Session
             sessionType = SessionType.PP5IDE;
             //targetAppPath = @"C:\Users\adam.chen\Desktop\Debug\bin\Chroma.PP5IDE.exe";
             //targetAppWorkingDir = @"C:\Users\adam.chen\Desktop\Debug\bin\";
-            base.targetAppPath = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\Chroma.PP5IDE.exe";
-            base.targetAppWorkingDir = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\";
+            //base.targetAppWorkingDir = @"C:\Program Files (x86)\Chroma\PowerPro5\Bin\";
+            targetAppPath = string.Format(PowerPro5Config.SubPathPattern, PowerPro5Config.ReleaseBinFolder, PowerPro5Config.IDEProcessName + ".exe");
+            //targetAppWorkingDir = PowerPro5Config.ReleaseBinFolder;
         }
 
         public PP5Driver CreateNewDriver()
@@ -28,6 +29,8 @@ namespace PP5AutoUITests.Session
             appCapabilities.AddAdditionalCapability("app", "Root");
             appCapabilities.AddAdditionalCapability("deviceName", DeviceName);
             currentDriver = new PP5Driver(new Uri(WindowsApplicationDriverUrl), appCapabilities, TimeSpan.FromSeconds(180), SessionType.Desktop);
+
+            currentDriver.ShouldNotBeNull($"PP5Driver: {sessionType.ToString()} created failed!");
 
             //PowerPro5Config.PP5WindowSessionType = sessionType.ToString();
 

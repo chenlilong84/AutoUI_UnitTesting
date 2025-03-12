@@ -26,7 +26,7 @@ namespace PP5AutoUITests
 
         public string targetAppPath { get; set; }
 
-        public string targetAppWorkingDir { get; set; }
+        public string targetAppWorkingDir = PowerPro5Config.ReleaseBinFolder;
         public int WaitForAppLaunch { get; set; }
 
         public const string DeviceName = "WindowsPC";

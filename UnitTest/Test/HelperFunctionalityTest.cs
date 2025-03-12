@@ -115,7 +115,7 @@ namespace PP5AutoUITests.Test
             string nodepathToUpdate = $"CommandGroupInfos[0]/Commands[0>-1]@{propertyNameToUpdate}={expectedCmdName}";
             string nodepathToVerify = "CommandGroupInfos[0]/Commands";
             string nodepathToDelete = "CommandGroupInfos[0]/Commands[-1]";
-            string commandFilePath = TestBase.GetCommandFileFullPath();
+            string commandFilePath = TestBase.GetTmpCommandFileFullPath();
 
             // Create a new node that cloned from the first command: "ABS" in the first group and update the property "CommandName"
             bool isJsonCreateNewNodeSuccess = FileProcessingExtension.JsonCreateNewNodeInList(filePath: commandFilePath,
@@ -311,7 +311,7 @@ namespace PP5AutoUITests.Test
             string nodepathToUpdate = $"CommandGroupInfos[0]/Commands[0>-1]@{propertyNameToUpdate}={cmdName}";
             string nodepathToCount = "CommandGroupInfos[0]/Commands";
             string nodepathToDelete = "CommandGroupInfos[0]/Commands[-1]";
-            string commandFilePath = TestBase.GetCommandFileFullPath();
+            string commandFilePath = TestBase.GetTmpCommandFileFullPath();
 
             // Create a new node that cloned from the first command: "ABS" in the first group and update the property "CommandName"
             bool isJsonCreateNewNodeSuccess = FileProcessingExtension.JsonCreateNewNodeInList(filePath: commandFilePath,

@@ -1,0 +1,880 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Chroma.UnitTest.Common</name>
+    </assembly>
+    <members>
+        <member name="F:FluentAssertions.CallerIdentification.AddNonEmptySymbolParsingStrategy.Mode.RemoveAllWhitespace">
+            <summary>
+            Remove all whitespace until we find a non-whitespace character
+            </summary>
+        </member>
+        <member name="F:FluentAssertions.CallerIdentification.AddNonEmptySymbolParsingStrategy.Mode.RemoveSuperfluousWhitespace">
+            <summary>
+            Only keep one whitespace character if more than one follow each other.
+            </summary>
+        </member>
+        <member name="T:FluentAssertions.CallerIdentification.IParsingStrategy">
+            <summary>
+            Represents a stateful parsing strategy that is used to help identify the "caller" to use in an assertion message.
+            </summary>
+            <remarks>
+            The strategies will be instantiated at the beginning of a "caller identification" task, and will live until
+            the statement can be identified (and thus some are stateful).
+            </remarks>
+        </member>
+        <member name="M:FluentAssertions.CallerIdentification.IParsingStrategy.Parse(System.Char,System.Text.StringBuilder)">
+            <summary>
+            Given a symbol, the parsing strategy should add/remove from the statement if needed, and then return
+            - InProgress if the symbol isn't relevant to the strategies (so other strategies can be tried)
+            - Handled if an action has been taken (and no other strategies should be used for this symbol)
+            - Done if the statement is complete, and thus further symbols should be read.
+            </summary>
+        </member>
+        <member name="M:FluentAssertions.CallerIdentification.IParsingStrategy.IsWaitingForContextEnd">
+            <summary>
+            Returns true if strategy is in the middle of a context (ex: strategy read "/*" and is waiting for "*/"
+            </summary>
+        </member>
+        <member name="M:FluentAssertions.CallerIdentification.IParsingStrategy.NotifyEndOfLineReached">
+            <summary>
+            Used to notify the strategy that we have reached the end of the line (very useful to detect the end of
+            a single line comment).
+            </summary>
+        </member>
+        <member name="M:FluentAssertions.CallerIdentification.ParsingStrategyBase.EndsWith(System.Text.StringBuilder,System.Char[])">
+            <summary>
+            
+            </summary>
+            <param name="statement"></param>
+            <param name="chars"></param>
+            <returns></returns>
+        </member>
+        <member name="T:FluentAssertions.CallerIdentifier">
+            <summary>
+            Tries to extract the name of the variable or invocation on which the assertion is executed.
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.AutoUI.ActionType">
+            <summary>
+            定義 Auto UI 動作種類
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.ActionType.None">
+            <summary>
+            No action, only get element
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.ActionType.LeftClick">
+            <summary>
+            滑鼠左鍵單擊 (left mouse button single click)
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.ActionType.LeftDoubleClick">
+            <summary>
+            滑鼠左鍵雙擊 (left mouse button double click)
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.ActionType.SendKeys">
+            <summary>
+            鍵盤輸入
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.AutoUI.SearchType">
+            <summary>
+            定義 Auto UI 動作種類
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.SearchType.XPath">
+            <summary>
+            By XPath
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.SearchType.AutomationID">
+            <summary>
+            By Automation ID
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.AutoUI.SessionType">
+            <summary>
+            定義 Auto UI 執行器種類
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.SessionType.MainPanel">
+            <summary>
+            By Main Panel
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.SessionType.PP5IDE">
+            <summary>
+            By IDE
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.AutoUI.VariableTabType">
+            <summary>
+            定義Variable子視窗種類
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.VariableTabType.Condition">
+            <summary>
+            Condition variable
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.VariableTabType.Result">
+            <summary>
+            Result variable
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.VariableTabType.Temp">
+            <summary>
+            Temp variable
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.VariableTabType.Global">
+            <summary>
+            Global variable
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.VariableTabType.DefectCode">
+            <summary>
+            Defect Code variable
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.AutoUI.WindowType">
+            <summary>
+            定義當前視窗種類
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.WindowType.LoginWindow">
+            <summary>
+            Main Panel Login Window
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.WindowType.MainPanelMenu">
+            <summary>
+            Main Panel Menu Window
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.WindowType.TestItemEditor">
+            <summary>
+            Test Item Editor Window
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.WindowType.EntryPoint">
+            <summary>
+            Test Item Entry Point Window
+            </summary>
+        </member>
+        <member name="F:Chroma.UnitTest.Common.AutoUI.SessionFactory.allSessions">
+            <summary>
+            Sessions 集合
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AutoUI.SessionFactory.CreateSession(System.String)">
+            <summary>
+            依照 Session Name 建立公開的 Session
+            </summary>
+            <param name="tableName">要建立的資料表名稱</param>
+            <returns>回傳建立的資料表</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AutoUI.SessionFactory.CreateFactory">
+            <summary>
+            初始化資料表處理物件集合
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AutoUI.DllHelper.FindWindow(System.String,System.String)">
+            <summary>
+            根据窗口标题查找窗体
+            </summary>
+            <param name="lpClassName"></param>
+            <param name="lpWindowName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AutoUI.DllHelper.GetWindowThreadProcessId(System.IntPtr,System.Int32@)">
+            <summary>
+            根据句柄查找进程ID
+            </summary>
+            <param name="hwnd"></param>
+            <param name="ID"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.PropertyTypeMismatchedException">
+            <summary>
+            PropertyTypeMismatchedException with a MismatchedPropertyType Property
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.PropertyTypeMismatchedException.#ctor(System.String,System.String)">
+            <summary>
+            PropertyTypeMismatchedException Constructor
+            </summary>
+            <param name="propertyType"></param>
+            <param name="message"></param>
+        </member>
+        <member name="P:Chroma.UnitTest.Common.PropertyTypeMismatchedException.MismatchedPropertyType">
+            <summary>
+            The Property Type Mismatched
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.PropertyTypeNotSupportedException">
+            <summary>
+            PropertyTypeNotSupportedException with a PropertyType Property
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.PropertyTypeNotSupportedException.#ctor(System.String,System.String)">
+            <summary>
+            PropertyTypeNotSupportedException Constructor
+            </summary>
+            <param name="propertyType"></param>
+            <param name="message"></param>
+        </member>
+        <member name="P:Chroma.UnitTest.Common.PropertyTypeNotSupportedException.PropertyType">
+            <summary>
+            The Property Type Not Supported
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.AssertExtenstion">
+            <summary>
+            Provides extensions related with unit test assertion.
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AssertExtenstion.Is(Microsoft.VisualStudio.TestTools.UnitTesting.Assert)">
+            <summary>
+            A chain/grouping of assert statements.
+            </summary>
+            <param name="assert">The Assert class.</param>
+            <returns>The class that contains the assert methods for this grouping.</returns>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.AssertIs">
+            <summary>
+            A grouping of Assert statements with similar functionality.
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AssertIs.Divisor(System.Int32,System.Int32)">
+            <summary>
+            Determines if the 'divisor' is actually a divisor of 'number'.
+            </summary>
+            <param name="number">A number.</param>
+            <param name="divisor">Its proclaimed divisor.</param>
+            <returns>True if it is a divisor.</returns>
+            <exception cref="T:Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException">If it is not a divisor.</exception>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AssertIs.Positive(System.Int32)">
+            <summary>
+            Determines if a number is positive.
+            </summary>
+            <param name="number">The number.</param>
+            <returns>True if it is positive.</returns>
+            <exception cref="T:Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException">If the number is not positive.</exception>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AssertIs.Negative(System.Int32)">
+            <summary>
+            Determines if a number is negative.
+            </summary>
+            <param name="number">The number.</param>
+            <returns>True if it is negative.</returns>
+            <exception cref="T:Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException">If the number is not negative.</exception>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AssertIs.OfType``1(System.Object)">
+            <summary>
+            A simple assert extension to validate if an object is of a given type.
+            </summary>
+            <typeparam name="T">The type to check.</typeparam>
+            <param name="obj">The object.</param>
+            <returns>True if object is of the given type.</returns>
+            <exception cref="T:Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException">If object is not of the given type.</exception>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.AssertIs.NotOfType``1(System.Object)">
+            <summary>
+            A simple assert extension to validate if an object is NOT of a given type.
+            </summary>
+            <typeparam name="T">The type to check.</typeparam>
+            <param name="obj">The object.</param>
+            <returns>True if object is NOT of the given type.</returns>
+            <exception cref="T:Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException">If object is of the given type.</exception>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.CollectionExtension">
+            <summary>
+            Provides extensions for working with collections
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.CollectionExtension.ContainsAllItems``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Checks if a list is contained in another list
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="mainList"></param>
+            <param name="subList"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.FileProcessingExtension">
+            <summary>
+            Provides extensions related with file and folder operations.
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.DeleteFilesWithDifferentExtension(System.String,System.String)">
+            <summary>
+            Deletes files given only the filename without extension, which means to delete same files with same name (extension excluded)
+            Ex: {Folder}/xxx.tp1, {Folder}/xxx.tp2, {Folder}/xxx.tp3
+                given {Folder}, {filename(xxx)}, the files: xxx.tp1, xxx.tp2, xxx.tp3 will be deleted
+            </summary>
+            <param name="folderPath">The path of the folder containing the files.</param>
+            <param name="fileName">The filename to be deleted.</param>
+            <returns><c>true</c> if the files are deleted successfully; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.DeleteFilesByExtension(System.String,System.String,System.String[])">
+            <summary>
+            Deletes files with a specified extension in the specified folder, excluding specified file names.
+            </summary>
+            <param name="folderPath">The path of the folder containing the files.</param>
+            <param name="extension">The file extension to filter files.</param>
+            <param name="excludedfFileNames">An optional array of file names to be excluded from deletion.</param>
+            <returns><c>true</c> if the files are deleted successfully; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.GetFilesWithExtensionName(System.String,System.String,System.Boolean@)">
+            <summary>
+            模擬檢查資料夾中是否有指定extensionName檔案的輔助方法
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.ReleaseComObject(System.Object)">
+            <summary>
+            Releases a COM object, setting it to <c>null</c> after release.
+            </summary>
+            <param name="obj">The COM object to be released.</param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.IsLegalDirectory(System.String)">
+            <summary>
+            Checks whether the specified path is a legal and valid directory path.
+            </summary>
+            <param name="path">The directory path to be checked.</param>
+            <returns>
+              <c>true</c> if the path is a legal and valid directory path; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.GetPath(System.String)">
+            <summary>
+            Gets the full directory path based on the given folder name.
+            </summary>
+            <param name="foldername">The name of the folder for which the full path is obtained.</param>
+            <returns>The full directory path combining the working directory and the specified folder name.</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.GetPaths(System.String[])">
+            <summary>
+            Get the full directory according to given folder names
+            </summary>
+            <param name="foldernames"></param>
+            <returns>
+            An array of strings representing the full directorys of the folders names.
+            </returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.IsFolderExist(System.String)">
+            <summary>
+            Checks if a folder exists based on the provided folder name.
+            </summary>
+            <param name="folderName">The name of the folder to check.</param>
+            <returns><c>true</c> if the folder exists; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.CreateFolderWithFullName(System.String)">
+            <summary>
+            Create directory according to the given folder full name.
+            </summary>
+            <param name="folderFullName"></param>
+            <returns>
+              <c>true</c> if the directory is created successfully; <c>false</c> if already exists.
+            </returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.CreateFoldersWithFullNames(System.String[])">
+            <summary>
+            Create directories according to the given folder full names.
+            </summary>
+            <param name="folderFullNames"></param>
+            <returns>
+            An array of strings representing the names of the folders that were successfully created.
+            </returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.CreateFolder(System.String)">
+            <summary>
+            Create directory according to the given folder name.
+            </summary>
+            <param name="folderName"></param>
+            <returns>
+              <c>true</c> if the directory is created successfully; <c>false</c> if already exists.
+            </returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.CreateFolders(System.String[])">
+            <summary>
+            Create directories according to the given folder names.
+            </summary>
+            <param name="folderNames"></param>
+            <returns>
+            An array of strings representing the names of the folders that were successfully created.
+            </returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.DeleteFolderWithFullName(System.String)">
+            <summary>
+            Deletes the specified folder with full path name.
+            </summary>
+            <param name="folderName">The name of the folder to delete.</param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.DeleteFoldersWithFullNames(System.String[])">
+            <summary>
+            Deletes multiple folders with full path names.
+            </summary>
+            <param name="folderNames">An array of folder names to delete.</param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.DeleteFolder(System.String)">
+            <summary>
+            Deletes the specified folder.
+            </summary>
+            <param name="folderName">The name of the folder to delete.</param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.FileProcessingExtension.DeleteFolders(System.String[])">
+            <summary>
+            Deletes multiple folders.
+            </summary>
+            <param name="folderNames">An array of folder names to delete.</param>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.ExcelExtension">
+            <summary>
+            Provides extensions related with excel operations.
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.ExcelExtension.DisposeExcelObjects(Microsoft.Office.Interop.Excel.Application,Microsoft.Office.Interop.Excel.Workbook,Microsoft.Office.Interop.Excel.Worksheet)">
+            <summary>
+            Dispose Excel Objects
+            </summary>
+            <param name="excelApp"></param>
+            <param name="workbook"></param>
+            <param name="worksheet"></param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.ExcelExtension.DisposeExcelWorksheet(Microsoft.Office.Interop.Excel.Worksheet)">
+            <summary>
+            Dispose Excel Worksheet
+            </summary>
+            <param name="ws"></param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.ExcelExtension.DisposeExcelWorkbook(Microsoft.Office.Interop.Excel.Workbook)">
+            <summary>
+            Dispose Excel Workbook
+            </summary>
+            <param name="ws"></param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.ExcelExtension.DisposeExcelApp(Microsoft.Office.Interop.Excel.Application)">
+            <summary>
+            Dispose Excel Worksheet
+            </summary>
+            <param name="ws"></param>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.StringExtension">
+            <summary>
+            Provides extensions for working string and char.
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.StringExtension.ParseTo2DJaggedArray(System.String,System.Char,System.Char)">
+            <summary>
+            將字串以指定分隔符號解析成 Jagged Array (string[][])
+            </summary>
+            <param name="input">例如 "123,456;999,999"</param>
+            <param name="rowDelimiter">用來分割列，預設為 ';'</param>
+            <param name="colDelimiter">用來分割欄，預設為 ','</param>
+            <returns>string[][]</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.StringExtension.ParseTo2DArray(System.String,System.Char,System.Char)">
+            <summary>
+            將字串以指定分隔符號解析成 2D Array (string[,])
+            </summary>
+            <param name="input">例如 "123,456;999,999"</param>
+            <param name="rowDelimiter">用來分割列，預設為 ';'</param>
+            <param name="colDelimiter">用來分割欄，預設為 ','</param>
+            <returns>string[,]</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.StringExtension.GetNiceString(System.Object)">
+            <summary>
+            Convert an object to a nicely formatted string
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.StringExtension.GetDifferenceString(System.Object,System.Object)">
+            <summary>
+            Get the object comparing difference representation as string
+            </summary>
+            <param name="obj1"></param>
+            <param name="obj2"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.TypeExtension">
+            <summary>
+            Provides extensions for working with types.
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeExtension.GetCurrentNamespaceAndClassname">
+            <summary>
+            Gets the fully-qualified name of the currently executing assembly.
+            </summary>
+            <returns>The full name of the executing assembly, including the namespace and class name.</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeExtension.Compare``1(``0,``0,System.String[])">
+            <summary>
+            Compares properties of two objects for equality, optionally ignoring specified properties.
+            </summary>
+            <typeparam name="T">The type of objects to compare.</typeparam>
+            <param name="actual">The actual object.</param>
+            <param name="expected">The expected object for comparison.</param>
+            <param name="ignore">An optional array of property names to be ignored during comparison.</param>
+            <returns><c>true</c> if the properties are equal; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeExtension.GetObjectTypeName(System.Object)">
+            <summary>
+            Get the type name of given object
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeExtension.GetDeclaredType``1(``0)">
+            <summary>
+            Gets the declared type of the specified object.
+            </summary>
+            <typeparam name="T">The type of the object.</typeparam>
+            <param name="obj">The object.</param>
+            <returns>
+            A <see cref="T:System.Type"/> object representing type 
+            <typeparamref name="T"/>; i.e., the type of <paramref name="obj"/> 
+            as it was declared. Note that the contents of 
+            <paramref name="obj"/> are irrelevant; if <paramref name="obj"/> 
+            contains an object whose class is derived from 
+            <typeparamref name="T"/>, then <typeparamref name="T"/> is 
+            returned, not the derived type.
+            </returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeExtension.ConvertEnumToStrings``1">
+            <summary>
+            Convert an enum to a list of strings
+            </summary>
+            <typeparam name="TEnum"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeExtension.ConvertEnumToEnums``1">
+            <summary>
+            Convert an enum to a list of enums
+            </summary>
+            <typeparam name="TEnum"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TestDataFactory.Create(System.String)">
+            <summary>
+            依照 TestData Name 建立公開的 TestData
+            </summary>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.TypeHelper">
+            <summary>
+            Methods for detecting types and converting types
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDynamicObject(System.Type)">
+            <summary>
+            Returns true if it is a dynamic object
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsExpandoObject(System.Object)">
+            <summary>
+            Determines whether the specified object is an expando object
+            </summary>
+            <param name="objectValue">The object value.</param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsByteArray(System.Type)">
+            <summary>
+            Returns true if it is a byte array
+            </summary>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.CanHaveChildren(System.Type)">
+            <summary>
+            Returns true if the type can have children
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsArray(System.Type)">
+            <summary>
+            True if the type is an array
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsBool(System.Type)">
+            <summary>
+            Returns true if the type is a boolean
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsImmutableArray(System.Type)">
+            <summary>
+            True if the type is an System.Collections.Immutable.ImmutableArray
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsReadOnlyCollection(System.Type)">
+            <summary>
+            True if the type is a System.Collections.ObjectModel.ReadOnlyCollection
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsStackOrQueueList(System.Type)">
+            <summary>
+            True if the type is a System.Collections.Generic.Stack
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsStruct(System.Type)">
+            <summary>
+            Returns true if it is a struct
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsTimespan(System.Type)">
+            <summary>
+            Returns true if the type is a timespan
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsClass(System.Type)">
+            <summary>
+            Return true if the type is a class
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsInterface(System.Type)">
+            <summary>
+            Return true if the type is an interface
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsUri(System.Type)">
+            <summary>
+            Return true if the type is a URI
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsPointer(System.Type)">
+            <summary>
+            Return true if the type is a pointer
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsEnum(System.Type)">
+            <summary>
+            Return true if the type is an enum
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsIDictionary(System.Type)">
+            <summary>
+            Return true if the type is a dictionary
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsHashSet(System.Type)">
+            <summary>
+            Return true if the type is a hashset
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsIList(System.Type)">
+            <summary>
+            Return true if the type is a List
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsEnumerable(System.Type)">
+            <summary>
+            Return true if the type is an Enumerable
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDouble(System.Type)">
+            <summary>
+            Return true if the type is a Double
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsFloat(System.Type)">
+            <summary>
+            Return true if the type is a Float
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDecimal(System.Type)">
+            <summary>
+            Return true if the type is a Decimal
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsLong(System.Type)">
+            <summary>
+            Return true if the type is a Long integer
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsShort(System.Type)">
+            <summary>
+            Return true if the type is a Short integer
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDecimal(System.Object)">
+            <summary>
+            Return true if the type is a Decimal or Nullable Decimal
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDateTime(System.Type)">
+            <summary>
+            Return true if the type is a DateTime
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDateOnly(System.Type)">
+            <summary>
+            Return true if the type is a DateTime
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsTimeOnly(System.Type)">
+            <summary>
+            Return true if the type is a TimeOnly
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDateTimeOffset(System.Type)">
+            <summary>
+            Return true if the type is a DateTimeOffset
+            </summary>
+            <param name="type"></param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsStringBuilder(System.Type)">
+            <summary>
+            Return true if the type is a StringBuilder
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsString(System.Type)">
+            <summary>
+            Return true if the type is a string
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsSimpleType(System.Type)">
+            <summary>
+            Return true if the type is a primitive type, date, decimal, string, or GUID
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsRuntimeType(System.Type)">
+            <summary>
+            Returns true if the Type is a Runtime type
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsGenericType(System.Type)">
+            <summary>
+            Returns true if the type is a generic type.
+            </summary>
+            <param name="type">The type.</param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDataset(System.Type)">
+            <summary>
+            Returns true if the type is a dataset
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDataTable(System.Type)">
+            <summary>
+            Returns true if the type is a data table
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDataRow(System.Type)">
+            <summary>
+            Returns true if the type is a data row
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsDataColumn(System.Type)">
+            <summary>
+            Returns true if the Type is Data Column
+            </summary>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.IsFont(System.Type)">
+            <summary>
+            Returns true if the type is a font
+            </summary>
+            <param name="type">The type1.</param>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.ListOfTypesSerializer(System.Collections.Generic.List{System.Type})">
+            <summary>
+            Turn a list of types into a list of string types
+            </summary>
+            <param name="types"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.TypeHelper.ListOfTypesDeserializer(System.Collections.Generic.List{System.String})">
+            <summary>
+            Turn a list of string into a list of types
+            </summary>
+            <param name="stringList"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.tifiTestData.GetSpecialTIFileNames(System.String)">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Chroma.UnitTest.Common.tifiTestData.IsSpecialTIFileName(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="tiName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Chroma.UnitTest.Common.VectorHelper">
+            <summary>
+            取得給定PP5 Vector Type對應的資訊
+            </summary>
+        </member>
+    </members>
+</doc>

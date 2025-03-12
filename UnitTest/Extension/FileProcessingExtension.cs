@@ -67,6 +67,23 @@ namespace PP5AutoUITests
             return filesToDelete.ToList().TrueForAll(fn => File.Exists(fn));
         }
 
+        /// <summary>
+        /// 模擬檢查資料夾中是否有指定extensionName檔案的輔助方法
+        /// </summary>
+        public static string[] GetFilesWithExtensionName(string folderPath, string extensionName, out bool isExist)
+        {
+            // 實際實作可判斷 UI 中列出的檔案清單，或直接檢查檔案系統
+            // 範例使用 Directory.GetFiles() 作為示意
+            if (!Directory.Exists(folderPath))
+            {
+                isExist = false;
+                return new string[0];
+            }
+            string[] fileNamesMatched = Directory.GetFiles(folderPath, $"*.{extensionName}", SearchOption.TopDirectoryOnly);
+            isExist = fileNamesMatched.Length > 0;
+            return fileNamesMatched;
+        }
+
         public static bool JsonCountNodesInList(string filePath, string nodePath /*node1[0]/node2*/, out int nodeCount)
         {
             nodeCount = 0;
@@ -353,47 +370,79 @@ namespace PP5AutoUITests
         public static bool JsonUpdateProperty(string filePath, string nodePath, string propertyName, object newValue)
         {
             bool propertyUpdated = false;
+
             try
             {
-                // Load the JSON configuration from the file
-                var json = File.ReadAllText(filePath);
-                var config = JObject.Parse(json);
+                // 驗證輸入參數
+                if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+                {
+                    Logger.LogMessage($"File not found or invalid path: {filePath}");
+                    return false;
+                }
 
-                // Find the specific property by name and update its ItemValue
+                // 讀取並解析 JSON
+                string json = File.ReadAllText(filePath);
+                JObject config = JObject.Parse(json);
+
+                // 找到指定路徑的節點
                 var nodes = nodePath.Split('/');
-                JToken nodeFound = config.DeepClone();
+                JToken currentNode = config;
 
                 foreach (var node in nodes)
                 {
-                    nodeFound = nodeFound.SelectToken(node);
-                    if (nodeFound == null)
-                        return propertyUpdated;
+                    currentNode = currentNode.SelectToken(node);
+                    if (currentNode == null)
+                    {
+                        Logger.LogMessage($"Node path '{nodePath}' not found.");
+                        return false;
+                    }
                 }
 
-                foreach (var item in nodeFound)
+                // 更新屬性值
+                bool found = false;
+                foreach (JObject item in currentNode.Children<JObject>())
                 {
-                    if (item["Name"].ToString() == propertyName)
+                    if (item["Name"]?.ToString() == propertyName)
                     {
-                        if (item["ItemValue"] != JToken.FromObject(newValue))
+                        if (item["ItemValue"]?.ToString() != newValue?.ToString())
+                        {
                             item["ItemValue"] = JToken.FromObject(newValue);
-                        propertyUpdated = true;
+                            propertyUpdated = true;
+                        }
+                        found = true;
                         break;
                     }
                 }
 
-                if (!propertyUpdated)
+                if (!found)
                 {
                     Logger.LogMessage($"Property with name '{propertyName}' not found.");
+                    return false;
                 }
 
-                // Save the updated JSON configuration back to the file
-                File.WriteAllText(filePath, config.ToString(Formatting.None));
-                Logger.LogMessage($"Property '{propertyName}' updated successfully.");
+                // 如果有更新，則寫回檔案
+                if (propertyUpdated)
+                {
+                    File.WriteAllText(filePath, config.ToString(Formatting.None));
+                    Logger.LogMessage($"Property '{propertyName}' updated with value '{newValue}' successfully.");
+                }
+            }
+            catch (IOException ex)
+            {
+                Logger.LogMessage($"File access error: {ex.Message}");
+                return false;
+            }
+            catch (JsonException ex)
+            {
+                Logger.LogMessage($"JSON parsing error: {ex.Message}");
+                return false;
             }
             catch (Exception ex)
             {
-                Logger.LogMessage($"Error updating property: {ex.Message}");
+                Logger.LogMessage($"Unexpected error: {ex.Message}");
+                return false;
             }
+
             return propertyUpdated;
         }
 

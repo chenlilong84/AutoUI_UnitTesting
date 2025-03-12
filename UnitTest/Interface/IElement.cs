@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium.Windows;
+using PP5AutoUITests.Model;
 
 namespace PP5AutoUITests
 {
@@ -126,7 +127,17 @@ namespace PP5AutoUITests
         bool IsTreeView { get; }
         bool IsImage { get; }
         bool IsGridCell { get; }
-        
+        bool IsCustom { get; }
+
+        bool CanResize { get; }
+        bool CanMove { get; }
+        bool CanRotate { get; }
+        bool CanMaximize { get; }
+        bool CanMinimize { get; }
+        bool IsModal { get; }
+        bool IsTopmost { get; }
+        WindowInteractionState InteractionState { get; }
+        WindowVisualState VisualState { get; }
 
         public string GetText();
 
@@ -142,6 +153,10 @@ namespace PP5AutoUITests
 
         public new ReadOnlyCollection<IElement> FindElements(By by);
         bool IsSameElement(IElement elementToCompare);
+        void MoveToElement();
+        void MoveToElement(MoveToElementOffsetStartingPoint startingPoint, int subOffsetX = 0, int subOffsetY = 0);
+        void DragAndDropToOffset(MoveToElementOffsetStartingPoint startingPoint, int srcOffsetX, int srcOffsetY, int destOffsetX, int destOffsetY);
+        void DragAndDropToOffset(DragAndDropInfo dragAndDropInfo);
 
         //public void RightClick();
         //public void DoubleClick();

@@ -872,6 +872,81 @@ namespace PP5AutoUITests
         /// </summary>
         public bool IsWindow => bool.Parse(GetAttribute("IsWindowPatternAvailable"));
 
+        public bool CanResize => IsWindow && bool.Parse(GetAttribute("Transform.CanResize"));
+        public bool CanMove => IsWindow && bool.Parse(GetAttribute("Transform.CanMove"));
+        public bool CanRotate => IsWindow && bool.Parse(GetAttribute("Transform.CanRotate"));
+
+        public bool CanMaximize => IsWindow && bool.Parse(GetAttribute("Window.CanMaximize"));
+        public bool CanMinimize => IsWindow && bool.Parse(GetAttribute("Window.CanMinimize"));
+
+        public bool IsModal => IsWindow && bool.Parse(GetAttribute("Window.IsModal"));
+
+        public bool IsTopmost => IsWindow && bool.Parse(GetAttribute("Window.IsTopmost"));
+
+        public WindowInteractionState InteractionState => IsWindow ? (WindowInteractionState)Enum.Parse(typeof(WindowInteractionState), GetAttribute("Window.WindowInteractionState")) : WindowInteractionState.None;
+        public WindowVisualState VisualState => IsWindow ? (WindowVisualState)Enum.Parse(typeof(WindowVisualState), GetAttribute("Window.WindowVisualState")) : WindowVisualState.None;
+
+        //// PP5 IDE Window Pattern Attributes
+        /// Normal Size (800x600):
+        //Transform.CanMove:	true
+        //Transform.CanResize:	true
+        //Transform.CanRotate:	false
+        //Window.CanMaximize:	true
+        //Window.CanMinimize:	true
+        //Window.IsModal:	false
+        //Window.IsTopmost:	false
+        //Window.WindowInteractionState:	ReadyForUserInteraction(2)
+        //Window.WindowVisualState:	Normal(0)
+
+        /// Maximized Size (1920x1040, according to current screen resolution):
+        //Transform.CanMove:	false
+        //Transform.CanResize:	false
+        //Transform.CanRotate:	false
+        //Window.CanMaximize:	true
+        //Window.CanMinimize:	true
+        //Window.IsModal:	false
+        //Window.IsTopmost:	false
+        //Window.WindowInteractionState:	ReadyForUserInteraction(2)
+        //Window.WindowVisualState:	Maximized(1)
+
+        //// TI Editor, "About" Dialog Pattern Attributes
+        /// Normal Size (498x449):
+        //Transform.CanMove:	true
+        //Transform.CanResize:	false
+        //Transform.CanRotate:	false
+        //Window.CanMaximize:	false
+        //Window.CanMinimize:	false
+        //Window.IsModal:	true
+        //Window.IsTopmost:	false
+        //Window.WindowInteractionState:	ReadyForUserInteraction(2)
+        //Window.WindowVisualState:	Normal(0)
+
+        //// TI Editor, "OverAllCheck" error Dialog Pattern Attributes
+        /// Normal Size (295x200):
+        /// AutomationId:	"MessageBoxExDialog"
+        //Transform.CanMove:	true
+        //Transform.CanResize:	false
+        //Transform.CanRotate:	false
+        //Window.CanMaximize:	false
+        //Window.CanMinimize:	false
+        //Window.IsModal:	true
+        //Window.IsTopmost:	true
+        //Window.WindowInteractionState:	ReadyForUserInteraction(2)
+        //Window.WindowVisualState:	Normal(0)
+
+        //// TI Editor, Restore Default Docking Pattern Attributes
+        /// Normal Size (378x200):
+        // AutomationId:	"MessageBoxExDialog"
+        //Transform.CanMove:	true
+        //Transform.CanResize:	false
+        //Transform.CanRotate:	false
+        //Window.CanMaximize:	false
+        //Window.CanMinimize:	false
+        //Window.IsModal:	true
+        //Window.IsTopmost:	true
+        //Window.WindowInteractionState:	ReadyForUserInteraction(2)
+        //Window.WindowVisualState:	Normal(0)
+
         public bool IsCustomNavigationPatternAvailable => bool.Parse(GetAttribute("IsCustomNavigationPatternAvailable"));
 
         public bool IsSelectionPattern2Available => bool.Parse(GetAttribute("IsSelectionPattern2Available"));
@@ -912,7 +987,8 @@ namespace PP5AutoUITests
         public bool IsProgressBar => this.ControlType == ElementControlType.ProgressBar;
         public bool IsTreeView => this.ControlType == ElementControlType.TreeView;
         public bool IsImage => this.ControlType == ElementControlType.Image;
-        public bool IsGridCell => this.ControlType == ElementControlType.Custom && this.HasGridItemPattern;
+        public bool IsGridCell => IsCustom && this.HasGridItemPattern;
+        public bool IsCustom => this.ControlType == ElementControlType.Custom;
 
         #endregion
 

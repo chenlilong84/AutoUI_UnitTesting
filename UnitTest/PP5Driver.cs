@@ -235,13 +235,27 @@ namespace PP5AutoUITests
             if (this.sessionType != SessionType.Desktop)
                 throw new Exception("Wrong session type of this driver! Only SessionType.Desktop is allowed.");
 
-            MoveToElementOffsetStartingPoint offsetStartingPoint = MoveToElementOffsetStartingPoint.Center;
-            if (element.IsTextBox)
-                offsetStartingPoint = MoveToElementOffsetStartingPoint.OuterCenterLeft;
-            else if (element.IsGridCell)
-                offsetStartingPoint = MoveToElementOffsetStartingPoint.InnerCenterLeft;
-            element.MoveToElement(offsetStartingPoint);
-            return this.PerformGetElement("/ByClass#Retry[Popup]/ToolTip[0]").GetText();
+            
+            int retryCount = 0;
+            var tooltipEle = this.PerformGetElement("/ByClass#Retry[Popup]/ToolTip[0]");
+            while (tooltipEle == null)
+            {
+                MoveToElementOffsetStartingPoint offsetStartingPoint;
+                if (element.IsTextBox)
+                    offsetStartingPoint = MoveToElementOffsetStartingPoint.OuterCenterLeft;
+                else if (element.IsGridCell)
+                    offsetStartingPoint = MoveToElementOffsetStartingPoint.InnerCenterLeft;
+                else
+                    offsetStartingPoint = MoveToElementOffsetStartingPoint.Center;
+                if (retryCount>=1)
+                    offsetStartingPoint = MoveToElementOffsetStartingPoint.InnerCenterLeft;
+                element.MoveToElement(offsetStartingPoint);
+
+                tooltipEle = this.PerformGetElement("/ByClass#Retry[Popup]/ToolTip[0]");
+                retryCount++;
+            }
+
+            return tooltipEle.GetText();
         }
 
         public override string ToString()
